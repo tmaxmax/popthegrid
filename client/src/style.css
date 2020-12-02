@@ -1,0 +1,67 @@
+:root {
+  --color-background: #000f1e;
+  --color-heading: #f6f4f3;
+  --color-body: #cecaca;
+  --color-cotton-candy: #fdc5f5;
+  --color-mauve: #f7aef8;
+  --color-lavender-floral: #b388eb;
+  --color-cornflower-blue: #8093f1;
+  --color-sky-blue: #72ddf7;
+  --color-assurance: #0cce6b;
+  --color-danger: #ef2d56;
+  --weight-heading: 800;
+  --weight-body: 450;
+}
+
+html {
+  width: 100vw;
+  height: 100vh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  padding: 6vmin 8vmin;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--color-background);
+}
+
+h1 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: var(--weight-heading);
+  text-align: center;
+  letter-spacing: 0.003em;
+  color: var(--color-heading);
+}
+
+p {
+  font-family: 'Heebo', sans-serif;
+  font-weight: var(--weight-body);
+  text-align: center;
+  margin: 0.3em;
+  letter-spacing: -0.0004em;
+  color: var(--color-body);
+}
+
+.grid__parent {
+  filter: drop-shadow(14px 10px 27px rgba(0, 0, 0, 0.68));
+  margin-top: 4vmin;
+  width: 100%;
+  max-width: 1000px;
+  height: 50%;
+  max-height: 20em;
+}
+
+footer {
+  margin-top: auto;
+}
+
+@media (min-height: 361px) {
+  body {
+    padding: 8vmin;
+  }
+}

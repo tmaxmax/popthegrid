@@ -1,0 +1,53 @@
+.grid__square {
+  width: 100%;
+  height: 100%;
+  background: var(--color);
+  transition: all 0.5s ease-out;
+  touch-action: manipulation;
+}
+
+@keyframes delete-grid__square {
+  from {
+    opacity: 1;
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    filter: blur(20px);
+  }
+}
+
+.grid__square--deleted {
+  animation-name: delete-grid__square;
+  animation-duration: 0.5s;
+  animation-timing-function: ease-out;
+  pointer-events: none;
+}
+
+@keyframes insert-grid__square {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(-180deg);
+    filter: blur(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+    filter: blur(0);
+  }
+}
+
+.grid__square--inserted {
+  animation-name: insert-grid__square;
+  animation-duration: 0.5s;
+  animation-timing-function: ease-out;
+  pointer-events: none;
+}
+
+.grid__square:hover {
+  z-index: 1;
+  border-radius: 20%;
+  transform: scale(1.33);
+  box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.53);
+  cursor: pointer;
+}
