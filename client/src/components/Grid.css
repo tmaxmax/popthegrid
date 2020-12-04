@@ -6,6 +6,7 @@
   grid-auto-rows: var(--size);
   justify-content: center;
   touch-action: manipulation;
+  user-select: none;
 }
 
 .grid--no-interaction {
