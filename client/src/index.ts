@@ -24,10 +24,13 @@ const squareMousedown = (() => {
       return
     }
     grid.removeSquare(this).destroy(true)
-    if (grid.squareCount === randInt(grid.squareCount + 1)) {
+    if (grid.squareCount > 1 && grid.squareCount === randInt(grid.squareCount + 1)) {
       ignoreClicks = true
       await grid.destroy(true)
       await grid.create(gridParent, true)
+    } else if (grid.squareCount === 0) {
+      // TODO: Better win alert
+      alert('you won')
     }
     ignoreClicks = false
   }
@@ -44,7 +47,7 @@ const grid = new Grid({
   ],
 })
 
-const sillyName = new SillyName(`ws://${window.location.host.split(':')[0]}`)
+const sillyName = new SillyName(`ws://${window.location.host.split(':')[0]}:${process.env.PORT}`)
 
 const main = async () => {
   sillyName.create(sillyNameParent)
