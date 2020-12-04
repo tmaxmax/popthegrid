@@ -34,7 +34,7 @@ export default ({ watch }) => ({
     injectProcessEnv({
       NODE_ENV: process.env.NODE_ENV,
       DEBUG: process.env.DEBUG,
-      SERVER: process.env.SERVER,
+      PORT: process.env.PORT,
     }),
     watch &&
       serve({
