@@ -7,15 +7,15 @@ import { Square } from './components/Square'
 import { Component } from './internal/Component'
 import { SillyName } from './components/SillyName'
 
-const ComponentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
+const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
   if (!elem) {
     throw new Error(`${name} doesn't exist in the HTML document!`)
   }
   return Component.from(elem)
 }
 
-const gridParent = ComponentFrom(document.querySelector<HTMLElement>('.grid__parent'), 'Grid parent')
-const sillyNameParent = ComponentFrom(document.querySelector<HTMLParagraphElement>('#silly-name'), 'Silly name parent')
+const gridParent = componentFrom(document.querySelector<HTMLElement>('.grid__parent'), 'Grid parent')
+const sillyNameParent = componentFrom(document.querySelector<HTMLParagraphElement>('#silly-name'), 'Silly name parent')
 
 const squareMousedown = (() => {
   let ignoreClicks = false
