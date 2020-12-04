@@ -4,7 +4,7 @@ down:
 
 # Start the server and the client with development config
 dev:
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build --detach
 
 # Start the server and the client with development config for debugging
 debug:
@@ -12,4 +12,4 @@ debug:
 
 # Start the server and the client with production config
 prod:
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --build
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --build --detach
