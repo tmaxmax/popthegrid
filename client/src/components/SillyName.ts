@@ -1,3 +1,5 @@
+import './SillyName.css'
+
 import { Component } from '../internal/Component'
 
 interface Response {
@@ -8,7 +10,7 @@ export class SillyName extends Component<HTMLElement> {
   private readonly websocket: WebSocket
 
   constructor(websocketURL: string) {
-    super({ tag: 'em', classList: ['sillyname'] })
+    super({ tag: 'em', classList: ['silly-name'] })
     this.websocket = new WebSocket(websocketURL)
     this.websocket.addEventListener('message', (ev) => {
       const res: Response = JSON.parse(ev.data)
