@@ -14,7 +14,7 @@ func main() {
 	app := fiber.New()
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "https://popthegrid.com, https://www.popthegrid.com",
+		AllowOrigins: "popthegrid.com, www.popthegrid.com",
 	}))
 
 	app.Use("/", func(c *fiber.Ctx) error {
