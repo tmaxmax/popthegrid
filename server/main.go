@@ -6,11 +6,16 @@ import (
 
 	"github.com/Pallinder/go-randomdata"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/websocket/v2"
 )
 
 func main() {
 	app := fiber.New()
+
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "https://popthegrid.com, https://www.popthegrid.com",
+	}))
 
 	app.Use("/", func(c *fiber.Ctx) error {
 		if websocket.IsWebSocketUpgrade(c) {
@@ -32,5 +37,5 @@ func main() {
 		}
 	}))
 
-	log.Fatalln(app.Listen(":80"))
+	log.Fatalln(app.Listen(":8081"))
 }
