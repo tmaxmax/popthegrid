@@ -2,12 +2,13 @@ version: '3.8'
 services:
   client:
     build:
+      args:
+        NODE_ENV: production
+        PORT: 8081
+        DEBUG:
       dockerfile: Dockerfile
     ports:
       - 8080:80
-    environment:
-      NODE_ENV: production
-      DEBUG:
   server:
     build:
       dockerfile: Dockerfile
