@@ -12,10 +12,13 @@ export class SillyName extends Component<HTMLElement> {
   constructor(websocketURL: string) {
     super({ tag: 'em', classList: ['silly-name'] })
     this.websocket = new WebSocket(websocketURL)
-    this.websocket.addEventListener('message', (ev) => {
+    this.websocket.onmessage = (ev) => {
       const res: Response = JSON.parse(ev.data)
       this.text = res.name
-    })
+    }
+    this.websocket.onerror = this.websocket.onclose = () => {
+      this.text = "an error"
+    }
   }
 
   create<T extends HTMLElement>(parent: Component<T>): void {
