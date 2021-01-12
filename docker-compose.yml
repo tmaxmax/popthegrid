@@ -9,5 +9,5 @@ services:
     build:
       context: server
     ports:
-      - 443:443
       - 80:80
+      - 8081:8081
