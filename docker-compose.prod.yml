@@ -4,7 +4,6 @@ services:
     build:
       args:
         NODE_ENV: production
-        PORT: 8081
         DEBUG:
       dockerfile: Dockerfile
     ports:
