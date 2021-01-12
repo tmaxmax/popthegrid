@@ -9,6 +9,7 @@ import postcssPresetEnv from 'postcss-preset-env'
 import cssnano from 'cssnano'
 import eslint from '@rollup/plugin-eslint'
 import injectProcessEnv from '@tmaxmax/rollup-plugin-inject-process-env'
+import fs from 'fs'
 
 export default ({ watch }) => ({
   input: './src/index.ts',
@@ -34,17 +35,19 @@ export default ({ watch }) => ({
     injectProcessEnv({
       NODE_ENV: process.env.NODE_ENV,
       DEBUG: process.env.DEBUG,
-      PORT: process.env.PORT,
     }),
     watch &&
       serve({
-        port: 8080,
+        port: 80,
         contentBase: 'public',
       }),
     watch &&
       livereload({
         watch: 'public',
-        usePolling: true,
+        https: {
+          key: fs.readFileSync('./nginx/certs/key.pem'),
+          cert: fs.readFileSync('./nginx/certs/crt.pem'),
+        }
       }),
     !watch && terser(),
   ],
