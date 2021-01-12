@@ -27,11 +27,11 @@ describe('SillyName', () => {
     server.close()
   })
   
-  it('should output "an error" if there is a connection error', () => {
+  it('should output "Teodor Maxim" if there is a connection error', () => {
     const component = new SillyName(`ws://${host}:1233`)
     
     component.create(Component.body)
     const dom = document.querySelector('.silly-name') as HTMLElement
-    expect(dom.innerText).toBe('an error')
+    expect(dom.innerText).toBe('Teodor Maxim')
   })
 })

@@ -12,7 +12,7 @@ export class SillyName extends Component<HTMLElement> {
   constructor(websocketURL: string) {
     super({ tag: 'em', classList: ['silly-name'] })
     const onerror = () => {
-      this.text = "an error"
+      this.text = "Teodor Maxim"
     }
     try {
       this.websocket = new WebSocket(websocketURL)
