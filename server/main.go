@@ -13,6 +13,11 @@ import (
 func main() {
 	app := fiber.New()
 
+	app.Use(func(c *fiber.Ctx) error {
+		log.Println(c.Hostname())
+		return c.Next()
+	})
+
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: "popthegrid.com, www.popthegrid.com",
 	}))
