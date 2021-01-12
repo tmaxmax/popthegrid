@@ -1,6 +1,6 @@
 {
   "name": "popthegrid",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Frontend for the 'Pop the grid!' game",
   "type": "module",
   "scripts": {
