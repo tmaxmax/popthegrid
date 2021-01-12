@@ -7,17 +7,23 @@ interface Response {
 }
 
 export class SillyName extends Component<HTMLElement> {
-  private readonly websocket: WebSocket
+  private readonly websocket?: WebSocket
 
   constructor(websocketURL: string) {
     super({ tag: 'em', classList: ['silly-name'] })
-    this.websocket = new WebSocket(websocketURL)
-    this.websocket.onmessage = (ev) => {
-      const res: Response = JSON.parse(ev.data)
-      this.text = res.name
-    }
-    this.websocket.onerror = this.websocket.onclose = () => {
+    const onerror = () => {
       this.text = "an error"
+    }
+    try {
+      this.websocket = new WebSocket(websocketURL)
+      this.websocket.onmessage = (ev) => {
+        const res: Response = JSON.parse(ev.data)
+        this.text = res.name
+      }
+      this.websocket.onerror = this.websocket.onclose = onerror;
+    } catch (e) {
+      console.error(e)
+      onerror()
     }
   }
 
@@ -26,7 +32,7 @@ export class SillyName extends Component<HTMLElement> {
   }
 
   destroy(): void {
-    this.websocket.close()
+    this.websocket?.close()
     this.remove()
   }
 }

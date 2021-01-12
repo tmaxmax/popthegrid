@@ -47,7 +47,7 @@ const grid = new Grid({
   ],
 })
 
-const sillyName = new SillyName(`ws://${window.location.host.split(':')[0]}:8081`)
+const sillyName = new SillyName(`ws${process.env.NODE_ENV === 'production' ? 's' : ''}://${window.location.host.split(':')[0]}:8081`)
 
 const main = async () => {
   sillyName.create(sillyNameParent)
