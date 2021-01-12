@@ -8,6 +8,3 @@ services:
   server:
     build:
       context: server
-    ports:
-      - 80:80
-      - 8081:8081
