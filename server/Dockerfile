@@ -4,9 +4,9 @@ WORKDIR /build
 COPY go.* ./
 RUN go mod download
 COPY . .
-RUN go build -o main .
+RUN CGO_ENABLED=0 go build -installsuffix 'static' -o main .
 
-FROM alpine
+FROM scratch
 WORKDIR /server
 COPY --from=build /build/main ./
 ENTRYPOINT ["./main"]

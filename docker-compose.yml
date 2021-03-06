@@ -5,10 +5,6 @@ services:
       context: client
     links:
       - server
-    environment:
-      PORT: 8081
   server:
     build:
       context: server
-    ports:
-      - 8081:80

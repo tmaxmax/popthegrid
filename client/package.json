@@ -1,12 +1,15 @@
 {
   "name": "popthegrid",
-  "version": "0.3.4",
+  "version": "0.4.5",
   "description": "Frontend for the 'Pop the grid!' game",
   "type": "module",
   "scripts": {
     "dev": "rollup -c -w",
     "build": "rollup -c",
-    "test": "jest --passWithNoTests --maxWorkers=1"
+    "test": "jest --passWithNoTests --maxWorkers=1",
+    "preversion": "npm t",
+    "version": "docker build --build-arg NODE_ENV=production --build-arg DEBUG= -t tmaxmax/popthegrid:latest-frontend -t tmaxmax/popthegrid:\"$npm_package_version\"-frontend .",
+    "postversion": "docker push tmaxmax/popthegrid:latest-frontend && docker push tmaxmax/popthegrid:\"$npm_package_version\"-frontend"
   },
   "repository": {
     "type": "git",
