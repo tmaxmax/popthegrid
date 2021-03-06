@@ -1,5 +1,8 @@
 node_modules/
-public/build/
+dist/
+.cache/
 package-lock.json
 pnpm-lock.yaml
-nginx/certs/
+
+# Local Netlify folder
+.netlify
