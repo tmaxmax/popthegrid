@@ -13,3 +13,5 @@ debug:
 # Start the server and the client with production config
 prod:
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --build --detach
+
+.PHONY: down dev debug prod release-frontend release-backend
