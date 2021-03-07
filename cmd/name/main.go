@@ -15,7 +15,7 @@ func handler(req events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse
 		Headers: map[string]string{
 			"Content-Type": "application/json",
 		},
-		Body: fmt.Sprintf(`{ name: %q }`, randomdata.SillyName()),
+		Body: fmt.Sprintf(`{ "name": %q }`, randomdata.SillyName()),
 	}, nil
 }
 
