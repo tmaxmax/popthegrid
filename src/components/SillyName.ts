@@ -8,7 +8,7 @@ interface Response {
 }
 
 const fetchSillyName: () => Promise<string> = () =>
-  fetch(`https://${window.location.host}/.netlify/functions/name`)
+  fetch(`http${window.location.host.startsWith('localhost') ? '' : 's'}://${window.location.host}/.netlify/functions/name`)
     .then((res) => res.json())
     .then((res: Response) => res.name)
 
