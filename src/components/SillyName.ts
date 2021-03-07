@@ -1,6 +1,7 @@
 import './SillyName.css'
 
 import { Component } from '../internal/Component'
+import { interval } from '../util'
 
 interface Response {
   name: string
@@ -12,18 +13,18 @@ const fetchSillyName: () => Promise<string> = () =>
     .then((res: Response) => res.name)
 
 export class SillyName extends Component<HTMLElement> {
-  constructor() {
+  constructor(signal?: AbortSignal) {
     super({ tag: 'em', classList: ['silly-name'] })
 
-    const interval = setInterval(async () => {
-      try {
-        this.text = await fetchSillyName()
-      } catch (e) {
-        console.error(e)
-        this.text = 'Teodor Maxim'
-        clearInterval(interval)
-      }
-    }, 2000)
+    interval({
+      callback: async () => (this.text = await fetchSillyName()),
+      interval: 2000,
+      leading: true,
+      signal,
+    }).catch((e) => {
+      console.error(e)
+      this.text = 'Teodor Maxim'
+    })
   }
 
   create<T extends HTMLElement>(parent: Component<T>): void {
