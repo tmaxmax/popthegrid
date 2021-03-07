@@ -6,25 +6,24 @@ interface Response {
   name: string
 }
 
-export class SillyName extends Component<HTMLElement> {
-  private readonly websocket?: WebSocket
+const fetchSillyName: () => Promise<string> = () =>
+  fetch(`https://${window.location.host}/.netlify/functions/name`)
+    .then((res) => res.json())
+    .then((res: Response) => res.name)
 
-  constructor(websocketURL: string) {
+export class SillyName extends Component<HTMLElement> {
+  constructor() {
     super({ tag: 'em', classList: ['silly-name'] })
-    const onerror = () => {
-      this.text = "Teodor Maxim"
-    }
-    try {
-      this.websocket = new WebSocket(websocketURL)
-      this.websocket.onmessage = (ev) => {
-        const res: Response = JSON.parse(ev.data)
-        this.text = res.name
+
+    const interval = setInterval(async () => {
+      try {
+        this.text = await fetchSillyName()
+      } catch (e) {
+        console.error(e)
+        this.text = 'Teodor Maxim'
+        clearInterval(interval)
       }
-      this.websocket.onerror = this.websocket.onclose = onerror;
-    } catch (e) {
-      console.error(e)
-      onerror()
-    }
+    }, 2000)
   }
 
   create<T extends HTMLElement>(parent: Component<T>): void {
@@ -32,7 +31,6 @@ export class SillyName extends Component<HTMLElement> {
   }
 
   destroy(): void {
-    this.websocket?.close()
     this.remove()
   }
 }
