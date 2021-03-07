@@ -8,7 +8,7 @@
     "dev:static": "parcel src/index.html",
     "dev": "run-p dev:*",
     "build:static": "parcel build src/index.html",
-    "build:funcs": "go build -o ./.netlify/functions/ ./cmd/...",
+    "build:funcs": "rimraf ./.netlify/functions/ && go build -o ./.netlify/functions/ ./cmd/...",
     "build": "run-s build:*",
     "test": "jest --passWithNoTests --maxWorkers=1"
   },
@@ -40,6 +40,7 @@
     "parcel-bundler": "1.12.3",
     "postcss": "^8.2.7",
     "prettier": "^2.2.1",
+    "rimraf": "^3.0.2",
     "ts-jest": "^26.5.3",
     "tslib": "^2.1.0",
     "typescript": "^4.2.3"
