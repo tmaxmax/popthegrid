@@ -1,11 +1,8 @@
 # example netlify.toml
 [build]
-command = "pnpm run build"
+command = "npm run build"
 functions = ".netlify/functions"
 publish = "."
-
-[build.environment]
-NPM_FLAGS = "--prefix=/"
 
 # Uncomment to use this redirect for Single Page Applications like create-react-app.
 # Not needed for static site generators.
@@ -17,7 +14,7 @@ NPM_FLAGS = "--prefix=/"
 # (optional) Settings for Netlify Dev
 # https://github.com/netlify/cli/blob/master/docs/netlify-dev.md#project-detection
 [dev]
-command = "pnpm run dev" # Command to start your dev server
+command = "npm run dev" # Command to start your dev server
 port = 3000 # Port that the dev server will be listening on
 publish = "dist" # Folder with the static content for _redirect file
 
