@@ -6,7 +6,7 @@ import { Grid } from './Grid'
 import { Square } from './Square'
 
 test('Grid', async () => {
-  document.write(fs.readFileSync(path.resolve(__dirname, '..', '..', 'public', 'index.html')).toString())
+  document.write(fs.readFileSync(path.resolve(__dirname, '..', 'index.html')).toString())
   const parentDOM = document.querySelector('.grid__parent') as HTMLElement
   expect(parentDOM).not.toBeNull()
   const colors = ['#000', '#fff']
