@@ -10,7 +10,8 @@
     "build:static": "parcel build src/index.html",
     "build:funcs": "go build -o ./.netlify/functions/name ./cmd/name",
     "build": "run-s build:*",
-    "test": "jest --passWithNoTests --maxWorkers=1"
+    "test": "jest --passWithNoTests --maxWorkers=1",
+    "start": "sirv dist --port 3000 --single"
   },
   "repository": {
     "type": "git",
@@ -24,7 +25,8 @@
   "homepage": "https://github.com/tmaxmax/popthegrid#readme",
   "devDependencies": {
     "@babel/core": "^7.13.8",
-    "@babel/polyfill": "^7.12.1",
+    "@babel/plugin-transform-runtime": "^7.13.9",
+    "@babel/preset-typescript": "^7.13.0",
     "@types/debug": "^4.1.5",
     "@types/jest": "^26.0.20",
     "@types/jsdom": "^16.2.6",
@@ -43,15 +45,25 @@
     "postcss": "^8.2.7",
     "prettier": "^2.2.1",
     "rimraf": "^3.0.2",
+    "sirv-cli": "^1.0.11",
     "ts-jest": "^26.5.3",
     "tslib": "^2.1.0",
     "typescript": "^4.2.3"
   },
   "dependencies": {
+    "@babel/runtime": "^7.13.9",
     "debug": "^4.3.1",
     "ms": "^2.1.3",
     "resize-observer-polyfill": "^1.5.1",
     "supports-color": "^8.1.1"
   },
-  "browserslist": "last 2 versions"
+  "browserslist": "last 2 versions",
+  "babel": {
+    "presets": [
+      "@babel/preset-typescript"
+    ],
+    "plugins": [
+      "@babel/plugin-transform-runtime"
+    ]
+  }
 }
