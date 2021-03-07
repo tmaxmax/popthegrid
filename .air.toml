@@ -2,5 +2,5 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-cmd = "pnpm run build:funcs"
+cmd = "npm run build:funcs"
 exclude_dir = ["src", "node_modules", "cache", "dist", ".netlify"]
