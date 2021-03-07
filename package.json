@@ -8,7 +8,7 @@
     "dev:static": "parcel src/index.html",
     "dev": "run-p dev:*",
     "build:static": "parcel build src/index.html",
-    "build:funcs": "rimraf ./.netlify/functions/ && go build -o ./.netlify/functions/ ./cmd/...",
+    "build:funcs": "go build -o ./.netlify/functions/name ./cmd/name",
     "build": "run-s build:*",
     "test": "jest --passWithNoTests --maxWorkers=1"
   },
