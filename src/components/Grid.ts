@@ -2,7 +2,7 @@ import './Grid.css'
 
 import { Component } from '../internal/Component'
 import { Square, SquareEventListener } from './Square'
-import { generateArray, baseLog, randInt, wait } from '../util'
+import { baseLog, randInt, wait } from '../util'
 import ResizeObserver from 'resize-observer-polyfill'
 
 interface GridProperties {
@@ -15,8 +15,8 @@ interface GridProperties {
 const log = baseLog.extend('Grid')
 
 const generateSquares = (props: Required<GridProperties>) =>
-  generateArray<Square>(
-    props.squareCount,
+  Array.from(
+    { length: props.squareCount },
     () =>
       new Square({
         color: props.colors[randInt(props.colors.length)],
