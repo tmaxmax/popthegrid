@@ -16,6 +16,8 @@ export class SillyName extends Component<HTMLElement> {
   constructor(signal?: AbortSignal) {
     super({ tag: 'em', classList: ['silly-name'] })
 
+    this.text = '...'
+
     interval({
       callback: async () => (this.text = await fetchSillyName()),
       interval: 2000,
