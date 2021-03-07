@@ -47,7 +47,7 @@ const grid = new Grid({
   ],
 })
 
-const sillyName = new SillyName(`wss://${window.location.host.split(':')[0]}/ws`)
+const sillyName = new SillyName()
 
 const main = async () => {
   sillyName.create(sillyNameParent)
