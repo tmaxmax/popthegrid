@@ -9,10 +9,10 @@ GO_IMPORT_PATH = "github.com/tmaxmax/popthegrid"
 
 # Uncomment to use this redirect for Single Page Applications like create-react-app.
 # Not needed for static site generators.
-# [[redirects]]
-# from = "/*"
-# status = 200
-# to = "/index.html"
+[[redirects]]
+from = "/*"
+status = 200
+to = "/index.html"
 
 # (optional) Settings for Netlify Dev
 # https://github.com/netlify/cli/blob/master/docs/netlify-dev.md#project-detection
