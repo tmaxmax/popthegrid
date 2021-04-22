@@ -4,12 +4,14 @@
   "description": "Frontend for the 'Pop the grid!' game",
   "type": "module",
   "scripts": {
-    "dev": "rollup -c -w",
-    "build": "rollup -c",
+    "dev:funcs": "air -c .air.toml",
+    "dev:static": "parcel src/index.html",
+    "dev": "run-p dev:*",
+    "build:static": "parcel build src/index.html",
+    "build:funcs": "go build -o ./.netlify/functions/name ./cmd/name",
+    "build": "run-s build:*",
     "test": "jest --passWithNoTests --maxWorkers=1",
-    "preversion": "npm t",
-    "version": "docker build --build-arg NODE_ENV=production --build-arg DEBUG= -t tmaxmax/popthegrid:latest-frontend -t tmaxmax/popthegrid:\"$npm_package_version\"-frontend .",
-    "postversion": "docker push tmaxmax/popthegrid:latest-frontend && docker push tmaxmax/popthegrid:\"$npm_package_version\"-frontend"
+    "start": "sirv dist --port 3000 --single"
   },
   "repository": {
     "type": "git",
@@ -22,42 +24,46 @@
   },
   "homepage": "https://github.com/tmaxmax/popthegrid#readme",
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^16.0.0",
-    "@rollup/plugin-eslint": "^8.0.0",
-    "@rollup/plugin-node-resolve": "^10.0.0",
-    "@rollup/plugin-typescript": "^6.1.0",
-    "@tmaxmax/rollup-plugin-inject-process-env": "^1.3.2",
+    "@babel/core": "^7.13.8",
+    "@babel/plugin-transform-runtime": "^7.13.9",
+    "@babel/preset-typescript": "^7.13.0",
     "@types/debug": "^4.1.5",
-    "@types/jest": "^26.0.16",
-    "@types/jsdom": "^16.2.5",
-    "@typescript-eslint/eslint-plugin": "^4.8.2",
-    "@typescript-eslint/parser": "^4.8.2",
+    "@types/jest": "^26.0.20",
+    "@types/jsdom": "^16.2.6",
+    "@typescript-eslint/eslint-plugin": "^4.16.1",
+    "@typescript-eslint/parser": "^4.16.1",
     "cssnano": "^4.1.10",
-    "eslint": "^7.14.0",
+    "eslint": "^7.21.0",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^26.6.3",
+    "jest-fetch-mock": "^3.0.3",
     "jest-websocket-mock": "^2.2.0",
     "jsdom": "^16.4.0",
     "mock-socket": "^9.0.3",
-    "postcss": "^8.1.10",
-    "postcss-preset-env": "^6.7.0",
+    "npm-run-all": "^4.1.5",
+    "parcel": "^2.0.0-beta.1",
+    "postcss": "^8.2.7",
     "prettier": "^2.2.1",
-    "rollup": "^2.34.0",
-    "rollup-plugin-hotreload": "^2.3.1",
-    "rollup-plugin-livereload": "^2.0.0",
-    "rollup-plugin-postcss": "^3.1.8",
-    "rollup-plugin-serve": "^1.1.0",
-    "rollup-plugin-terser": "^7.0.2",
-    "rollup-plugin-typescript2": "^0.29.0",
-    "ts-jest": "^26.4.4",
-    "tslib": "^2.0.3",
-    "typescript": "^4.1.2"
+    "rimraf": "^3.0.2",
+    "sirv-cli": "^1.0.11",
+    "ts-jest": "^26.5.3",
+    "tslib": "^2.1.0",
+    "typescript": "^4.2.3"
   },
   "dependencies": {
-    "@types/es6-promise": "^3.3.0",
+    "@babel/runtime": "^7.13.9",
     "debug": "^4.3.1",
+    "ms": "^2.1.3",
     "resize-observer-polyfill": "^1.5.1",
-    "supports-color": "^8.0.0"
+    "supports-color": "^8.1.1"
   },
-  "main": "src/index.ts"
+  "browserslist": "last 2 versions",
+  "babel": {
+    "presets": [
+      "@babel/preset-typescript"
+    ],
+    "plugins": [
+      "@babel/plugin-transform-runtime"
+    ]
+  }
 }
