@@ -1,42 +1,38 @@
+import WS from 'jest-websocket-mock'
 import { Component } from '../internal/Component'
 import { SillyName } from './SillyName'
-import mock from 'jest-fetch-mock'
-import { wait } from '../util'
+import { wait } from '../util/'
 
-mock.enableMocks()
+beforeEach(() => {
+  WS.clean()
+})
 
 describe('SillyName', () => {
-  beforeEach(() => {
-    mock.resetMocks()
-  })
-
-  // Tests seem to affect each other. TODO: fix this
-  // it('should output "Teodor Maxim" if there is a connection error', async () => {
-  //   mock.mockRejectOnce()
-  //   const component = new SillyName()
-
-  //   component.create(Component.body)
-
-  //   await wait(50)
-
-  //   const dom = document.querySelector('.silly-name') as HTMLElement
-  //   expect(dom.innerText).toBe('Teodor Maxim')
-  // })
+  const [host, port] = ['ws://localhost', 1234]
 
   it('should output the text received from the server', async () => {
-    const message = { name: 'sarmale' } as const
-    mock.mockResponseOnce(JSON.stringify(message))
+    const server = new WS(`ws://${host}:${port}`, { jsonProtocol: true })
 
-    const controller = new AbortController()
-    const component = new SillyName(controller.signal)
+    const component = new SillyName(`ws://${host}:${port}`)
+    await server.connected
 
     component.create(Component.body)
-    controller.abort()
 
-    await wait(50)
+    const message = { name: 'sarmale' } as const
+    server.send(message)
 
     const dom = document.querySelector('.silly-name') as HTMLElement
     expect(dom).not.toBeNull()
-    expect(dom.innerText).toBe(message.name)
+    expect(dom.textContent).toBe(message.name)
+
+    server.close()
+  })
+
+  it('should output "Teodor Maxim" if there is a connection error', () => {
+    const component = new SillyName(`ws://${host}:1233`)
+
+    component.create(Component.body)
+    const dom = document.querySelector('.silly-name') as HTMLElement
+    expect(dom.textContent).toBe('Teodor Maxim')
   })
 })

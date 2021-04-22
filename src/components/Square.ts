@@ -3,7 +3,7 @@ import './Square.css'
 import { Component } from '../internal/Component'
 
 interface SquareEventListener {
-  event: string
+  event: keyof HTMLElementEventMap
   callback: (this: Square, event: Event) => void
   options?: boolean | AddEventListenerOptions
 }
@@ -13,7 +13,7 @@ interface SquareProperties {
   eventListeners?: SquareEventListener[]
 }
 
-class Square extends Component<HTMLDivElement> {
+class Square extends Component<HTMLDivElement, false> {
   private userEvents?: SquareEventListener[]
 
   constructor(properties: SquareProperties) {
@@ -24,12 +24,8 @@ class Square extends Component<HTMLDivElement> {
       this.setStyle('z-index', `${2}`)
     })
     this.addEventListener('mouseleave', () => {
-      const transitionEventHandler = function (this: Square) {
-        this.setStyle('z-index', '')
-        this.removeEventListener('transitionend', transitionEventHandler)
-      }.bind(this)
       this.setStyle('z-index', `${1}`)
-      this.addEventListener('transitionend', transitionEventHandler)
+      this.eventsRace(['transitionend', 'transitioncancel']).then(() => this.setStyle('z-index', null))
     })
   }
 
@@ -41,27 +37,30 @@ class Square extends Component<HTMLDivElement> {
     this.setStyle('--color', color)
   }
 
-  async create<T extends HTMLElement>(parent: Component<T>, animate: boolean): Promise<void> {
-    this.appendTo(parent)
-    if (animate) {
-      this.addClass('grid__square--inserted')
-      await new Promise<void>((resolve) => {
-        this.addEventListener('animationend', () => {
-          this.removeClass('grid__square--inserted')
-          resolve()
-        })
-      })
-    }
+  set row(row: number) {
+    this.setStyle('--row', `${row}`)
   }
 
-  async destroy(animate: boolean): Promise<void> {
+  set col(col: number) {
+    this.setStyle('--col', `${col}`)
+  }
+
+  animate(which: string, animate = true): Promise<void> {
     if (animate) {
-      await new Promise<void>((resolve) => {
-        this.addEventListener('animationend', () => resolve())
-        this.addClass('grid__square--deleted')
-      })
+      const c = `grid__square--${which}`
+      this.addClass(c)
+      return this.eventsRace(['animationend', 'animationcancel']).then(() => this.removeClass(c))
     }
-    this.remove()
+    return Promise.resolve()
+  }
+
+  create<V extends boolean>(parent: Component<HTMLElement, V>, animate: boolean): Promise<void> {
+    this.appendTo(parent)
+    return this.animate('inserted', animate)
+  }
+
+  destroy(animate: boolean): Promise<void> {
+    return this.animate('deleted', animate).then(() => this.remove())
   }
 }
 

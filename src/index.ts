@@ -2,7 +2,7 @@ import './reset.css'
 import './style.css'
 
 import { Grid } from './components/Grid'
-import { randInt } from './util'
+import { randInt } from './util/'
 import { Square } from './components/Square'
 import { Component } from './internal/Component'
 import { SillyName } from './components/SillyName'
@@ -11,7 +11,7 @@ const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Com
   if (!elem) {
     throw new Error(`${name} doesn't exist in the HTML document!`)
   }
-  return Component.from(elem)
+  return Component.from(elem, false)
 }
 
 const gridParent = componentFrom(document.querySelector<HTMLElement>('.grid__parent'), 'Grid parent')
@@ -23,7 +23,7 @@ const squareMousedown = (() => {
     if (ignoreClicks) {
       return
     }
-    grid.removeSquare(this).destroy(true)
+    grid.removeSquare(this)
     if (grid.squareCount > 1 && grid.squareCount === randInt(grid.squareCount + 1)) {
       ignoreClicks = true
       await grid.destroy(true)

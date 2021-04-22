@@ -1,32 +1,30 @@
 import './SillyName.css'
 
 import { Component } from '../internal/Component'
-import { interval } from '../util'
 
 interface Response {
   name: string
 }
 
-const fetchSillyName: () => Promise<string> = () =>
-  fetch(`/.netlify/functions/name`)
-    .then((res) => res.json())
-    .then((res: Response) => res.name)
+export class SillyName extends Component<HTMLElement, false> {
+  private readonly websocket?: WebSocket
 
-export class SillyName extends Component<HTMLElement> {
-  constructor(signal?: AbortSignal) {
+  constructor(websocketURL: string) {
     super({ tag: 'em', classList: ['silly-name'] })
-
-    this.text = '...'
-
-    interval({
-      callback: async () => (this.text = await fetchSillyName()),
-      interval: 2000,
-      leading: true,
-      signal,
-    }).catch((e) => {
-      console.error(e)
+    const onerror = () => {
       this.text = 'Teodor Maxim'
-    })
+    }
+    try {
+      this.websocket = new WebSocket(websocketURL)
+      this.websocket.onmessage = (ev) => {
+        const res: Response = JSON.parse(ev.data)
+        this.text = res.name
+      }
+      this.websocket.onerror = this.websocket.onclose = onerror
+    } catch (e) {
+      console.error(e)
+      onerror()
+    }
   }
 
   create<T extends HTMLElement>(parent: Component<T>): void {
@@ -34,6 +32,7 @@ export class SillyName extends Component<HTMLElement> {
   }
 
   destroy(): void {
+    this.websocket?.close()
     this.remove()
   }
 }
