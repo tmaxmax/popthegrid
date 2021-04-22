@@ -6,13 +6,13 @@ interface Response {
   name: string
 }
 
-export class SillyName extends Component<HTMLElement> {
+export class SillyName extends Component<HTMLElement, false> {
   private readonly websocket?: WebSocket
 
   constructor(websocketURL: string) {
     super({ tag: 'em', classList: ['silly-name'] })
     const onerror = () => {
-      this.text = "Teodor Maxim"
+      this.text = 'Teodor Maxim'
     }
     try {
       this.websocket = new WebSocket(websocketURL)
@@ -20,7 +20,7 @@ export class SillyName extends Component<HTMLElement> {
         const res: Response = JSON.parse(ev.data)
         this.text = res.name
       }
-      this.websocket.onerror = this.websocket.onclose = onerror;
+      this.websocket.onerror = this.websocket.onclose = onerror
     } catch (e) {
       console.error(e)
       onerror()
