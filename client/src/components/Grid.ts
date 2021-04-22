@@ -50,12 +50,31 @@ class Grid extends Component<HTMLDivElement> {
     log('Grid properties: %O', this.properties)
     this.addClass('grid')
     this.resizeObserver = new ResizeObserver(() => {
-      const { sideLength } = this.getSquareData()
-      this.squareSideLength = sideLength
+      this.setSquaresPosition()
     })
   }
 
-  setColors(colors: string[]): void {
+  private setSquaresPosition(start?: number, end?: number) {
+    start ??= 0
+    end ??= this.squares.length
+
+    const size = this.squareData.sideLength
+    const cols = (this.width / size) | 0
+
+    this.squares.slice(start, end).forEach((s, i) => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const j = start! + i
+      s.size = size
+      s.row = (j / cols) | 0
+      s.col = j % cols
+    })
+  }
+
+  get colors(): string[] {
+    return this.properties.colors
+  }
+
+  set colors(colors: string[]) {
     this.properties.colors = colors
     this.squares.forEach((square) => (square.color = colors[randInt(colors.length)]))
   }
@@ -64,10 +83,11 @@ class Grid extends Component<HTMLDivElement> {
     return this.squares.length
   }
 
-  removeSquare(square: Square): Square {
+  removeSquare(square: Square): void {
     const i = this.squares.indexOf(square)
     log('Square %d removed', i)
-    return this.squares.splice(i, 1)[0]
+    this.squares.splice(i, 1)[0].destroy(true)
+    this.setSquaresPosition(i)
   }
 
   async create<T extends HTMLElement>(parent: Component<T>, animate: boolean): Promise<void> {
@@ -95,22 +115,6 @@ class Grid extends Component<HTMLDivElement> {
     this.remove()
   }
 
-  private getWidth(): number {
-    return parseInt(this.getComputedStyle('width'))
-  }
-
-  private getHeight(): number {
-    return parseInt(this.getComputedStyle('height'))
-  }
-
-  private get squareSideLength(): number {
-    return parseInt(this.getStyle('--size'))
-  }
-
-  private set squareSideLength(squareSideLength: number) {
-    this.setStyle('--size', `${squareSideLength}px`)
-  }
-
   private async appendSquares(squares: Square[], animate: boolean): Promise<void> {
     let promise: Promise<void> | undefined
     let i = this.squares.length
@@ -125,10 +129,18 @@ class Grid extends Component<HTMLDivElement> {
     await promise
   }
 
-  private getSquareData() {
+  private get width(): number {
+    return parseInt(this.getComputedStyle('width'))
+  }
+
+  private get height(): number {
+    return parseInt(this.getComputedStyle('height'))
+  }
+
+  private get squareData() {
     const n = this.properties.squareCount
-    const x = this.getWidth()
-    const y = this.getHeight()
+    const x = this.width
+    const y = this.height
 
     log('Width: %d, Height: %d', x, y)
 

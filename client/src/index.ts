@@ -23,7 +23,7 @@ const squareMousedown = (() => {
     if (ignoreClicks) {
       return
     }
-    grid.removeSquare(this).destroy(true)
+    grid.removeSquare(this)
     if (grid.squareCount > 1 && grid.squareCount === randInt(grid.squareCount + 1)) {
       ignoreClicks = true
       await grid.destroy(true)

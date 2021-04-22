@@ -41,6 +41,30 @@ class Square extends Component<HTMLDivElement> {
     this.setStyle('--color', color)
   }
 
+  get size(): number {
+    return parseInt(this.getStyle('--size'), 10)
+  }
+
+  set size(size: number) {
+    this.setStyle('--size', `${size}px`)
+  }
+
+  get row(): number {
+    return parseInt(this.getStyle('--row'), 10)
+  }
+
+  set row(row: number) {
+    this.setStyle('--row', `${row}`)
+  }
+
+  get col(): number {
+    return parseInt(this.getStyle('--col'), 10)
+  }
+
+  set col(col: number) {
+    this.setStyle('--col', `${col}`)
+  }
+
   async create<T extends HTMLElement>(parent: Component<T>, animate: boolean): Promise<void> {
     this.appendTo(parent)
     if (animate) {

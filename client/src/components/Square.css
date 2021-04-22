@@ -1,6 +1,9 @@
 .grid__square {
-  width: 100%;
-  height: 100%;
+  width: var(--size);
+  height: var(--size);
+  top: calc(var(--row) * var(--size));
+  left: calc(var(--col) * var(--size));
+  position: absolute;
   background: var(--color);
   transition: all 0.5s ease-out;
   touch-action: manipulation;
