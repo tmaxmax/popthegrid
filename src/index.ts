@@ -2,7 +2,7 @@ import './reset.css'
 import './style.css'
 
 import { Grid } from './components/Grid'
-import { randInt } from './util/'
+import { randInt } from './util'
 import { Square } from './components/Square'
 import { Component } from './internal/Component'
 import { SillyName } from './components/SillyName'
@@ -23,12 +23,13 @@ const squareMousedown = (() => {
     if (ignoreClicks) {
       return
     }
-    grid.removeSquare(this)
+    const removed = grid.removeSquare(this)
     if (grid.squareCount > 1 && grid.squareCount === randInt(grid.squareCount + 1)) {
       ignoreClicks = true
       await grid.destroy(true)
       await grid.create(gridParent, true)
     } else if (grid.squareCount === 0) {
+      await removed
       // TODO: Better win alert
       alert('you won')
     }
