@@ -4,6 +4,7 @@
   "compilerOptions": {
     "allowJs": true,
     "esModuleInterop": true,
+    "lib": ["DOM", "ESNext"],
     "target": "ES5",
     "module": "ESNext",
     "moduleResolution": "node",
