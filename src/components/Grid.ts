@@ -2,8 +2,7 @@ import './Grid.css'
 
 import { Component } from '../internal/Component'
 import { Square, SquareEventListener } from './Square'
-import { baseLog, randInt, wait } from '../util/'
-import Async from '../util/async'
+import { baseLog, randInt, wait, Async } from '../util'
 import ResizeObserver from 'resize-observer-polyfill'
 
 interface GridProperties {
