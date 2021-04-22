@@ -11,19 +11,19 @@ test('Grid', async () => {
   expect(parentDOM).not.toBeNull()
   const colors = ['#000', '#fff']
   const squareCount = 48
-  const handler = jest.fn(async function (this: Square) {
+  const callback = jest.fn(async function (this: Square) {
     expect(colors).toContain(this.color)
     const prevSquareCount = grid.squareCount
     await grid.removeSquare(this).destroy(false)
     expect(grid.squareCount).toBe(prevSquareCount - 1)
   })
   const grid = new Grid({
-    squareCount: squareCount,
-    colors: colors,
+    squareCount,
+    colors,
     squareEventListeners: [
       {
         event: 'click',
-        callback: handler,
+        callback,
       },
     ],
   })
@@ -33,5 +33,5 @@ test('Grid', async () => {
   expect(gridDOM).not.toBeNull()
   expect(gridDOM.children.length).toBe(squareCount)
   fireClick(gridDOM.children.item(randInt(gridDOM.children.length)) as Element)
-  expect(handler).toBeCalled()
+  expect(callback).toBeCalled()
 })
