@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import { Component } from '../internal/Component'
-import { randInt, fireClick } from '../util'
+import { randInt, fireClick } from '../util/'
 import { Grid } from './Grid'
 import { Square } from './Square'
 
@@ -14,7 +14,7 @@ test('Grid', async () => {
   const callback = jest.fn(async function (this: Square) {
     expect(colors).toContain(this.color)
     const prevSquareCount = grid.squareCount
-    await grid.removeSquare(this).destroy(false)
+    await grid.removeSquare(this)
     expect(grid.squareCount).toBe(prevSquareCount - 1)
   })
   const grid = new Grid({
