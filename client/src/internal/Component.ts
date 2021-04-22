@@ -1,4 +1,7 @@
-import { isDefined } from '../util'
+import type { If, IfElse } from '../util/'
+import { isDefined } from '../util/'
+
+type HasComputedStyle<T extends boolean> = IfElse<T, { hasComputedStyle: true }, { hasComputedStyle?: false }>
 
 interface ComponentFromExisting<T extends HTMLElement> {
   alreadyExisting: true
@@ -11,11 +14,13 @@ interface ComponentFromTag {
   classList?: string[]
 }
 
-export class Component<T extends HTMLElement> {
-  protected readonly element: T
-  private readonly computedStyle: CSSStyleDeclaration
+type Timeout = { timeout?: number }
 
-  protected constructor(props: ComponentFromTag | ComponentFromExisting<T>) {
+export class Component<T extends HTMLElement = HTMLElement, U extends boolean = boolean> {
+  protected readonly element: T
+  private readonly computedStyle?: CSSStyleDeclaration
+
+  protected constructor(props: (ComponentFromTag | ComponentFromExisting<T>) & HasComputedStyle<U>) {
     if (props.alreadyExisting) {
       this.element = props.element
     } else {
@@ -24,20 +29,22 @@ export class Component<T extends HTMLElement> {
         this.addClass(...props.classList)
       }
     }
-    this.computedStyle = getComputedStyle(this.element)
+    if (props.hasComputedStyle) {
+      this.computedStyle = getComputedStyle(this.element)
+    }
   }
 
   /**
-   * Add a class to the element
-   * @param name The class name
+   * Adds classes to the element
+   * @param name The classes
    */
   protected addClass(...name: string[]): void {
     this.element.classList.add(...name)
   }
 
   /**
-   * Remove a class from the element
-   * @param name The class name
+   * Removes classes from the element
+   * @param name The classes
    */
   protected removeClass(...name: string[]): void {
     this.element.classList.remove(...name)
@@ -81,8 +88,9 @@ export class Component<T extends HTMLElement> {
    * Get a CSS style property computed value
    * @param name The CSS style name
    */
-  protected getComputedStyle(name: string): string {
-    return this.computedStyle.getPropertyValue(name)
+  protected getComputedStyle(name: string): If<U, string> {
+    // @ts-expect-error Typescript is not able to infer types here
+    return this.computedStyle?.getPropertyValue(name)
   }
 
   /**
@@ -90,11 +98,12 @@ export class Component<T extends HTMLElement> {
    * @param event The event type
    * @param callback The event callback
    */
-  protected addEventListener<S extends Component<T>>(
-    event: keyof HTMLElementEventMap | string,
-    callback: (this: S, ev: Event) => void,
+  protected addEventListener<S extends Component<T, U>, E extends keyof HTMLElementEventMap>(
+    event: E,
+    callback: (this: S, ev: HTMLElementEventMap[E]) => void,
     options?: boolean | AddEventListenerOptions
   ): void {
+    // @ts-expect-error `this` is different than expected, but the `this` from addEventListener is not used.
     this.element.addEventListener(event, callback, options)
   }
 
@@ -103,27 +112,63 @@ export class Component<T extends HTMLElement> {
    * @param event The event type
    * @param callback The event callback
    */
-  protected removeEventListener<S extends Component<T>>(
-    event: keyof HTMLElementEventMap | string,
-    callback: (this: S, ev: Event) => void,
+  protected removeEventListener<S extends Component<T, U>, E extends keyof HTMLElementEventMap>(
+    event: E,
+    callback: (this: S, ev: HTMLElementEventMap[E]) => void,
     options?: boolean | EventListenerOptions
   ): void {
+    // @ts-expect-error same as above
     this.element.removeEventListener(event, callback, options)
   }
 
+  protected event<E extends keyof HTMLElementEventMap>(
+    event: E,
+    options?: boolean | (EventListenerOptions & Timeout)
+  ): Promise<HTMLElementEventMap[E]> {
+    type Ev = HTMLElementEventMap[E]
+
+    return new Promise<Ev>((resolve, reject) => {
+      const callback = (e: Ev) => {
+        this.element.removeEventListener(event, callback, options)
+        resolve(e)
+      }
+
+      if (options && typeof options !== 'boolean' && 'timeout' in options) {
+        setTimeout(() => {
+          this.element.removeEventListener(event, callback, options)
+          reject()
+        }, options.timeout)
+      }
+
+      this.element.addEventListener(event, callback, options)
+    })
+  }
+
+  private events(events: (keyof HTMLElementEventMap)[]): Promise<Event>[] {
+    return events.map((e) => this.event(e))
+  }
+
+  protected eventsAll(events: (keyof HTMLElementEventMap)[]): Promise<Event[]> {
+    return Promise.all(this.events(events))
+  }
+
+  protected eventsRace(events: (keyof HTMLElementEventMap)[]): Promise<Event> {
+    return Promise.race(this.events(events))
+  }
+
   protected get text(): string {
-    return this.element.innerText
+    return this.element.textContent || ''
   }
 
   protected set text(value: string) {
-    this.element.innerText = value
+    this.element.textContent = value
   }
 
   /**
    * Insert a component at the end of this component's tree
    * @param child The component to be appended
    */
-  protected append<T extends HTMLElement>(child: Component<T>): void {
+  protected append(child: Component): void {
     this.element.append(child.element)
   }
 
@@ -131,7 +176,7 @@ export class Component<T extends HTMLElement> {
    * Append this component to another component's tree
    * @param parent The component to append to
    */
-  protected appendTo<T extends HTMLElement>(parent: Component<T>): void {
+  protected appendTo(parent: Component): void {
     parent.append(this)
   }
 
@@ -142,8 +187,8 @@ export class Component<T extends HTMLElement> {
     this.element.remove()
   }
 
-  static from<T extends HTMLElement>(element: T): Component<T> {
-    return new Component({ alreadyExisting: true, element })
+  static from<T extends HTMLElement, U extends boolean>(element: T, hasComputedStyle?: U): Component<T, U> {
+    return new Component<T, U>({ alreadyExisting: true, element, hasComputedStyle })
   }
   static body = Component.from(document.body || document.documentElement)
   static head = Component.from(document.head)
