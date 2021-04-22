@@ -73,7 +73,7 @@ export class Component<T extends HTMLElement> {
    * @param name The CSS style or variable name
    * @param value The new value
    */
-  protected setStyle(name: string, value: string): void {
+  protected setStyle(name: string, value: string | null): void {
     this.element.style.setProperty(name, value)
   }
 
