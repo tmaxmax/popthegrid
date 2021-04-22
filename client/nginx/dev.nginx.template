@@ -18,10 +18,6 @@ server {
     proxy_pass http://client/; 
   }
   
-  location /livereload.js {
-    return 301 http://$host$request_uri;
-  }
-  
   location /ws {
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header Host $host;
