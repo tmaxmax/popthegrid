@@ -2,7 +2,7 @@ import './Grid.css'
 
 import { Component } from '../internal/Component'
 import { Square, SquareEventListener } from './Square'
-import { generateArray, baseLog, randInt, wait } from '../util/'
+import { baseLog, randInt, wait } from '../util/'
 import Async from '../util/async'
 import ResizeObserver from 'resize-observer-polyfill'
 
