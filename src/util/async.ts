@@ -1,3 +1,5 @@
+import { isDefined } from '../util'
+
 type Callback<T, U> = (elem: T, i: number, arr: readonly T[]) => Promise<U>
 type Reducer<T, U> = (acc: U, elem: T, i: number, arr: readonly T[]) => Promise<U>
 
@@ -15,14 +17,15 @@ export default class Async {
   static reduce<T, U>(arr: readonly T[], fn: Reducer<T, U>, init: U): Promise<U>
   // eslint-disable-next-line
   static async reduce<T, U>(arr: readonly T[], fn: Reducer<T, U>, init?: any): Promise<U | null> {
+    const existsInit = isDefined(init)
     if (arr.length === 0) {
-      if (typeof init === 'undefined') {
-        return null
+      if (existsInit) {
+        return init
       }
-      return init
+      return null
     }
     let i = 0
-    if (typeof init === 'undefined') {
+    if (existsInit) {
       init = arr[i]
       i++
     }
