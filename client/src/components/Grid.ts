@@ -2,7 +2,8 @@ import './Grid.css'
 
 import { Component } from '../internal/Component'
 import { Square, SquareEventListener } from './Square'
-import { generateArray, baseLog, randInt, wait } from '../util'
+import { generateArray, baseLog, randInt, wait } from '../util/'
+import Async from '../util/async'
 import ResizeObserver from 'resize-observer-polyfill'
 
 interface GridProperties {
@@ -39,13 +40,13 @@ const defaultProps: Required<GridProperties> = {
   squareEventListeners: [],
 }
 
-class Grid extends Component<HTMLDivElement> {
+class Grid extends Component<HTMLDivElement, true> {
   private readonly properties: Required<GridProperties>
   private squares: Square[] = []
   private readonly resizeObserver: ResizeObserver
 
   constructor(properties: GridProperties) {
-    super({ tag: 'div', classList: ['grid'] })
+    super({ tag: 'div', classList: ['grid'], hasComputedStyle: true })
     this.properties = { ...defaultProps, ...properties }
     log('Grid properties: %O', this.properties)
     this.addClass('grid')
@@ -54,25 +55,18 @@ class Grid extends Component<HTMLDivElement> {
     })
   }
 
-  private setSquaresPosition(start?: number, end?: number) {
-    start ??= 0
-    end ??= this.squares.length
-
+  private async setSquaresPosition(start = 0, end = this.squares.length) {
     const size = this.squareData.sideLength
     const cols = (this.width / size) | 0
 
     this.setStyle('--size', `${size}px`)
 
-    this.squares.slice(start, end).forEach((s, i) => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const j = start! + i
+    await Async.map(this.squares.slice(start, end), async (s, i) => {
+      const j = start + i
       s.row = (j / cols) | 0
       s.col = j % cols
+      return this.eventsRace(['transitionend', 'transitioncancel'])
     })
-  }
-
-  get colors(): string[] {
-    return this.properties.colors
   }
 
   set colors(colors: string[]) {
@@ -84,14 +78,13 @@ class Grid extends Component<HTMLDivElement> {
     return this.squares.length
   }
 
-  removeSquare(square: Square): void {
+  async removeSquare(square: Square): Promise<void> {
     const i = this.squares.indexOf(square)
     log('Square %d removed', i)
-    this.squares.splice(i, 1)[0].destroy(true)
-    this.setSquaresPosition(i)
+    await Promise.all([this.squares.splice(i, 1)[0].destroy(true), this.setSquaresPosition(i)])
   }
 
-  async create<T extends HTMLElement>(parent: Component<T>, animate: boolean): Promise<void> {
+  async create(parent: Component, animate: boolean): Promise<void> {
     log('Creating grid')
     this.appendTo(parent)
     this.resizeObserver.observe(this.element)
@@ -122,7 +115,7 @@ class Grid extends Component<HTMLDivElement> {
     this.squares.push(...squares)
     for (; i < this.squares.length; i++) {
       const square = this.squares[i]
-      promise = square.create(this, animate)
+      promise = square.create((this as unknown) as Component, animate)
       if (animate) {
         await Promise.race([promise, wait(getDelay(this.properties.animationDelay, i, this.squares.length))])
       }
