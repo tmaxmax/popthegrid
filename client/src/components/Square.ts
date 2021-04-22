@@ -41,14 +41,6 @@ class Square extends Component<HTMLDivElement> {
     this.setStyle('--color', color)
   }
 
-  get size(): number {
-    return parseInt(this.getStyle('--size'), 10)
-  }
-
-  set size(size: number) {
-    this.setStyle('--size', `${size}px`)
-  }
-
   get row(): number {
     return parseInt(this.getStyle('--row'), 10)
   }

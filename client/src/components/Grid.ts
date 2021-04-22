@@ -61,10 +61,11 @@ class Grid extends Component<HTMLDivElement> {
     const size = this.squareData.sideLength
     const cols = (this.width / size) | 0
 
+    this.setStyle('--size', `${size}px`)
+
     this.squares.slice(start, end).forEach((s, i) => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const j = start! + i
-      s.size = size
       s.row = (j / cols) | 0
       s.col = j % cols
     })
