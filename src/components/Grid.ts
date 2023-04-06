@@ -79,6 +79,9 @@ class Grid extends Component<HTMLDivElement, true> {
 
   async removeSquare(square: Square): Promise<void> {
     const i = this.squares.indexOf(square)
+    if (i == -1) {
+      throw new Error('Square does not exist in grid')
+    }
     log('Square %d removed', i)
     await Promise.all([this.squares.splice(i, 1)[0].destroy(true), this.setSquaresPosition(i)])
   }
