@@ -2,10 +2,10 @@ import './reset.css'
 import './style.css'
 
 import { Grid } from './components/Grid'
-import { randInt } from './util'
 import { Square } from './components/Square'
 import { Component } from './internal/Component'
 import { SillyName } from './components/SillyName'
+import { Gamemode, RandomTimer } from './gamemode'
 
 const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
   if (!elem) {
@@ -17,6 +17,8 @@ const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Com
 const gridParent = componentFrom(document.querySelector<HTMLElement>('.grid__parent'), 'Grid parent')
 const sillyNameParent = componentFrom(document.querySelector<HTMLParagraphElement>('#silly-name'), 'Silly name parent')
 
+const gamemode: Gamemode = new RandomTimer({ minSeconds: 5, maxSeconds: 10 })
+
 const squareMousedown = (() => {
   let ignoreClicks = false
   return async function (this: Square) {
@@ -24,12 +26,12 @@ const squareMousedown = (() => {
       return
     }
     const removed = grid.removeSquare(this)
-    if (grid.squareCount > 1 && grid.squareCount === randInt(grid.squareCount + 1)) {
+    if (gamemode.shouldDestroy(grid, this)) {
       ignoreClicks = true
-      await grid.destroy(true)
+      await Promise.all([grid.destroy(true), gamemode.reset()])
       await grid.create(gridParent, true)
     } else if (grid.squareCount === 0) {
-      await removed
+      await Promise.all([removed, gamemode.reset()])
       // TODO: Better win alert
       alert('you won')
     }
