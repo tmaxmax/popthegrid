@@ -77,6 +77,10 @@ class Grid extends Component<HTMLDivElement, true> {
     return this.squares.length
   }
 
+  get activeSquares(): readonly Square[] {
+    return this.squares
+  }
+
   async removeSquare(square: Square): Promise<void> {
     const i = this.squares.indexOf(square)
     if (i == -1) {
