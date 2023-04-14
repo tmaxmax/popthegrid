@@ -5,6 +5,7 @@ go 1.15
 require (
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/andybalholm/brotli v1.0.1 // indirect
+	github.com/aws/aws-lambda-go v1.40.0
 	github.com/gofiber/fiber/v2 v2.3.3
 	github.com/gofiber/websocket/v2 v2.0.2
 	github.com/klauspost/compress v1.11.6 // indirect
