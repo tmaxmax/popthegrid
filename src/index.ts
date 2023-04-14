@@ -6,6 +6,8 @@ import { Square } from './components/Square'
 import { Component } from './components/internal/Component'
 import { SillyName } from './components/SillyName'
 import { Gamemode, RandomCount, RandomTimer } from './gamemode'
+import { IndexedDB } from '$util'
+import { Attempt, Gamemode as SchemaGamemode, getStats, insertAttempt, retrieveAttempts, schema } from './db/schema'
 
 const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
   if (!elem) {
@@ -22,7 +24,9 @@ const gamemodeInputs: NodeListOf<HTMLInputElement> = document.querySelectorAll('
 console.log(gamemodeInputs.length)
 
 let gamemode: Gamemode = new RandomCount()
+let gamemodeName: SchemaGamemode = 'random'
 let canChangeGamemode = true
+let db: IDBDatabase
 
 const setGamemodeChangePermission = (allow: boolean) => {
   canChangeGamemode = allow
@@ -41,11 +45,12 @@ const squareMousedown = (() => {
     const removed = grid.removeSquare(this)
     if (gamemode.shouldDestroy(grid, this)) {
       ignoreClicks = true
+      const att = insertAttempt(db, new Attempt(gamemodeName, false))
       await Promise.all([grid.destroy(true), gamemode.reset()])
       setGamemodeChangePermission(true)
-      await grid.create(gridParent, true)
+      await Promise.all([grid.create(gridParent, true), att])
     } else if (grid.squareCount === 0) {
-      await Promise.all([removed, gamemode.reset()])
+      await Promise.all([removed, gamemode.reset(), insertAttempt(db, new Attempt(gamemodeName, true))])
       // TODO: Better win alert
       alert('you won')
     }
@@ -66,12 +71,10 @@ const grid = new Grid({
 
 const sillyName = new SillyName()
 
-type GamemodeInput = 'random' | 'random-timer'
-
 const gamemodeChangeEvent = (ev: Event) => {
   if (!canChangeGamemode) return
 
-  const gamemodeName = (ev.target! as HTMLInputElement).value as GamemodeInput
+  gamemodeName = (ev.target! as HTMLInputElement).value as SchemaGamemode
   console.log(gamemodeName)
 
   switch (gamemodeName) {
@@ -89,6 +92,7 @@ const gamemodeChangeEvent = (ev: Event) => {
 const main = async () => {
   gamemodeFieldset.addEventListener('change', gamemodeChangeEvent)
   sillyName.create(sillyNameParent)
+  db = await IndexedDB.open(window.indexedDB, schema)
   await grid.create(gridParent, true)
 }
 
