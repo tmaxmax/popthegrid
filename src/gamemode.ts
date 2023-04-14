@@ -19,7 +19,7 @@ export interface Gamemode {
 export class RandomCount implements Gamemode {
     shouldDestroy(grid: Grid, _: Square): boolean {
         const count = grid.activeSquares.length
-        return count > 1 && count === randInt(count)
+    return count > 1 && count === randInt(count + 1)
     }
 
     reset() {}
