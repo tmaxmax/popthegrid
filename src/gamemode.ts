@@ -11,18 +11,19 @@ export interface Grid {
   colors: readonly string[]
 }
 
-export interface Gamemode {
-  shouldDestroy(grid: Grid, destroyedSquare: Square): boolean
-  reset(): void | Promise<void>
+export abstract class Gamemode {
+  abstract shouldDestroy(grid: Grid, destroyedSquare: Square): boolean
+
+  reset(): void | Promise<void> {
+    return
+  }
 }
 
-export class RandomCount implements Gamemode {
+export class RandomCount extends Gamemode {
   shouldDestroy(grid: Grid, _: Square): boolean {
     const count = grid.activeSquares.length
     return count > 1 && count === randInt(count + 1)
   }
-
-  reset() {}
 }
 
 export interface RandomTimerParameters {
@@ -32,10 +33,10 @@ export interface RandomTimerParameters {
 
 export class RandomTimer implements Gamemode {
   private readonly numIterations: number
-  private hasPoppedFirstSquare: boolean = false
+  private hasPoppedFirstSquare = false
   private controller: AbortController | undefined
   private interval: Promise<number> | undefined
-  private done: boolean = false
+  private done = false
 
   constructor({ minSeconds, maxSeconds }: RandomTimerParameters) {
     this.numIterations = minSeconds + randInt(maxSeconds - minSeconds + 1)
