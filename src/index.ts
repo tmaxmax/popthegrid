@@ -5,7 +5,7 @@ import { Grid } from './components/Grid'
 import { Square } from './components/Square'
 import { Component } from './components/internal/Component'
 import { SillyName } from './components/SillyName'
-import { Gamemode, RandomTimer } from './gamemode'
+import { Gamemode, RandomCount, RandomTimer } from './gamemode'
 
 const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
   if (!elem) {
@@ -16,8 +16,17 @@ const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Com
 
 const gridParent = componentFrom(document.querySelector<HTMLElement>('.grid__parent'), 'Grid parent')
 const sillyNameParent = componentFrom(document.querySelector<HTMLParagraphElement>('#silly-name'), 'Silly name parent')
+const gamemodeFieldset: HTMLFieldSetElement = document.querySelector('#gamemode')!
+const gamemodeInputs: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[name=gamemode]')
+console.log(gamemodeInputs.length)
 
-const gamemode: Gamemode = new RandomTimer({ minSeconds: 5, maxSeconds: 10 })
+let gamemode: Gamemode = new RandomCount()
+let canChangeGamemode = true
+
+const setGamemodeChangePermission = (allow: boolean) => {
+  canChangeGamemode = allow
+  gamemodeInputs.forEach((i) => (i.disabled = !allow))
+}
 
 const squareMousedown = (() => {
   let ignoreClicks = false
@@ -25,10 +34,14 @@ const squareMousedown = (() => {
     if (ignoreClicks) {
       return
     }
+    if (canChangeGamemode) {
+      setGamemodeChangePermission(false)
+    }
     const removed = grid.removeSquare(this)
     if (gamemode.shouldDestroy(grid, this)) {
       ignoreClicks = true
       await Promise.all([grid.destroy(true), gamemode.reset()])
+      setGamemodeChangePermission(true)
       await grid.create(gridParent, true)
     } else if (grid.squareCount === 0) {
       await Promise.all([removed, gamemode.reset()])
@@ -52,7 +65,26 @@ const grid = new Grid({
 
 const sillyName = new SillyName()
 
+type GamemodeInput = 'random' | 'random-timer'
+
+const gamemodeChangeEvent = (ev: Event) => {
+  if (!canChangeGamemode) return
+
+  const gamemodeName = (ev.target! as HTMLInputElement).value as GamemodeInput
+  console.log(gamemodeName)
+
+  switch (gamemodeName) {
+    case 'random':
+      gamemode = new RandomCount()
+      break
+    case 'random-timer':
+      gamemode = new RandomTimer({ minSeconds: 4, maxSeconds: 9 })
+      break
+  }
+}
+
 const main = async () => {
+  gamemodeFieldset.addEventListener('change', gamemodeChangeEvent)
   sillyName.create(sillyNameParent)
   await grid.create(gridParent, true)
 }

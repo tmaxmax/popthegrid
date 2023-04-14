@@ -11,6 +11,7 @@
   --color-danger: #ef2d56;
   --weight-heading: 800;
   --weight-body: 450;
+  --font-body: 'Heebo', sans-serif;
 }
 
 html {
@@ -39,7 +40,7 @@ h1 {
 }
 
 p {
-  font-family: 'Heebo', sans-serif;
+  font-family: var(--font-body);
   font-weight: var(--weight-body);
   text-align: center;
   margin: 0.3em;
@@ -54,10 +55,61 @@ p {
   max-width: 1000px;
   height: 50%;
   max-height: 20em;
+  position: relative;
+}
+
+fieldset.game-parameter {
+  color: var(--color-body);
+  font-family: var(--font-body);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  max-width: fit-content;
+  margin-bottom: 5vmin;
+}
+
+fieldset.game-parameter label {
+  text-align: bottom;
+}
+
+fieldset.game-parameter span {
+  border: 3px solid var(--color-body);
+  border-radius: 100%;
+  display: inline-block;
+  width: 1.8rem;
+  height: 1.8rem;
+  text-align: center;
+  font-weight: bold;
+  transition: all 0.2s ease-in;
+  cursor: pointer;
+}
+
+fieldset.game-parameter input {
+  display: none;
+}
+
+fieldset.game-parameter input:disabled + span {
+  cursor: default;
+  opacity: 40%;
+}
+
+fieldset.game-parameter input:disabled:checked + span {
+  opacity: 100%;
+  border-color: var(--color-assurance);
+  background-color: var(--color-assurance);
+}
+
+fieldset.game-parameter input:checked + span {
+  background-color: var(--color-body);
+  color: var(--color-background);
 }
 
 footer {
   margin-top: auto;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
 }
 
 @media (min-height: 361px) {
