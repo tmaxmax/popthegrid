@@ -81,7 +81,7 @@ const gamemodeChangeEvent = (ev: Event) => {
       break
     case 'random-timer':
       gamemode = new RandomTimer({ minSeconds: 4, maxSeconds: 9 })
-      gamemodePrompt.textContent = `Gamemode: Time (${(gamemode as RandomTimer).numSeconds} seconds)`
+      gamemodePrompt.textContent = `Gamemode: Time (4–9 seconds)`
       break
   }
 }
