@@ -1,5 +1,7 @@
-import interval from './interval'
-import wait from './wait'
+import interval from '$util/interval'
+import wait from '$util/wait'
+
+import { describe, it, expect, vi } from 'vitest'
 
 describe('interval', () => {
   it("should respect the interval, compensate for the callback's duration and take leading into account", async () => {
@@ -15,7 +17,7 @@ describe('interval', () => {
     expect(Math.abs(end - start - time * 2)).toBeLessThan(20) // There is a constant overhead for configuring the interval
   })
   it('should run for a given iteration count', async () => {
-    const callback = jest.fn()
+    const callback = vi.fn()
     const callCount = await interval({
       callback,
       iterations: 5,
@@ -25,7 +27,7 @@ describe('interval', () => {
   })
   it('should abort on signal', async () => {
     const controller = new AbortController()
-    const callback = jest.fn((iteration: number) => {
+    const callback = vi.fn((iteration: number) => {
       if (iteration === 2) {
         controller.abort()
       }

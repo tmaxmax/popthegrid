@@ -3,7 +3,7 @@ import './style.css'
 
 import { Grid } from './components/Grid'
 import { Square } from './components/Square'
-import { Component } from './internal/Component'
+import { Component } from './components/internal/Component'
 import { SillyName } from './components/SillyName'
 import { Gamemode, RandomTimer } from './gamemode'
 

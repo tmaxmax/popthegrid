@@ -1,31 +1,36 @@
-import { Component } from '../internal/Component'
-import { SillyName } from './SillyName'
-import mock from 'jest-fetch-mock'
-import { wait } from '../util'
-
-mock.enableMocks()
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { Component } from '$components/internal/Component'
+import { SillyName } from '$components/SillyName'
+import { wait } from '$util'
+import { cleanupDOM } from '$util/tests'
+import 'vitest-fetch-mock'
 
 describe('SillyName', () => {
   beforeEach(() => {
-    mock.resetMocks()
+    fetchMock.doMock()
+  })
+
+  afterEach(() => {
+    fetchMock.resetMocks()
+    cleanupDOM()
   })
 
   // Tests seem to affect each other. TODO: fix this
-  // it('should output "Teodor Maxim" if there is a connection error', async () => {
-  //   mock.mockRejectOnce()
-  //   const component = new SillyName()
+  it('should output "Teodor Maxim" if there is a connection error', async () => {
+    fetchMock.mockRejectOnce()
+    const component = new SillyName()
 
-  //   component.create(Component.body)
+    component.create(Component.body)
 
-  //   await wait(50)
+    await wait(50)
 
-  //   const dom = document.querySelector('.silly-name') as HTMLElement
-  //   expect(dom.innerText).toBe('Teodor Maxim')
-  // })
+    const dom = document.querySelector('.silly-name') as HTMLElement
+    expect(dom.textContent).toEqual('Teodor Maxim')
+  })
 
   it('should output the text received from the server', async () => {
     const message = { name: 'sarmale' } as const
-    mock.mockResponseOnce(JSON.stringify(message))
+    fetchMock.mockResponseOnce(JSON.stringify(message))
 
     const controller = new AbortController()
     const component = new SillyName(controller.signal)
@@ -36,7 +41,7 @@ describe('SillyName', () => {
     await wait(50)
 
     const dom = document.querySelector('.silly-name') as HTMLElement
-    expect(dom).not.toBeNull()
-    expect(dom.innerText).toBe(message.name)
+    expect(dom).toBeDefined()
+    expect(dom.textContent).toEqual(message.name)
   })
 })

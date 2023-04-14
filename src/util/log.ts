@@ -2,11 +2,11 @@ import debug from 'debug'
 
 const log = debug('popthegrid')
 
-if (process.env.DEBUG) {
-  debug.enable(process.env.DEBUG)
+if (import.meta.env.DEBUG) {
+  debug.enable(import.meta.env.DEBUG)
 } else {
   debug.disable()
 }
-log(`Environment: ${process.env.NODE_ENV}\nDebug namespaces: ${process.env.DEBUG}`)
+log(`Environment: ${import.meta.env.NODE_ENV}\nDebug namespaces: ${import.meta.env.DEBUG}`)
 
 export default log

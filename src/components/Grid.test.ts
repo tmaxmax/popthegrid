@@ -1,17 +1,20 @@
 import fs from 'fs'
 import path from 'path'
-import { Component } from '../internal/Component'
-import { randInt, fireClick } from '../util/'
-import { Grid } from './Grid'
-import { Square } from './Square'
+import { Component } from '$components/internal/Component'
+import { randInt, fireClick } from '$util'
+import { cleanupDOM } from '$util/tests'
+import { Grid } from '$components/Grid'
+import { Square } from '$components/Square'
+
+import { test, expect, vi } from 'vitest'
 
 test('Grid', async () => {
-  document.write(fs.readFileSync(path.resolve(__dirname, '..', 'index.html')).toString())
+  document.write(fs.readFileSync(path.resolve(__dirname, '..', '..', 'index.html')).toString())
   const parentDOM = document.querySelector('.grid__parent') as HTMLElement
   expect(parentDOM).not.toBeNull()
   const colors = ['#000', '#fff']
   const squareCount = 48
-  const callback = jest.fn(async function (this: Square) {
+  const callback = vi.fn(async function (this: Square) {
     expect(colors).toContain(this.color)
     const prevSquareCount = grid.squareCount
     await grid.removeSquare(this)
@@ -34,4 +37,5 @@ test('Grid', async () => {
   expect(gridDOM.children.length).toBe(squareCount)
   fireClick(gridDOM.children.item(randInt(gridDOM.children.length)) as Element)
   expect(callback).toBeCalled()
+  cleanupDOM()
 })

@@ -1,11 +1,11 @@
 import './Grid.css'
 
-import { Component } from '../internal/Component'
+import { Component } from './internal/Component'
 import { Square, SquareEventListener } from './Square'
 import { baseLog, randInt, wait, Async } from '../util'
 import ResizeObserver from 'resize-observer-polyfill'
 
-interface GridProperties {
+export interface GridProperties {
   colors?: string[]
   animationDelay?: number
   squareCount?: number
@@ -39,7 +39,7 @@ const defaultProps: Required<GridProperties> = {
   squareEventListeners: [],
 }
 
-class Grid extends Component<HTMLDivElement, true> {
+export class Grid extends Component<HTMLDivElement, true> {
   private readonly properties: Required<GridProperties>
   private squares: Square[] = []
   private readonly resizeObserver: ResizeObserver
@@ -165,5 +165,3 @@ class Grid extends Component<HTMLDivElement, true> {
     return { sideLength }
   }
 }
-
-export { Grid, GridProperties }

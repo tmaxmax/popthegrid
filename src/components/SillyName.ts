@@ -1,14 +1,16 @@
 import './SillyName.css'
 
-import { Component } from '../internal/Component'
+import { Component } from './internal/Component'
 import { interval } from '../util'
 
 interface Response {
   name: string
 }
 
+const FUNCTIONS_ROOT = import.meta.env.VITE_FUNCTIONS_ROOT
+
 const fetchSillyName: () => Promise<string> = () =>
-  fetch(`/.netlify/functions/name`)
+  fetch(`${FUNCTIONS_ROOT}/name`)
     .then((res) => res.json())
     .then((res: Response) => res.name)
 

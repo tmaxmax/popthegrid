@@ -1,19 +1,19 @@
 import './Square.css'
 
-import { Component } from '../internal/Component'
+import { Component } from './internal/Component'
 
-interface SquareEventListener {
+export interface SquareEventListener {
   event: keyof HTMLElementEventMap
   callback: (this: Square, event: Event) => void
   options?: boolean | AddEventListenerOptions
 }
 
-interface SquareProperties {
+export interface SquareProperties {
   color: string
   eventListeners?: SquareEventListener[]
 }
 
-class Square extends Component<HTMLDivElement, false> {
+export class Square extends Component<HTMLDivElement, false> {
   private userEvents?: SquareEventListener[]
 
   constructor(properties: SquareProperties) {
@@ -63,5 +63,3 @@ class Square extends Component<HTMLDivElement, false> {
     return this.animate('deleted', animate).then(() => this.remove())
   }
 }
-
-export { Square, SquareProperties, SquareEventListener }
