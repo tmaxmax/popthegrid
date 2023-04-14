@@ -77,12 +77,21 @@ fieldset.game-parameter span {
   border: 3px solid var(--color-body);
   border-radius: 100%;
   display: inline-block;
-  width: 1.8rem;
-  height: 1.8rem;
+  width: 2rem;
+  height: 2rem;
+  padding-top: 0.1rem;
   text-align: center;
   font-weight: bold;
   transition: all 0.2s ease-in;
   cursor: pointer;
+}
+
+.game-parameter-labels-layout {
+  margin-left: -0.02rem;
+}
+
+.game-parameter-label ~ .game-parameter-label {
+  margin-left: 0.4rem;
 }
 
 fieldset.game-parameter input {

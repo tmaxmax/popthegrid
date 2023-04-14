@@ -17,6 +17,7 @@ const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Com
 const gridParent = componentFrom(document.querySelector<HTMLElement>('.grid__parent'), 'Grid parent')
 const sillyNameParent = componentFrom(document.querySelector<HTMLParagraphElement>('#silly-name'), 'Silly name parent')
 const gamemodeFieldset: HTMLFieldSetElement = document.querySelector('#gamemode')!
+const gamemodePrompt: HTMLLegendElement = document.querySelector('#gamemode legend')!
 const gamemodeInputs: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[name=gamemode]')
 console.log(gamemodeInputs.length)
 
@@ -76,9 +77,11 @@ const gamemodeChangeEvent = (ev: Event) => {
   switch (gamemodeName) {
     case 'random':
       gamemode = new RandomCount()
+      gamemodePrompt.textContent = 'Gamemode: Luck'
       break
     case 'random-timer':
       gamemode = new RandomTimer({ minSeconds: 4, maxSeconds: 9 })
+      gamemodePrompt.textContent = `Gamemode: Time (${(gamemode as RandomTimer).numSeconds} seconds)`
       break
   }
 }

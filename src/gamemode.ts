@@ -76,4 +76,8 @@ export class RandomTimer implements Gamemode {
       this.done = true
     }
   }
+
+  public get numSeconds(): number {
+    return this.numIterations
+  }
 }

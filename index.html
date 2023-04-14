@@ -19,15 +19,17 @@
     <main class="grid__parent"></main>
     <footer>
       <fieldset class="game-parameter" id="gamemode">
-        <legend>Gamemode:</legend>
-        <label for="gamemode-1">
-          <input type="radio" name="gamemode" id="gamemode-1" value="random" checked />
-          <span>1</span>
-        </label>
-        <label for="gamemode-2">
-          <input type="radio" name="gamemode" id="gamemode-2" value="random-timer" />
-          <span>2</span>
-        </label>
+        <legend>Gamemode: Luck</legend>
+        <div class="game-parameter-labels-layout">
+          <label class="game-parameter-label" for="gamemode-1">
+            <input type="radio" name="gamemode" id="gamemode-1" value="random" checked />
+            <span>1</span>
+          </label>
+          <label class="game-parameter-label" for="gamemode-2">
+            <input type="radio" name="gamemode" id="gamemode-2" value="random-timer" />
+            <span>2</span>
+          </label>
+        </div>
       </fieldset>
       <p id="silly-name">Made by&nbsp;</p>
     </footer>
