@@ -48,6 +48,12 @@ p {
   color: var(--color-body);
 }
 
+.noselect {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 .grid__parent {
   filter: drop-shadow(14px 10px 27px rgba(0, 0, 0, 0.68));
   margin-top: 4vmin;
