@@ -3,15 +3,38 @@ import { transact } from '$util/indexedDB/transact'
 
 export type Gamemode = 'random' | 'random-timer'
 
-export class Attempt {
-  public timestamp: string
+export interface OngoingAttempt {
+  end(isWin: boolean): Attempt
+}
 
-  constructor(public gamemode: Gamemode, public isWin: boolean, time?: Date) {
-    if (time) {
-      this.timestamp = time.toISOString()
-    } else {
-      this.timestamp = new Date().toISOString()
+export interface Attempt {
+  gamemode: Gamemode
+  startedAt: Date
+  /** In milliseconds. */
+  duration: number
+  isWin: boolean
     }
+
+export function startAttempt(gamemode: Gamemode): OngoingAttempt {
+  const now = performance.now()
+  const startedAt = new Date()
+  let ended = false
+
+  return {
+    end(isWin) {
+      if (ended) {
+        throw new Error('This attempt was already ended.')
+      }
+
+      ended = true
+
+      return {
+        gamemode,
+        startedAt,
+        duration: performance.now() - now,
+        isWin,
+      }
+    },
   }
 }
 

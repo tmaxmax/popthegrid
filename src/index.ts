@@ -7,7 +7,7 @@ import { Component } from './components/internal/Component'
 import { SillyName } from './components/SillyName'
 import { Gamemode, RandomCount, RandomTimer } from './gamemode'
 import { IndexedDB } from '$util'
-import { Attempt, Gamemode as SchemaGamemode, insertAttempt, schema } from './db/schema'
+import { Attempt, OngoingAttempt, startAttempt, Gamemode as SchemaGamemode, insertAttempt, schema } from './db/schema'
 
 const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
   if (!elem) {
@@ -26,6 +26,7 @@ let gamemode: Gamemode = new RandomCount()
 let gamemodeName: SchemaGamemode = 'random'
 let canChangeGamemode = true
 let db: IDBDatabase
+let ongoingAttempt: OngoingAttempt
 
 const setGamemodeChangePermission = (allow: boolean) => {
   canChangeGamemode = allow
@@ -40,16 +41,17 @@ const squareMousedown = (() => {
     }
     if (canChangeGamemode) {
       setGamemodeChangePermission(false)
+      ongoingAttempt = startAttempt(gamemodeName)
     }
     const removed = grid.removeSquare(this)
     if (gamemode.shouldDestroy(grid, this)) {
       ignoreClicks = true
-      const att = insertAttempt(db, new Attempt(gamemodeName, false))
+      const att = insertAttempt(db, ongoingAttempt.end(false))
       await Promise.all([grid.destroy(true), gamemode.reset()])
       setGamemodeChangePermission(true)
       await Promise.all([grid.create(gridParent, true), att])
     } else if (grid.squareCount === 0) {
-      await Promise.all([removed, gamemode.reset(), insertAttempt(db, new Attempt(gamemodeName, true))])
+      await Promise.all([removed, gamemode.reset(), insertAttempt(db, ongoingAttempt.end(true))])
       // TODO: Better win alert
       alert('you won')
     }
