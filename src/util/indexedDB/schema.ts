@@ -1,12 +1,10 @@
-export interface ConfiguratorParams {
-  database: IDBDatabase
-  transaction: IDBTransaction
+export interface VersionTransition {
   oldVersion: number
   newVersion: number
 }
 
 export interface Configurator {
-  (params: ConfiguratorParams): void
+  (db: IDBDatabase, tx: IDBTransaction, transition: VersionTransition): void
 }
 
 export interface Schema {
@@ -20,9 +18,9 @@ export interface Migration {
 }
 
 export function createConfigurator(migrations: Migration[]): Configurator {
-  return ({ database, transaction, oldVersion, newVersion }) => {
+  return (db, tx, { oldVersion, newVersion }) => {
     for (let i = oldVersion; i < newVersion; i++) {
-      migrations[i](database, transaction)
+      migrations[i](db, tx)
     }
   }
 }

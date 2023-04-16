@@ -43,23 +43,24 @@ export function open(factory: IDBFactory, { schema: { name, version, configurato
         return
       }
 
-      const database = target.result
+      const db = target.result
       // we know this is not null because it is an open request
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const transaction = target.transaction!
+      const tx = target.transaction!
+      const { oldVersion, newVersion } = ev
 
-      configureVersionChange(database, onVersionChange)
+      configureVersionChange(db, onVersionChange)
 
-      transaction.onerror = () => {
+      tx.onerror = () => {
         reject(new OperationError('config-error'))
       }
 
-      if (!ev.newVersion) {
+      if (!newVersion) {
         reject(new Error(`newVersion unexpectedly empty: got ${ev.newVersion}`, { cause: ev.newVersion }))
         return
       }
 
-      configurator({ database, transaction, oldVersion: ev.oldVersion, newVersion: ev.newVersion })
+      configurator(db, tx, { oldVersion, newVersion })
     }
 
     openRequest.onsuccess = () => {
