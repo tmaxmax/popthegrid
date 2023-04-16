@@ -2,6 +2,10 @@ export function isDefined<T>(arg: T | undefined): arg is T {
   return typeof arg !== 'undefined'
 }
 
+export function isNonNull<T>(arg: T | null | undefined): arg is T {
+  return arg != null
+}
+
 export function objectKeys<T extends Record<string, unknown>>(o: T): (keyof T)[] {
   return Object.keys(o) as (keyof T)[]
 }
