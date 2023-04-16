@@ -4,7 +4,7 @@ import { Component } from './internal/Component'
 import { Square, SquareEventListener } from './Square'
 import baseLog from '$util/log'
 import { randInt, wait } from '$util'
-import Async from '$util/async'
+import { map as mapAsync } from '$util/async'
 import ResizeObserver from 'resize-observer-polyfill'
 
 export interface GridProperties {
@@ -62,7 +62,7 @@ export class Grid extends Component<HTMLDivElement, true> {
 
     this.setStyle('--size', `${size}px`)
 
-    await Async.map(this.squares.slice(start, end), async (s, i) => {
+    await mapAsync(this.squares.slice(start, end), (s, i) => {
       const j = start + i
       s.row = (j / cols) | 0
       s.col = j % cols
