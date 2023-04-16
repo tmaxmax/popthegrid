@@ -6,10 +6,6 @@ export function isNonNull<T>(arg: T | null | undefined): arg is T {
   return arg != null
 }
 
-export function objectKeys<T extends Record<string, unknown>>(o: T): (keyof T)[] {
-  return Object.keys(o) as (keyof T)[]
-}
-
 export function randInt(limit: number): number {
   return Math.floor(Math.random() * limit)
 }
