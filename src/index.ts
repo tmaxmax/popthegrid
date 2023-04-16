@@ -9,7 +9,7 @@ import { Gamemode, RandomCount, RandomTimer } from './gamemode'
 import { IndexedDB } from '$util'
 import { startAttempt, OngoingAttempt, insertAttempt } from '$db/attempt'
 import { Gamemode as SchemaGamemode } from '$db/gamemode'
-import { schema } from '$db/schema'
+import schema from '$db/schema'
 
 const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
   if (!elem) {

@@ -1,7 +1,7 @@
 import { OpenOptions } from '$util/indexedDB'
 import { ATTEMPTS_STORE } from './attempt'
 
-export const schema: OpenOptions = {
+const schema: OpenOptions = {
   name: 'popthegrid',
   version: 1,
   configurator({ database: db }) {
@@ -14,3 +14,5 @@ export const schema: OpenOptions = {
     store.createIndex('isWin', 'isWin', { unique: false })
   },
 }
+
+export default schema
