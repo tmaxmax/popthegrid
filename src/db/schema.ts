@@ -80,37 +80,50 @@ export function retrieveAttempts(db: IDBDatabase): Promise<AttemptInserted[]> {
   })
 }
 
-export interface Counts {
+type Counts = {
   numAttempts: number
   numWins: number
   numLosses: number
 }
 
-export type Statistics = Record<Gamemode | 'total', Counts>
+type GamemodeRecord<T extends Gamemode> = { gamemode: T }
+
+export type Statistics =
+  | (Counts & { gamemode?: never })
+  | (Counts & GamemodeRecord<'random'>)
+  | (Counts & GamemodeRecord<'random-timer'> & { fastestWinDuration?: number })
 
 const EMPTY_COUNTS: Counts = {
   numAttempts: 0,
   numWins: 0,
   numLosses: 0,
-}
+} as const
 
-export function getStats(data: Attempt[]): Statistics {
-  const init: Statistics = {
-    total: { ...EMPTY_COUNTS },
-    random: { ...EMPTY_COUNTS },
-    'random-timer': { ...EMPTY_COUNTS },
-  }
+export function getStatistics(data: Attempt[]): Statistics[] {
+  const init: Statistics[] = [{ ...EMPTY_COUNTS }]
 
   return data.reduce((acc, curr) => {
-    acc.total.numAttempts++
-    acc[curr.gamemode].numAttempts++
+    let accg = acc.find((s) => 'gamemode' in s && s.gamemode === curr.gamemode)
+    if (!accg) {
+      acc.push({ gamemode: curr.gamemode, ...EMPTY_COUNTS })
+      accg = acc[acc.length - 1]
+    }
+
+    acc[0].numAttempts++
+    accg.numAttempts++
 
     if (curr.isWin) {
-      acc.total.numWins++
-      acc[curr.gamemode].numWins++
+      acc[0].numWins++
+      accg.numWins++
+
+      if ('gamemode' in accg && accg.gamemode === 'random-timer') {
+        if (!accg.fastestWinDuration || accg.fastestWinDuration > curr.duration) {
+          accg.fastestWinDuration = curr.duration
+        }
+      }
     } else {
-      acc.total.numLosses++
-      acc[curr.gamemode].numLosses++
+      acc[0].numLosses++
+      accg.numLosses++
     }
 
     return acc
