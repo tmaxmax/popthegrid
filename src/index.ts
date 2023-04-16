@@ -7,7 +7,9 @@ import { Component } from './components/internal/Component'
 import { SillyName } from './components/SillyName'
 import { Gamemode, RandomCount, RandomTimer } from './gamemode'
 import { IndexedDB } from '$util'
-import { Attempt, OngoingAttempt, startAttempt, Gamemode as SchemaGamemode, insertAttempt, schema } from './db/schema'
+import { startAttempt, OngoingAttempt, insertAttempt } from '$db/attempt'
+import { Gamemode as SchemaGamemode } from '$db/gamemode'
+import { schema } from '$db/schema'
 
 const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
   if (!elem) {
