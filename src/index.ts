@@ -96,7 +96,12 @@ const gamemodeChangeEvent = (ev: Event) => {
 const main = async () => {
   gamemodeFieldset.addEventListener('change', gamemodeChangeEvent)
   sillyName.create(sillyNameParent)
-  db = await openIndexedDB(window.indexedDB, schema)
+  db = await openIndexedDB(window.indexedDB, {
+    schema,
+    onVersionChange() {
+      throw new Error('unimplemented')
+    },
+  })
   await grid.create(gridParent, true)
 }
 

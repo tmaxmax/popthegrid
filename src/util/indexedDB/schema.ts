@@ -1,4 +1,19 @@
-import { Configurator } from '.'
+export interface ConfiguratorParams {
+  database: IDBDatabase
+  transaction: IDBTransaction
+  oldVersion: number
+  newVersion: number
+}
+
+export interface Configurator {
+  (params: ConfiguratorParams): void
+}
+
+export interface Schema {
+  name: string
+  version?: number
+  configurator: Configurator
+}
 
 export interface Migration {
   up(db: IDBDatabase, tx: IDBTransaction): void

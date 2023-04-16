@@ -1,5 +1,4 @@
-import { OpenOptions } from '$util/indexedDB'
-import { Migration, createConfigurator } from '$util/indexedDB/schema'
+import { Schema, Migration, createConfigurator } from '$util/indexedDB/schema'
 import { ATTEMPTS_STORE } from './attempt'
 
 const migrations: Migration[] = [
@@ -28,7 +27,7 @@ const migrations: Migration[] = [
   },
 ]
 
-const schema: OpenOptions = {
+const schema: Schema = {
   name: 'popthegrid',
   version: migrations.length,
   configurator: createConfigurator(migrations),

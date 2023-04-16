@@ -1,21 +1,11 @@
-export interface ConfiguratorParams {
-  database: IDBDatabase
-  transaction: IDBTransaction
-  oldVersion: number
-  newVersion: number
-}
-
-export interface Configurator {
-  (params: ConfiguratorParams): void
-}
+import { Schema } from './schema'
 
 export interface OpenOptions {
-  name: string
-  configurator: Configurator
-  version?: number
+  schema: Schema
+  onVersionChange: (ev: IDBVersionChangeEvent) => void
 }
 
-type ErrorCode = 'blocked' | 'config-error' | 'request-error' | 'transaction-error' | 'result-error'
+type ErrorCode = 'blocked' | 'version-change' | 'config-error' | 'request-error' | 'transaction-error' | 'result-error'
 
 const errorMessages: Readonly<Record<ErrorCode, string>> = {
   blocked: 'The user blocked the creation of an IndexedDB',
@@ -23,6 +13,7 @@ const errorMessages: Readonly<Record<ErrorCode, string>> = {
   'request-error': 'Failed to open an IndexedDB',
   'transaction-error': 'The transaction failed',
   'result-error': 'Failed to get result',
+  'version-change': 'The database version was changed',
 }
 
 export class OperationError extends Error {
@@ -31,7 +22,7 @@ export class OperationError extends Error {
   }
 }
 
-export function open(factory: IDBFactory, { name, version, configurator }: OpenOptions): Promise<IDBDatabase> {
+export function open(factory: IDBFactory, { schema: { name, version, configurator }, onVersionChange }: OpenOptions): Promise<IDBDatabase> {
   const openRequest = factory.open(name, version)
 
   return new Promise((resolve, reject) => {
@@ -57,6 +48,8 @@ export function open(factory: IDBFactory, { name, version, configurator }: OpenO
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const transaction = target.transaction!
 
+      configureVersionChange(database, onVersionChange)
+
       transaction.onerror = () => {
         reject(new OperationError('config-error'))
       }
@@ -70,6 +63,7 @@ export function open(factory: IDBFactory, { name, version, configurator }: OpenO
     }
 
     openRequest.onsuccess = () => {
+      configureVersionChange(openRequest.result, onVersionChange)
       resolve(openRequest.result)
     }
 
@@ -77,6 +71,13 @@ export function open(factory: IDBFactory, { name, version, configurator }: OpenO
       reject(new OperationError('blocked', openRequest.error))
     }
   })
+}
+
+function configureVersionChange(db: IDBDatabase, cb: (ev: IDBVersionChangeEvent) => void) {
+  db.onversionchange = (ev) => {
+    db.close()
+    cb(ev)
+  }
 }
 
 export function fromRequest<T>(req: IDBRequest): Promise<T> {
