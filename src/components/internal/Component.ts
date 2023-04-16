@@ -1,4 +1,5 @@
 import { If, IfElse, isDefined } from '$util'
+import { isBindable } from '$util/functions'
 
 type HasComputedStyle<T extends boolean> = IfElse<T, { hasComputedStyle: true }, { hasComputedStyle?: false }>
 
@@ -102,6 +103,12 @@ export class Component<T extends HTMLElement = HTMLElement, U extends boolean = 
     callback: (this: S, ev: HTMLElementEventMap[E]) => void,
     options?: boolean | AddEventListenerOptions
   ): void {
+    if (isBindable(callback)) {
+      // @ts-expect-error if the function is bindable then it has no `this`.
+      // it would be impossible, in this case, for `this` to have a different type.
+      callback = callback.bind(this)
+    }
+
     // @ts-expect-error `this` is different than expected, but the `this` from addEventListener is not used.
     this.element.addEventListener(event, callback, options)
   }
