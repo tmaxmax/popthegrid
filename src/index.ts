@@ -21,7 +21,6 @@ const sillyNameParent = componentFrom(document.querySelector<HTMLParagraphElemen
 const gamemodeFieldset: HTMLFieldSetElement = document.querySelector('#gamemode')!
 const gamemodePrompt: HTMLLegendElement = document.querySelector('#gamemode legend')!
 const gamemodeInputs: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[name=gamemode]')
-console.log(gamemodeInputs.length)
 
 let gamemode: Gamemode = new RandomCount()
 let gamemodeName: SchemaGamemode = 'random'
@@ -75,7 +74,6 @@ const gamemodeChangeEvent = (ev: Event) => {
   if (!canChangeGamemode) return
 
   gamemodeName = (ev.target! as HTMLInputElement).value as SchemaGamemode
-  console.log(gamemodeName)
 
   switch (gamemodeName) {
     case 'random':
