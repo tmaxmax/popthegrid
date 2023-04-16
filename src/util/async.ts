@@ -1,4 +1,4 @@
-import isDefined from './isDefined'
+import { isDefined } from '.'
 
 type Callback<T, U> = (elem: T, i: number, arr: readonly T[]) => Promise<U>
 type Reducer<T, U> = (acc: U, elem: T, i: number, arr: readonly T[]) => Promise<U>

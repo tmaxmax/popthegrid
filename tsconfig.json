@@ -16,6 +16,7 @@
     "skipLibCheck": true,
     "paths": {
       "$util/*": ["./src/util/*"],
+      "$util": ["./src/util/index.ts"],
       "$components/*": ["./src/components/*"],
       "$db/*": ["./src/db/*"]
     }

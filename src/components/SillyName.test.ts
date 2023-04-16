@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Component } from '$components/internal/Component'
 import { SillyName } from '$components/SillyName'
-import wait from '$util/wait'
+import { wait } from '$util'
 import { cleanupDOM } from '$util/for.test'
 import 'vitest-fetch-mock'
 

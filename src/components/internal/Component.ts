@@ -1,5 +1,4 @@
-import type { If, IfElse } from '$util/types'
-import isDefined from '$util/isDefined'
+import { If, IfElse, isDefined } from '$util'
 
 type HasComputedStyle<T extends boolean> = IfElse<T, { hasComputedStyle: true }, { hasComputedStyle?: false }>
 

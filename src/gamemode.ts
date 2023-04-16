@@ -1,5 +1,5 @@
 import interval from '$util/interval'
-import randInt from '$util/randInt'
+import { randInt } from '$util'
 
 export interface Square {
   color: string
