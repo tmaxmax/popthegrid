@@ -34,34 +34,26 @@ export const schema: OpenOptions = {
   },
 }
 
-export async function insertAttempt(db: IDBDatabase, attempt: Attempt): Promise<AttemptInserted> {
-  let res: Promise<AttemptInserted>
-
-  await transact(db, {
+export function insertAttempt(db: IDBDatabase, attempt: Attempt): Promise<AttemptInserted> {
+  return transact(db, {
     stores: ATTEMPTS_STORE,
     mode: 'readwrite',
     operation(tx) {
       const req = tx.objectStore(ATTEMPTS_STORE).add(attempt)
-      res = fromRequest<AttemptInserted>(req)
+      return fromRequest<AttemptInserted>(req)
     },
   })
-
-  return res!
 }
 
-export async function retrieveAttempts(db: IDBDatabase): Promise<AttemptInserted[]> {
-  let res: Promise<AttemptInserted[]>
-
-  await transact(db, {
+export function retrieveAttempts(db: IDBDatabase): Promise<AttemptInserted[]> {
+  return transact(db, {
     stores: ATTEMPTS_STORE,
     mode: 'readonly',
     operation(tx) {
       const req = tx.objectStore(ATTEMPTS_STORE).getAll()
-      res = fromRequest<AttemptInserted[]>(req)
+      return fromRequest<AttemptInserted[]>(req)
     },
   })
-
-  return res!
 }
 
 export interface Counts {

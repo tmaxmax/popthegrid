@@ -77,18 +77,20 @@ export function open(factory: IDBFactory, { name, version, configurator }: OpenO
   })
 }
 
-export interface TransactOptions {
+export interface TransactOptions<T> {
   stores: string | string[]
   mode?: IDBTransactionMode
-  operation(tx: IDBTransaction): void
+  operation(tx: IDBTransaction): T | Promise<T>
 }
 
-export function transact(db: IDBDatabase, { stores, mode, operation }: TransactOptions): Promise<void> {
+export async function transact<T>(db: IDBDatabase, { stores, mode, operation }: TransactOptions<T>): Promise<T> {
   const tx = db.transaction(stores || [], mode)
 
-  return new Promise<void>((resolve, reject) => {
+  return await new Promise<T | Promise<T>>((resolve, reject) => {
+    let res: T | Promise<T>
+
     tx.oncomplete = () => {
-      resolve()
+      resolve(res)
     }
 
     tx.onerror = () => {
@@ -96,7 +98,7 @@ export function transact(db: IDBDatabase, { stores, mode, operation }: TransactO
     }
 
     try {
-      operation(tx)
+      res = operation(tx)
       tx.commit()
     } catch (err) {
       reject(new OperationError('transaction-error', err))
