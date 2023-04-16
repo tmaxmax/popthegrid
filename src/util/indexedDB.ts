@@ -28,11 +28,29 @@ export function open(factory: IDBFactory, { name, version, configurator }: OpenO
       reject(new OperationError('request-error', openRequest.error))
     }
 
-    openRequest.onupgradeneeded = (ev: Event) => {
-      const db = (ev.target as any).result as IDBDatabase
+    openRequest.onupgradeneeded = (ev: IDBVersionChangeEvent) => {
+      // Should never happen; type definitions say it can, so let's handle this defensively
+      if (!ev.target) {
+        reject(new OperationError('config-error', 'no event target'))
+        return
+      }
 
-      db.onerror = () => {
+      const target = ev.target as IDBOpenDBRequest
+      if (target.error) {
+        reject(new OperationError('config-error', target.error))
+        return
+      }
+
+      const db = target.result
+      const transaction = target.transaction! // we know this is not null because it is an open request
+
+      transaction.onerror = () => {
         reject(new OperationError('config-error'))
+      }
+
+      if (!ev.newVersion) {
+        reject(new Error(`newVersion unexpectedly empty: got ${ev.newVersion}`, { cause: ev.newVersion }))
+        return
       }
 
       configurator(db)
