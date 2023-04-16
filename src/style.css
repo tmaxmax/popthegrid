@@ -31,7 +31,8 @@ body {
   background-color: var(--color-background);
 }
 
-h1 {
+h1,
+h2 {
   font-family: 'Poppins', sans-serif;
   font-weight: var(--weight-heading);
   text-align: center;
@@ -125,6 +126,40 @@ footer {
   display: flex;
   align-items: center;
   flex-direction: column;
+}
+
+#versionchange {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000f1e00;
+  backdrop-filter: blur(0px);
+  top: 0;
+  left: 0;
+  display: flex;
+  visibility: hidden;
+  z-index: -100;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 2s ease, backdrop-filter 2s ease;
+}
+
+#versionchange.visible {
+  z-index: 100;
+  visibility: visible;
+  background-color: #000f1e88;
+  backdrop-filter: blur(10px);
+}
+
+.versionchange-content {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 1s ease-in;
+}
+
+.versionchange-content.visible {
+  visibility: visible;
+  opacity: 100%;
 }
 
 @media (min-height: 361px) {

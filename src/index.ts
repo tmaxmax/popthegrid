@@ -11,6 +11,8 @@ import { startAttempt, OngoingAttempt, insertAttempt } from '$db/attempt'
 import { Gamemode as SchemaGamemode } from '$db/gamemode'
 import schema from '$db/schema'
 import { assert, assertNonNull } from '$util/assert'
+import { VersionChangeModal } from '$components/VersionChangeModal'
+import { wait } from './util'
 
 const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
   assertNonNull(elem, `${name} doesn't exist in the HTML document!`)
@@ -25,43 +27,42 @@ const gamemodePrompt: HTMLLegendElement | null = document.querySelector('#gamemo
 assertNonNull(gamemodePrompt)
 const gamemodeInputs: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[name=gamemode]')
 assert(gamemodeInputs.length === 2)
+const versionChangeModal = new VersionChangeModal(document.querySelector('#versionchange'))
 
 let gamemode: Gamemode = new RandomCount()
 let gamemodeName: SchemaGamemode = 'random'
 let canChangeGamemode = true
 let db: IDBDatabase
 let ongoingAttempt: OngoingAttempt
+let ignoreClicks = false
 
 const setGamemodeChangePermission = (allow: boolean) => {
   canChangeGamemode = allow
   gamemodeInputs.forEach((i) => (i.disabled = !allow))
 }
 
-const squareMousedown = (() => {
-  let ignoreClicks = false
-  return async function (this: Square) {
-    if (ignoreClicks) {
-      return
-    }
-    if (canChangeGamemode) {
-      setGamemodeChangePermission(false)
-      ongoingAttempt = startAttempt(gamemodeName)
-    }
-    const removed = grid.removeSquare(this)
-    if (gamemode.shouldDestroy(grid, this)) {
-      ignoreClicks = true
-      const att = insertAttempt(db, ongoingAttempt.end(false))
-      await Promise.all([grid.destroy(true), gamemode.reset()])
-      setGamemodeChangePermission(true)
-      await Promise.all([grid.create(gridParent, true), att])
-    } else if (grid.squareCount === 0) {
-      await Promise.all([removed, gamemode.reset(), insertAttempt(db, ongoingAttempt.end(true))])
-      // TODO: Better win alert
-      alert('you won')
-    }
-    ignoreClicks = false
+const squareMousedown = async function (this: Square) {
+  if (ignoreClicks) {
+    return
   }
-})()
+  if (canChangeGamemode) {
+    setGamemodeChangePermission(false)
+    ongoingAttempt = startAttempt(gamemodeName)
+  }
+  const removed = grid.removeSquare(this)
+  if (gamemode.shouldDestroy(grid, this)) {
+    ignoreClicks = true
+    const att = insertAttempt(db, ongoingAttempt.end(false))
+    await Promise.all([grid.destroy(true), gamemode.reset()])
+    setGamemodeChangePermission(true)
+    await Promise.all([grid.create(gridParent, true), att])
+  } else if (grid.squareCount === 0) {
+    await Promise.all([removed, gamemode.reset(), insertAttempt(db, ongoingAttempt.end(true))])
+    // TODO: Better win alert
+    alert('you won')
+  }
+  ignoreClicks = false
+}
 
 const grid = new Grid({
   squareCount: 48,
@@ -99,7 +100,10 @@ const main = async () => {
   db = await openIndexedDB(window.indexedDB, {
     schema,
     onVersionChange() {
-      throw new Error('unimplemented')
+      ignoreClicks = true
+      setGamemodeChangePermission(false)
+      grid.destroy(true)
+      versionChangeModal.show()
     },
   })
   await grid.create(gridParent, true)
