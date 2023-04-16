@@ -1,6 +1,17 @@
+export interface ConfiguratorParams {
+  database: IDBDatabase
+  transaction: IDBTransaction
+  oldVersion: number
+  newVersion: number
+}
+
+export interface Configurator {
+  (params: ConfiguratorParams): void
+}
+
 export interface OpenOptions {
   name: string
-  configurator(db: IDBDatabase): void
+  configurator: Configurator
   version?: number
 }
 
@@ -41,7 +52,7 @@ export function open(factory: IDBFactory, { name, version, configurator }: OpenO
         return
       }
 
-      const db = target.result
+      const database = target.result
       const transaction = target.transaction! // we know this is not null because it is an open request
 
       transaction.onerror = () => {
@@ -53,7 +64,7 @@ export function open(factory: IDBFactory, { name, version, configurator }: OpenO
         return
       }
 
-      configurator(db)
+      configurator({ database, transaction, oldVersion: ev.oldVersion, newVersion: ev.newVersion })
     }
 
     openRequest.onsuccess = () => {

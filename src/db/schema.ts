@@ -23,7 +23,7 @@ const ATTEMPTS_STORE = 'attempts'
 export const schema: OpenOptions = {
   name: 'popthegrid',
   version: 1,
-  configurator(db: IDBDatabase) {
+  configurator({ database: db }) {
     const store = db.createObjectStore(ATTEMPTS_STORE, {
       keyPath: 'id',
       autoIncrement: true,
