@@ -24,14 +24,3 @@ export function createConfigurator(migrations: Migration[]): Configurator {
     }
   }
 }
-
-export function concatMigrations(a: Migration, b: Migration, ...others: Migration[]): Migration {
-  return (db, tx) => {
-    a(db, tx)
-    b(db, tx)
-
-    for (const m of others) {
-      m(db, tx)
-    }
-  }
-}
