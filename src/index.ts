@@ -10,19 +10,21 @@ import { open as openIndexedDB } from '$util/indexedDB'
 import { startAttempt, OngoingAttempt, insertAttempt } from '$db/attempt'
 import { Gamemode as SchemaGamemode } from '$db/gamemode'
 import schema from '$db/schema'
+import { assert, assertNonNull } from '$util/assert'
 
 const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
-  if (!elem) {
-    throw new Error(`${name} doesn't exist in the HTML document!`)
-  }
+  assertNonNull(elem, `${name} doesn't exist in the HTML document!`)
   return Component.from(elem, false)
 }
 
 const gridParent = componentFrom(document.querySelector<HTMLElement>('.grid__parent'), 'Grid parent')
 const sillyNameParent = componentFrom(document.querySelector<HTMLParagraphElement>('#silly-name'), 'Silly name parent')
-const gamemodeFieldset: HTMLFieldSetElement = document.querySelector('#gamemode')!
-const gamemodePrompt: HTMLLegendElement = document.querySelector('#gamemode legend')!
+const gamemodeFieldset: HTMLFieldSetElement | null = document.querySelector('#gamemode')
+assertNonNull(gamemodeFieldset)
+const gamemodePrompt: HTMLLegendElement | null = document.querySelector('#gamemode legend')
+assertNonNull(gamemodePrompt)
 const gamemodeInputs: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[name=gamemode]')
+assert(gamemodeInputs.length === 2)
 
 let gamemode: Gamemode = new RandomCount()
 let gamemodeName: SchemaGamemode = 'random'
