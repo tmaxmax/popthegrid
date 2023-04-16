@@ -1,5 +1,3 @@
-import './interval.polyfill'
-
 /**
  * Represents the parameters passed to an interval function.
  *
