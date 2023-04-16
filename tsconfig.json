@@ -15,7 +15,6 @@
     "noImplicitReturns": true,
     "skipLibCheck": true,
     "paths": {
-      "$util": ["./src/util.ts"],
       "$util/*": ["./src/util/*"],
       "$components/*": ["./src/components/*"],
       "$db/*": ["./src/db/*"]

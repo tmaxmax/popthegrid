@@ -1,7 +1,7 @@
 import './SillyName.css'
 
 import { Component } from './internal/Component'
-import { interval } from '../util'
+import interval from '$util/interval'
 
 interface Response {
   name: string

@@ -6,7 +6,7 @@ import { Square } from './components/Square'
 import { Component } from './components/internal/Component'
 import { SillyName } from './components/SillyName'
 import { Gamemode, RandomCount, RandomTimer } from './gamemode'
-import { IndexedDB } from '$util'
+import { open as openIndexedDB } from '$util/indexedDB'
 import { startAttempt, OngoingAttempt, insertAttempt } from '$db/attempt'
 import { Gamemode as SchemaGamemode } from '$db/gamemode'
 import schema from '$db/schema'
@@ -94,7 +94,7 @@ const gamemodeChangeEvent = (ev: Event) => {
 const main = async () => {
   gamemodeFieldset.addEventListener('change', gamemodeChangeEvent)
   sillyName.create(sillyNameParent)
-  db = await IndexedDB.open(window.indexedDB, schema)
+  db = await openIndexedDB(window.indexedDB, schema)
   await grid.create(gridParent, true)
 }
 

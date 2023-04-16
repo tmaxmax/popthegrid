@@ -53,7 +53,9 @@ export function open(factory: IDBFactory, { name, version, configurator }: OpenO
       }
 
       const database = target.result
-      const transaction = target.transaction! // we know this is not null because it is an open request
+      // we know this is not null because it is an open request
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const transaction = target.transaction!
 
       transaction.onerror = () => {
         reject(new OperationError('config-error'))
@@ -77,13 +79,14 @@ export function open(factory: IDBFactory, { name, version, configurator }: OpenO
   })
 }
 
-export function fromRequest<T>(req: IDBRequest<any>): Promise<T> {
+export function fromRequest<T>(req: IDBRequest): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     req.onerror = () => {
       reject(req.error)
     }
 
     req.onsuccess = (ev) => {
+      // eslint-disable-next-line
       resolve((ev.target! as any).result)
     }
   })

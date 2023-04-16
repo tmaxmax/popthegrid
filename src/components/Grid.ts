@@ -2,7 +2,10 @@ import './Grid.css'
 
 import { Component } from './internal/Component'
 import { Square, SquareEventListener } from './Square'
-import { baseLog, randInt, wait, Async } from '../util'
+import baseLog from '$util/log'
+import randInt from '$util/randInt'
+import wait from '$util/wait'
+import Async from '$util/async'
 import ResizeObserver from 'resize-observer-polyfill'
 
 export interface GridProperties {
@@ -121,7 +124,7 @@ export class Grid extends Component<HTMLDivElement, true> {
     this.squares.push(...squares)
     for (; i < this.squares.length; i++) {
       const square = this.squares[i]
-      promise = square.create((this as unknown) as Component, animate)
+      promise = square.create(this as unknown as Component, animate)
       if (animate) {
         await Promise.race([promise, wait(getDelay(this.properties.animationDelay, i, this.squares.length))])
       }

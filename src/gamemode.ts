@@ -1,4 +1,5 @@
-import { interval, randInt } from './util'
+import interval from '$util/interval'
+import randInt from '$util/randInt'
 
 export interface Square {
   color: string
@@ -20,7 +21,7 @@ export abstract class Gamemode {
 }
 
 export class RandomCount extends Gamemode {
-  shouldDestroy(grid: Grid, _: Square): boolean {
+  shouldDestroy(grid: Grid): boolean {
     const count = grid.activeSquares.length
     return count > 1 && count === randInt(count + 1)
   }
@@ -31,7 +32,7 @@ export interface RandomTimerParameters {
   maxSeconds: number
 }
 
-export class RandomTimer implements Gamemode {
+export class RandomTimer extends Gamemode {
   private readonly numIterations: number
   private hasPoppedFirstSquare = false
   private controller: AbortController | undefined
@@ -39,10 +40,11 @@ export class RandomTimer implements Gamemode {
   private done = false
 
   constructor({ minSeconds, maxSeconds }: RandomTimerParameters) {
+    super()
     this.numIterations = minSeconds + randInt(maxSeconds - minSeconds + 1)
   }
 
-  shouldDestroy(_grid: Readonly<Grid>, _square: Readonly<Square>): boolean {
+  shouldDestroy(): boolean {
     if (!this.hasPoppedFirstSquare) {
       this.controller = new AbortController()
       this.interval = interval({
