@@ -1,4 +1,5 @@
-import { OpenOptions, fromRequest, transact } from '$util/indexedDB'
+import { OpenOptions, fromRequest } from '$util/indexedDB'
+import { transact } from '$util/indexedDB/transact'
 
 export type Gamemode = 'random' | 'random-timer'
 
