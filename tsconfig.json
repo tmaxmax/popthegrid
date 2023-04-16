@@ -17,7 +17,8 @@
     "paths": {
       "$util": ["./src/util.ts"],
       "$util/*": ["./src/util/*"],
-      "$components/*": ["./src/components/*"]
+      "$components/*": ["./src/components/*"],
+      "$db/*": ["./src/db/*"]
     }
   },
   "include": ["src"]

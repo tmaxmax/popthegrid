@@ -7,6 +7,7 @@ export default defineConfig({
     alias: {
       $util: path.resolve(__dirname, 'src', 'util'),
       $components: path.resolve(__dirname, 'src', 'components'),
+      $db: path.resolve(__dirname, 'src', 'db'),
     },
   },
   test: {
