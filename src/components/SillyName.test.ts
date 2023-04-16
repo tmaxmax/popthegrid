@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Component } from '$components/internal/Component'
 import { SillyName } from '$components/SillyName'
 import wait from '$util/wait'
-import { cleanupDOM } from '$util/tests'
+import { cleanupDOM } from '$util/for.test'
 import 'vitest-fetch-mock'
 
 describe('SillyName', () => {

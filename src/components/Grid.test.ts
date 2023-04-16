@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { Component } from '$components/internal/Component'
 import randInt from '$util/randInt'
-import { fireClick } from '$util'
+import { cleanupDOM, fireClick } from '$util/for.test'
 import { Grid } from '$components/Grid'
 import { Square } from '$components/Square'
 
