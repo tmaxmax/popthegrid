@@ -14,13 +14,15 @@ interface ComponentFromTag {
   classList?: string[]
 }
 
+export type ComponentProps<T extends HTMLElement, U extends boolean> = (ComponentFromTag | ComponentFromExisting<T>) & HasComputedStyle<U>
+
 type Timeout = { timeout?: number }
 
 export class Component<T extends HTMLElement = HTMLElement, U extends boolean = boolean> {
   protected readonly element: T
   private readonly computedStyle?: CSSStyleDeclaration
 
-  protected constructor(props: (ComponentFromTag | ComponentFromExisting<T>) & HasComputedStyle<U>) {
+  protected constructor(props: ComponentProps<T, U>) {
     if (props.alreadyExisting) {
       this.element = props.element
     } else {
