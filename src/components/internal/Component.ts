@@ -162,6 +162,10 @@ export class Component<T extends HTMLElement = HTMLElement, U extends boolean = 
     return Promise.race(this.events(events))
   }
 
+  protected async waitForAnimation(): Promise<void> {
+    await this.eventsRace(['animationend', 'animationcancel'])
+  }
+
   protected get text(): string {
     return this.element.textContent || ''
   }
