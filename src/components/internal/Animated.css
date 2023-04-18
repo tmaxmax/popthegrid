@@ -1,0 +1,7 @@
+.visible {
+  animation-duration: var(--animation-duration-visible);
+}
+
+.hidden {
+  animation-duration: var(--animation-duration-hidden);
+}
