@@ -1,0 +1,123 @@
+.modal {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  visibility: visible;
+  background-color: #000f1e99;
+  backdrop-filter: blur(10px);
+}
+
+@keyframes modal--show {
+  from {
+    background-color: #000f1e00;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    background-color: #000f1e99;
+    backdrop-filter: blur(10px);
+  }
+}
+
+@keyframes modal--hide {
+  from {
+    background-color: #000f1e99;
+    backdrop-filter: blur(10px);
+  }
+  to {
+    background-color: #000f1e00;
+    backdrop-filter: blur(0px);
+  }
+}
+
+.modal.hidden {
+  animation-name: modal--hide;
+  animation-duration: var(--show-duration, 0.3s);
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
+.modal.visible {
+  animation-name: modal--show;
+  animation-duration: var(--show-duration, 2s);
+  animation-timing-function: ease;
+  animation-fill-mode: forwards;
+}
+
+@keyframes modal-content--hide {
+  from {
+    opacity: 100%;
+  }
+  to {
+    opacity: 0%;
+  }
+}
+
+.modal-content.hidden,
+.modal-close-button.hidden {
+  animation-name: modal-content--hide;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
+.modal-content.hidden {
+  animation-duration: var(--modal-content-show-duration, 0.3s);
+}
+
+.modal-close-button.hidden,
+.modal-close-button.visible {
+  animation-duration: var(--modal-close-button-show-duration, 0.1s);
+}
+
+@keyframes modal-content--show {
+  from {
+    opacity: 0%;
+  }
+  to {
+    opacity: 100%;
+  }
+}
+
+.modal-content.visible,
+.modal-close-button.visible {
+  animation-name: modal-content--show;
+  animation-timing-function: ease;
+  animation-fill-mode: forwards;
+}
+
+.modal-content.visible {
+  animation-duration: var(--modal-content-show-duration, 1s);
+}
+
+.modal-close-button {
+  position: fixed;
+  top: 0rem;
+  right: 0rem;
+  margin-top: 1rem;
+  margin-right: 1rem;
+  width: 3rem;
+  height: 3rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.modal-close-button::after {
+  display: inline-block;
+  content: '\00d7';
+  font-weight: bold;
+  font-family: var(--font-body);
+  font-size: 4rem;
+  line-height: 0.69;
+  margin-left: 0.04rem;
+  color: var(--color-body);
+}
+
+.modal-close-button:hover::after {
+  color: var(--color-heading);
+}

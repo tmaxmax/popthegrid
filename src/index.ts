@@ -11,8 +11,7 @@ import { startAttempt, OngoingAttempt, insertAttempt } from '$db/attempt'
 import { Gamemode as SchemaGamemode } from '$db/gamemode'
 import schema from '$db/schema'
 import { assert, assertNonNull } from '$util/assert'
-import { VersionChangeModal } from '$components/VersionChangeModal'
-import { wait } from './util'
+import { Modal } from '$components/Modal'
 
 const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
   assertNonNull(elem, `${name} doesn't exist in the HTML document!`)
@@ -27,7 +26,6 @@ const gamemodePrompt: HTMLLegendElement | null = document.querySelector('#gamemo
 assertNonNull(gamemodePrompt)
 const gamemodeInputs: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[name=gamemode]')
 assert(gamemodeInputs.length === 2)
-const versionChangeModal = new VersionChangeModal(document.querySelector('#versionchange'))
 
 let gamemode: Gamemode = new RandomCount()
 let gamemodeName: SchemaGamemode = 'random'
@@ -94,6 +92,21 @@ const gamemodeChangeEvent = (ev: Event) => {
   }
 }
 
+const getVersionChangeModalContent = () => {
+  const root = document.createElement('div')
+  const title = document.createElement('h2')
+  title.append('Game update!')
+  root.append(title)
+  const content = document.createElement('p')
+  content.append('The game was updated! Please refresh the page.')
+  root.append(content)
+  return root
+}
+
+const getVersionChangeModal = () => {
+  return new Modal({ content: getVersionChangeModalContent(), allowClose: true, animateClose: true })
+}
+
 const main = async () => {
   gamemodeFieldset.addEventListener('change', gamemodeChangeEvent)
   sillyName.create(sillyNameParent)
@@ -103,7 +116,7 @@ const main = async () => {
       ignoreClicks = true
       setGamemodeChangePermission(false)
       grid.destroy(true)
-      versionChangeModal.show()
+      getVersionChangeModal().create(Component.body, true)
     },
   })
   await grid.create(gridParent, true)
