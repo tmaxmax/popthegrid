@@ -1,9 +1,9 @@
 import './reset.css'
 import './style.css'
 
-import { Grid } from './components/Grid'
-import { Square } from './components/Square'
-import { Component } from './components/internal/Component'
+import { Grid } from '$components/Grid'
+import { Square } from '$components/Square'
+import { Component } from '$components/internal/Component'
 import { Gamemode, RandomCount, RandomTimer } from './gamemode'
 import { open as openIndexedDB } from '$util/indexedDB'
 import { startAttempt, OngoingAttempt, insertAttempt } from '$db/attempt'
