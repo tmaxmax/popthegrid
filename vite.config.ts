@@ -8,6 +8,7 @@ export default defineConfig({
       $util: path.resolve(__dirname, 'src', 'util'),
       $components: path.resolve(__dirname, 'src', 'components'),
       $db: path.resolve(__dirname, 'src', 'db'),
+      $game: path.resolve(__dirname, 'src', 'game'),
     },
   },
   test: {

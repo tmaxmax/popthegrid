@@ -18,7 +18,9 @@
       "$util/*": ["./src/util/*"],
       "$util": ["./src/util/index.ts"],
       "$components/*": ["./src/components/*"],
-      "$db/*": ["./src/db/*"]
+      "$db/*": ["./src/db/*"],
+      "$game": ["./src/game/index.ts"],
+      "$game/*": ["./src/game/*"],
     }
   },
   "include": ["src"]
