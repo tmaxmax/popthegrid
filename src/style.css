@@ -66,61 +66,6 @@ p {
   position: relative;
 }
 
-fieldset.game-parameter {
-  color: var(--color-body);
-  font-family: var(--font-body);
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: space-evenly;
-  max-width: fit-content;
-}
-
-fieldset.game-parameter label {
-  text-align: bottom;
-}
-
-fieldset.game-parameter span {
-  border: 3px solid var(--color-body);
-  border-radius: 100%;
-  display: inline-block;
-  width: 2rem;
-  height: 2rem;
-  padding-top: 0.1rem;
-  text-align: center;
-  font-weight: bold;
-  transition: all 0.2s ease-in;
-  cursor: pointer;
-}
-
-.game-parameter-labels-layout {
-  margin-left: -0.02rem;
-}
-
-.game-parameter-label ~ .game-parameter-label {
-  margin-left: 0.4rem;
-}
-
-fieldset.game-parameter input {
-  display: none;
-}
-
-fieldset.game-parameter input:disabled + span {
-  cursor: default;
-  opacity: 40%;
-}
-
-fieldset.game-parameter input:disabled:checked + span {
-  opacity: 100%;
-  border-color: var(--color-assurance);
-  background-color: var(--color-assurance);
-}
-
-fieldset.game-parameter input:checked + span {
-  background-color: var(--color-body);
-  color: var(--color-background);
-}
-
 footer {
   margin-top: auto;
   display: flex;

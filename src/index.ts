@@ -9,8 +9,9 @@ import { open as openIndexedDB } from '$util/indexedDB'
 import { startAttempt, OngoingAttempt, insertAttempt } from '$db/attempt'
 import { Gamemode as SchemaGamemode } from '$db/gamemode'
 import schema from '$db/schema'
-import { assert, assertNonNull } from '$util/assert'
+import { assertNonNull } from '$util/assert'
 import { Modal } from '$components/Modal'
+import { Fieldset } from '$components/Input/Fieldset'
 
 const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
   assertNonNull(elem, `${name} doesn't exist in the HTML document!`)
@@ -18,12 +19,7 @@ const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Com
 }
 
 const gridParent = componentFrom(document.querySelector<HTMLElement>('.grid__parent'), 'Grid parent')
-const gamemodeFieldset: HTMLFieldSetElement | null = document.querySelector('#gamemode')
-assertNonNull(gamemodeFieldset)
-const gamemodePrompt: HTMLLegendElement | null = document.querySelector('#gamemode legend')
-assertNonNull(gamemodePrompt)
-const gamemodeInputs: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[name=gamemode]')
-assert(gamemodeInputs.length === 2)
+const footer = componentFrom(document.querySelector('footer'), 'Footer')
 
 let gamemode: Gamemode = new RandomCount()
 let gamemodeName: SchemaGamemode = 'random'
@@ -34,7 +30,7 @@ let ignoreClicks = false
 
 const setGamemodeChangePermission = (allow: boolean) => {
   canChangeGamemode = allow
-  gamemodeInputs.forEach((i) => (i.disabled = !allow))
+  gamemodePicker.disabled = !allow
 }
 
 const squareMousedown = async function (this: Square) {
@@ -71,23 +67,35 @@ const grid = new Grid({
   ],
 })
 
+const gamemodePicker = new Fieldset({
+  name: 'gamemode',
+  legend: 'Gamemode',
+  onChange(name: SchemaGamemode) {
+    if (!canChangeGamemode) return
 
-const gamemodeChangeEvent = (ev: Event) => {
-  if (!canChangeGamemode) return
+    gamemodeName = name
 
-  gamemodeName = (ev.target! as HTMLInputElement).value as SchemaGamemode
-
-  switch (gamemodeName) {
-    case 'random':
-      gamemode = new RandomCount()
-      gamemodePrompt.textContent = 'Gamemode: Luck'
-      break
-    case 'random-timer':
-      gamemode = new RandomTimer({ minSeconds: 4, maxSeconds: 9 })
-      gamemodePrompt.textContent = `Gamemode: Time (4–9 seconds)`
-      break
-  }
-}
+    switch (name) {
+      case 'random':
+        gamemode = new RandomCount()
+        break
+      case 'random-timer':
+        gamemode = new RandomTimer({ minSeconds: 4, maxSeconds: 9 })
+        break
+    }
+  },
+  values: [
+    {
+      name: 'Luck',
+      value: 'random',
+      default: true,
+    },
+    {
+      name: 'Time (4–9 seconds)',
+      value: 'random-timer',
+    },
+  ],
+})
 
 const getVersionChangeModalContent = () => {
   const root = document.createElement('div')
@@ -105,7 +113,7 @@ const getVersionChangeModal = () => {
 }
 
 const main = async () => {
-  gamemodeFieldset.addEventListener('change', gamemodeChangeEvent)
+  gamemodePicker.create(footer, false)
   db = await openIndexedDB(window.indexedDB, {
     schema,
     onVersionChange() {
