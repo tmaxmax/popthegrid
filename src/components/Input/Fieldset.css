@@ -1,0 +1,92 @@
+fieldset {
+  color: var(--color-body);
+  font-family: var(--font-body);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  max-width: fit-content;
+  margin: 0;
+  padding: 0;
+}
+
+fieldset legend {
+  padding: 0;
+  margin-bottom: 0.2rem;
+  font-family: var(--font-heading);
+  font-weight: bold;
+  color: var(--color-heading);
+  font-size: 1.4rem;
+  line-height: 1.3;
+}
+
+fieldset legend ~ .fieldset-layout {
+  margin-left: 1rem;
+}
+
+fieldset label ~ label span {
+  padding-top: 0.2rem;
+}
+
+fieldset label span {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  text-align: center;
+  transition: all 0.1s ease-in;
+}
+
+fieldset label input {
+  width: 1px;
+  height: 1px;
+  opacity: 0%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+fieldset label span span.radio {
+  border: 3px solid var(--color-body);
+  border-radius: 100%;
+  display: inline-block;
+  width: 1.4rem;
+  height: 1.4rem;
+  padding-top: 0.1rem;
+  text-align: center;
+  font-weight: bold;
+  cursor: pointer;
+  margin-right: 0.3rem;
+}
+
+fieldset label input:hover:not(:disabled) + span,
+fieldset label input:focus-visible:not(:disabled) + span {
+  color: var(--color-heading);
+}
+
+fieldset label input:hover:not(:disabled) + span > span.radio,
+fieldset label input:focus-visible:not(:disabled) + span > span.radio {
+  border-color: var(--color-heading);
+}
+
+fieldset label input:hover:checked:not(:disabled) + span > span.radio,
+fieldset label input:focus-visible:checked:not(:disabled) + span > span.radio {
+  border-color: var(--color-heading);
+  background-color: var(--color-heading);
+}
+
+fieldset label input:disabled + span {
+  opacity: 40%;
+}
+
+fieldset input:disabled:checked + span {
+  opacity: 100%;
+}
+
+fieldset input:checked + span > span.radio {
+  background-color: var(--color-body);
+}
+
+fieldset input:checked:disabled + span > span.radio {
+  background-color: var(--color-heading);
+  border-color: var(--color-heading);
+}
