@@ -19,7 +19,7 @@ export type AnimatedProps<T extends KnownHTMLElement> = ComponentProps<T> & {
    * If an AnimationDuration object is given and its property 'destroyed' is set,
    * then the animation durations will differ
    */
-  duration: DurationString | AnimationDuration
+  duration?: DurationString | AnimationDuration
 }
 
 const CSS_VAR_NAME = 'animation-duration'
@@ -32,7 +32,10 @@ export class Animated<T extends KnownHTMLElement = HTMLElement> extends Componen
     super(props)
 
     // This is important, as it assigns the duration.
-    this.animationDuration = props.duration
+    this.animationDuration = props.duration || {
+      create: '0s',
+      destroy: '0s',
+    }
   }
 
   async create(parent: Component, animate: boolean): Promise<void> {
