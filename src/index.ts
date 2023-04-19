@@ -4,7 +4,6 @@ import './style.css'
 import { Grid } from './components/Grid'
 import { Square } from './components/Square'
 import { Component } from './components/internal/Component'
-import { SillyName } from './components/SillyName'
 import { Gamemode, RandomCount, RandomTimer } from './gamemode'
 import { open as openIndexedDB } from '$util/indexedDB'
 import { startAttempt, OngoingAttempt, insertAttempt } from '$db/attempt'
@@ -72,7 +71,6 @@ const grid = new Grid({
   ],
 })
 
-const sillyName = new SillyName()
 
 const gamemodeChangeEvent = (ev: Event) => {
   if (!canChangeGamemode) return
