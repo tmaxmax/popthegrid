@@ -15,7 +15,7 @@ import { Modal } from '$components/Modal'
 
 const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
   assertNonNull(elem, `${name} doesn't exist in the HTML document!`)
-  return Component.from(elem, false)
+  return Component.from(elem)
 }
 
 const gridParent = componentFrom(document.querySelector<HTMLElement>('.grid__parent'), 'Grid parent')

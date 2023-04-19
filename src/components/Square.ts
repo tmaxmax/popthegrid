@@ -13,7 +13,7 @@ export interface SquareProperties {
   eventListeners?: SquareEventListener[]
 }
 
-export class Square extends Component<HTMLDivElement, false> {
+export class Square extends Component<HTMLDivElement> {
   private userEvents?: SquareEventListener[]
 
   constructor(properties: SquareProperties) {
@@ -54,7 +54,7 @@ export class Square extends Component<HTMLDivElement, false> {
     return Promise.resolve()
   }
 
-  create<V extends boolean>(parent: Component<HTMLElement, V>, animate: boolean): Promise<void> {
+  create(parent: Component, animate: boolean): Promise<void> {
     this.appendTo(parent)
     return this.animate('inserted', animate)
   }

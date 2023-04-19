@@ -1,6 +1,6 @@
 import './Animated.css'
 
-import { Component, ComponentProps } from './Component'
+import { Component, ComponentProps, KnownHTMLElement } from './Component'
 
 const CREATE_ANIMATION_CLASS_NAME = 'visible'
 const DESTROY_ANIMATION_CLASS_NAME = 'hidden'
@@ -12,7 +12,7 @@ export interface AnimationDuration {
   destroy?: DurationString
 }
 
-export type AnimatedProps<T extends HTMLElement, U extends boolean> = ComponentProps<T, U> & {
+export type AnimatedProps<T extends KnownHTMLElement> = ComponentProps<T> & {
   /**
    * The duration of the create & destroy animations.
    * If a DurationString is given, the create & destroy animations will have the same duration.
@@ -24,11 +24,11 @@ export type AnimatedProps<T extends HTMLElement, U extends boolean> = ComponentP
 
 const CSS_VAR_NAME = 'animation-duration'
 
-export class Animated<T extends HTMLElement = HTMLElement, U extends boolean = boolean> extends Component<T, U> {
+export class Animated<T extends KnownHTMLElement = HTMLElement> extends Component<T> {
   private duration!: Required<AnimationDuration>
   private children: Animated[] = []
 
-  constructor(props: AnimatedProps<T, U>) {
+  constructor(props: AnimatedProps<T>) {
     super(props)
 
     // This is important, as it assigns the duration.

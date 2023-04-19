@@ -2,7 +2,7 @@ import './Modal.css'
 
 import { Component } from './internal/Component'
 
-class ModalContent extends Component<HTMLElement, false> {
+class ModalContent extends Component<HTMLElement> {
   constructor(element: HTMLElement) {
     super({ element, alreadyExisting: true })
     this.addClass('modal-content')
@@ -29,7 +29,7 @@ class ModalContent extends Component<HTMLElement, false> {
   }
 }
 
-class ModalCloseButton extends Component<HTMLButtonElement, false> {
+class ModalCloseButton extends Component<HTMLButtonElement> {
   constructor(onClose: () => void) {
     super({ tag: 'button', classList: ['modal-close-button'] })
 
@@ -63,7 +63,7 @@ export interface ModalProperties {
   animateClose: boolean
 }
 
-export class Modal extends Component<HTMLDivElement, false> {
+export class Modal extends Component<HTMLDivElement> {
   private readonly content: ModalContent
   private readonly closeButton: ModalCloseButton | undefined
 

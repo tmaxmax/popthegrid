@@ -14,7 +14,7 @@ const fetchSillyName: () => Promise<string> = () =>
     .then((res) => res.json())
     .then((res: Response) => res.name)
 
-export class SillyName extends Component<HTMLElement> {
+export class SillyName extends Component {
   constructor(signal?: AbortSignal) {
     super({ tag: 'em', classList: ['silly-name'] })
 
@@ -31,7 +31,7 @@ export class SillyName extends Component<HTMLElement> {
     })
   }
 
-  create<T extends HTMLElement>(parent: Component<T>): void {
+  create(parent: Component): void {
     this.appendTo(parent)
   }
 

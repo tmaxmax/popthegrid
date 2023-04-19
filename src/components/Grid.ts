@@ -41,13 +41,13 @@ const defaultProps: Required<GridProperties> = {
   squareEventListeners: [],
 }
 
-export class Grid extends Component<HTMLDivElement, true> {
+export class Grid extends Component<HTMLDivElement> {
   private readonly properties: Required<GridProperties>
   private squares: Square[] = []
   private readonly resizeObserver: ResizeObserver
 
   constructor(properties: GridProperties) {
-    super({ tag: 'div', classList: ['grid'], hasComputedStyle: true })
+    super({ tag: 'div', classList: ['grid'] })
     this.properties = { ...defaultProps, ...properties }
     log('Grid properties: %O', this.properties)
     this.addClass('grid')

@@ -1,30 +1,32 @@
-import { If, IfElse, isDefined } from '$util'
+import { isDefined } from '$util'
 import { isBindable } from '$util/functions'
-
-type HasComputedStyle<T extends boolean> = IfElse<T, { hasComputedStyle: true }, { hasComputedStyle?: false }>
 
 interface ComponentFromExisting<T extends HTMLElement> {
   alreadyExisting: true
   element: T
 }
 
-interface ComponentFromTag {
+interface ComponentFromTag<K extends keyof HTMLElementTagNameMap> {
   alreadyExisting?: false
-  tag: keyof HTMLElementTagNameMap
+  tag: K
   classList?: string[]
 }
 
-export type ComponentProps<T extends HTMLElement, U extends boolean> = (ComponentFromTag | ComponentFromExisting<T>) & HasComputedStyle<U>
+export type KnownHTMLElement = HTMLElementTagNameMap[keyof HTMLElementTagNameMap]
+
+export type ComponentProps<T extends KnownHTMLElement> =
+  | ComponentFromTag<T extends HTMLElementTagNameMap[infer K extends keyof HTMLElementTagNameMap] ? K : never>
+  | ComponentFromExisting<T>
 
 type EventOptions = Omit<AddEventListenerOptions, 'once' | 'signal'> & {
   stopPropagation?: 'further' | 'immediate'
 } & ({ timeout?: number } | { signal?: AbortSignal })
 
-export class Component<T extends HTMLElement = HTMLElement, U extends boolean = boolean> {
+export class Component<T extends KnownHTMLElement = HTMLElement> {
   protected readonly element: T
-  private readonly computedStyle?: CSSStyleDeclaration
+  private computedStyle?: CSSStyleDeclaration
 
-  protected constructor(props: ComponentProps<T, U>) {
+  protected constructor(props: ComponentProps<T>) {
     if (props.alreadyExisting) {
       this.element = props.element
     } else {
@@ -32,9 +34,6 @@ export class Component<T extends HTMLElement = HTMLElement, U extends boolean = 
       if (isDefined(props.classList)) {
         this.addClass(...props.classList)
       }
-    }
-    if (props.hasComputedStyle) {
-      this.computedStyle = getComputedStyle(this.element)
     }
   }
 
@@ -92,9 +91,12 @@ export class Component<T extends HTMLElement = HTMLElement, U extends boolean = 
    * Get a CSS style property computed value
    * @param name The CSS style name
    */
-  protected getComputedStyle(name: string): If<U, string> {
-    // @ts-expect-error Typescript is not able to infer types here
-    return this.computedStyle?.getPropertyValue(name)
+  protected getComputedStyle(name: string): string {
+    if (!this.computedStyle) {
+      this.computedStyle = window.getComputedStyle(this.element)
+    }
+
+    return this.computedStyle.getPropertyValue(name)
   }
 
   /**
@@ -102,7 +104,7 @@ export class Component<T extends HTMLElement = HTMLElement, U extends boolean = 
    * @param event The event type
    * @param callback The event callback
    */
-  protected addEventListener<S extends Component<T, U>, E extends keyof HTMLElementEventMap>(
+  protected addEventListener<S extends Component<T>, E extends keyof HTMLElementEventMap>(
     event: E,
     callback: (this: S, ev: HTMLElementEventMap[E]) => void,
     options?: AddEventListenerOptions
@@ -122,7 +124,7 @@ export class Component<T extends HTMLElement = HTMLElement, U extends boolean = 
    * @param event The event type
    * @param callback The event callback
    */
-  protected removeEventListener<S extends Component<T, U>, E extends keyof HTMLElementEventMap>(
+  protected removeEventListener<S extends Component<T>, E extends keyof HTMLElementEventMap>(
     event: E,
     callback: (this: S, ev: HTMLElementEventMap[E]) => void,
     options?: AddEventListenerOptions
@@ -229,8 +231,8 @@ export class Component<T extends HTMLElement = HTMLElement, U extends boolean = 
     this.element.remove()
   }
 
-  static from<T extends HTMLElement, U extends boolean>(element: T, hasComputedStyle?: U): Component<T, U> {
-    return new Component<T, U>({ alreadyExisting: true, element, hasComputedStyle })
+  static from<T extends HTMLElement>(element: T): Component<T> {
+    return new Component<T>({ alreadyExisting: true, element })
   }
   static body = Component.from(document.body || document.documentElement)
   static head = Component.from(document.head)
