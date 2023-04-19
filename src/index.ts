@@ -12,6 +12,7 @@ import schema from '$db/schema'
 import { assertNonNull } from '$util/assert'
 import { Modal } from '$components/Modal'
 import { Fieldset } from '$components/Input/Fieldset'
+import { map } from '$util/async'
 
 const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
   assertNonNull(elem, `${name} doesn't exist in the HTML document!`)
@@ -56,9 +57,11 @@ const squareMousedown = async function (this: Square) {
   ignoreClicks = false
 }
 
+const NUM_COLORS = 5
+
 const grid = new Grid({
   squareCount: 48,
-  colors: ['cotton-candy', 'mauve', 'lavender-floral', 'cornflower-blue', 'sky-blue'].map((color) => `var(--color-${color})`),
+  colors: Array.from({ length: NUM_COLORS }, (_, i) => `var(--color-square-${i + 1})`),
   squareEventListeners: [
     {
       event: 'mousedown',
