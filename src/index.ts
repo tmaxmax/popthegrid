@@ -12,7 +12,6 @@ import schema from '$db/schema'
 import { assertNonNull } from '$util/assert'
 import { Modal } from '$components/Modal'
 import { Fieldset } from '$components/Input/Fieldset'
-import { map } from '$util/async'
 
 const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
   assertNonNull(elem, `${name} doesn't exist in the HTML document!`)
