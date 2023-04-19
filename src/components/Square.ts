@@ -5,7 +5,7 @@ import { Component } from './internal/Component'
 export interface SquareEventListener {
   event: keyof HTMLElementEventMap
   callback: (this: Square, event: Event) => void
-  options?: boolean | AddEventListenerOptions
+  options?: AddEventListenerOptions
 }
 
 export interface SquareProperties {

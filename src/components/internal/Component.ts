@@ -16,7 +16,9 @@ interface ComponentFromTag {
 
 export type ComponentProps<T extends HTMLElement, U extends boolean> = (ComponentFromTag | ComponentFromExisting<T>) & HasComputedStyle<U>
 
-type Timeout = { timeout?: number }
+type EventOptions = Omit<AddEventListenerOptions, 'once' | 'signal'> & {
+  stopPropagation?: 'further' | 'immediate'
+} & ({ timeout?: number } | { signal?: AbortSignal })
 
 export class Component<T extends HTMLElement = HTMLElement, U extends boolean = boolean> {
   protected readonly element: T
@@ -103,7 +105,7 @@ export class Component<T extends HTMLElement = HTMLElement, U extends boolean = 
   protected addEventListener<S extends Component<T, U>, E extends keyof HTMLElementEventMap>(
     event: E,
     callback: (this: S, ev: HTMLElementEventMap[E]) => void,
-    options?: boolean | AddEventListenerOptions
+    options?: AddEventListenerOptions
   ): void {
     if (isBindable(callback)) {
       // @ts-expect-error if the function is bindable then it has no `this`.
@@ -123,49 +125,77 @@ export class Component<T extends HTMLElement = HTMLElement, U extends boolean = 
   protected removeEventListener<S extends Component<T, U>, E extends keyof HTMLElementEventMap>(
     event: E,
     callback: (this: S, ev: HTMLElementEventMap[E]) => void,
-    options?: boolean | EventListenerOptions
+    options?: AddEventListenerOptions
   ): void {
     // @ts-expect-error same as above
     this.element.removeEventListener(event, callback, options)
   }
 
-  protected event<E extends keyof HTMLElementEventMap>(
-    event: E,
-    options?: boolean | (EventListenerOptions & Timeout)
-  ): Promise<HTMLElementEventMap[E]> {
+  protected event<E extends keyof HTMLElementEventMap>(event: E, options?: EventOptions): Promise<HTMLElementEventMap[E]> {
     type Ev = HTMLElementEventMap[E]
 
     return new Promise<Ev>((resolve, reject) => {
-      const callback = (e: Ev) => {
-        this.element.removeEventListener(event, callback, options)
-        resolve(e)
+      const opts: AddEventListenerOptions = {
+        once: true,
       }
 
-      if (options && typeof options !== 'boolean' && 'timeout' in options) {
-        setTimeout(() => {
-          this.element.removeEventListener(event, callback, options)
-          reject()
-        }, options.timeout)
+      // What type is this?
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let timeoutID: any
+
+      if (options) {
+        opts.capture = options.capture
+        opts.passive = options.passive
+
+        if ('signal' in options) {
+          opts.signal = options.signal
+        } else if ('timeout' in options && options.timeout) {
+          const controller = new AbortController()
+          timeoutID = setTimeout(() => controller.abort(), options.timeout)
+          opts.signal = controller.signal
+        }
       }
 
-      this.element.addEventListener(event, callback, options)
+      const callback = (e: Event) => {
+        if (options?.stopPropagation) {
+          switch (options.stopPropagation) {
+            case 'further':
+              e.stopPropagation()
+              break
+            case 'immediate':
+              e.stopImmediatePropagation()
+              break
+            default:
+              reject(new Error(`Unhandled stop propagation type ${options.stopPropagation}`))
+              return
+          }
+        }
+
+        if (timeoutID) {
+          clearTimeout(timeoutID)
+        }
+
+        resolve(e as Ev)
+      }
+
+      this.element.addEventListener(event, callback, opts)
     })
   }
 
-  private events(events: (keyof HTMLElementEventMap)[]): Promise<Event>[] {
-    return events.map((e) => this.event(e))
+  private events(events: (keyof HTMLElementEventMap)[], options?: EventOptions): Promise<Event>[] {
+    return events.map((e) => this.event(e, options))
   }
 
-  protected eventsAll(events: (keyof HTMLElementEventMap)[]): Promise<Event[]> {
-    return Promise.all(this.events(events))
+  protected eventsAll(events: (keyof HTMLElementEventMap)[], options?: EventOptions): Promise<Event[]> {
+    return Promise.all(this.events(events, options))
   }
 
-  protected eventsRace(events: (keyof HTMLElementEventMap)[]): Promise<Event> {
-    return Promise.race(this.events(events))
+  protected eventsRace(events: (keyof HTMLElementEventMap)[], options?: EventOptions): Promise<Event> {
+    return Promise.race(this.events(events, options))
   }
 
   protected async waitForAnimation(): Promise<void> {
-    await this.eventsRace(['animationend', 'animationcancel'])
+    await this.eventsRace(['animationend', 'animationcancel'], { stopPropagation: 'immediate' })
   }
 
   protected get text(): string {
