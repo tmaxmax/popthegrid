@@ -12,9 +12,16 @@ export interface Attempt {
   /** In milliseconds. */
   duration: number
   isWin: boolean
+  /** Can be undefined because the previous database version didn't save it. */
+  numSquares?: number
 }
 
-export function startAttempt(gamemode: Gamemode): OngoingAttempt {
+export interface StartAttemptProps {
+  gamemode: Gamemode
+  numSquares: number
+}
+
+export function startAttempt({ gamemode, numSquares }: StartAttemptProps): OngoingAttempt {
   const now = performance.now()
   const startedAt = new Date()
   let ended = false
@@ -32,6 +39,7 @@ export function startAttempt(gamemode: Gamemode): OngoingAttempt {
         startedAt,
         duration: performance.now() - now,
         isWin,
+        numSquares,
       }
     },
   }

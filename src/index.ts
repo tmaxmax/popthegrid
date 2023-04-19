@@ -44,7 +44,7 @@ const squareMousedown = async function (this: Square) {
   }
   if (canChangeGamemode) {
     setGamemodeChangePermission(false)
-    ongoingAttempt = startAttempt(gamemodeName)
+    ongoingAttempt = startAttempt({ gamemode: gamemodeName, numSquares: grid.squareCount })
   }
   const removed = grid.removeSquare(this)
   if (gamemode.shouldDestroy(grid, this)) {
