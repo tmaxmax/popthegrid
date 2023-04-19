@@ -94,4 +94,8 @@ export class Animated<T extends KnownHTMLElement = HTMLElement> extends Componen
   protected appendChild(component: Animated) {
     this.children.push(component)
   }
+
+  static from<T extends KnownHTMLElement>(element: T, duration?: DurationString | AnimationDuration): Animated<T> {
+    return new Animated({ element, alreadyExisting: true, duration })
+  }
 }
