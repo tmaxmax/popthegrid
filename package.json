@@ -26,6 +26,7 @@
     "vitest-fetch-mock": "^0.2.2"
   },
   "dependencies": {
+    "color-interpolate": "^1.0.5",
     "debug": "^4.3.4",
     "resize-observer-polyfill": "^1.5.1"
   }

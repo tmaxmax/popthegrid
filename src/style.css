@@ -73,7 +73,6 @@ fieldset.game-parameter {
   align-items: center;
   justify-content: space-evenly;
   max-width: fit-content;
-  margin-bottom: 5vmin;
 }
 
 fieldset.game-parameter label {

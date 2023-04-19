@@ -19,7 +19,6 @@ const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Com
 }
 
 const gridParent = componentFrom(document.querySelector<HTMLElement>('.grid__parent'), 'Grid parent')
-const sillyNameParent = componentFrom(document.querySelector<HTMLParagraphElement>('#silly-name'), 'Silly name parent')
 const gamemodeFieldset: HTMLFieldSetElement | null = document.querySelector('#gamemode')
 assertNonNull(gamemodeFieldset)
 const gamemodePrompt: HTMLLegendElement | null = document.querySelector('#gamemode legend')
@@ -109,7 +108,6 @@ const getVersionChangeModal = () => {
 
 const main = async () => {
   gamemodeFieldset.addEventListener('change', gamemodeChangeEvent)
-  sillyName.create(sillyNameParent)
   db = await openIndexedDB(window.indexedDB, {
     schema,
     onVersionChange() {

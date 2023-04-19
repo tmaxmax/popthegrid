@@ -1,0 +1,41 @@
+.silly-name {
+  font-style: normal;
+}
+
+.silly-name a {
+  text-decoration: underline;
+  font-weight: bold;
+  color: var(--color-body);
+}
+
+.silly-name a:hover {
+  color: var(--color-heading);
+}
+
+.silly-name.undiscovered {
+  transition: color 0.1s ease-out;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.silly-name.undiscovered:hover {
+  color: var(--color-heading);
+}
+
+@keyframes colour-progress {
+  from {
+    color: var(--color-heading);
+  }
+  20% {
+    color: var(--color);
+  }
+  to {
+    color: var(--color-heading);
+  }
+}
+
+.silly-name.undiscovered.clicked {
+  animation-name: colour-progress;
+  animation-duration: 0.4s;
+  animation-timing-function: ease-out;
+}
