@@ -10,16 +10,12 @@ export interface SquareEventListener {
 
 export interface SquareProperties {
   color: string
-  eventListeners?: SquareEventListener[]
 }
 
 export class Square extends Component<HTMLDivElement> {
-  private userEvents?: SquareEventListener[]
-
   constructor(properties: SquareProperties) {
     super({ tag: 'div', classList: ['grid__square'] })
-    ;({ color: this.color, eventListeners: this.userEvents } = properties)
-    this.userEvents?.forEach((listener) => this.addEventListener(listener.event, listener.callback.bind(this), listener.options))
+    ;({ color: this.color } = properties)
     this.addEventListener('mouseenter', () => {
       this.setStyle('z-index', `${2}`)
     })
@@ -41,8 +37,16 @@ export class Square extends Component<HTMLDivElement> {
     this.setStyle('--row', `${row}`)
   }
 
+  get row(): number {
+    return parseInt(this.getStyle('--row'), 10)
+  }
+
   set col(col: number) {
     this.setStyle('--col', `${col}`)
+  }
+
+  get col(): number {
+    return parseInt(this.getStyle('--col'), 10)
   }
 
   animate(which: string, animate = true): Promise<void> {

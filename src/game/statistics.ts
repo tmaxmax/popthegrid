@@ -1,5 +1,5 @@
 import { Attempt } from './attempt'
-import { Gamemode } from './gamemode'
+import { GamemodeName } from './gamemode'
 
 type Counts = {
   numAttempts: number
@@ -7,7 +7,7 @@ type Counts = {
   numLosses: number
 }
 
-type GamemodeRecord<T extends Gamemode> = { gamemode: T }
+type GamemodeRecord<T extends GamemodeName> = { gamemode: T }
 
 export type Statistics =
   | (Counts & { gamemode?: never })

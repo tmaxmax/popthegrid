@@ -1,9 +1,9 @@
 import './Grid.css'
 
 import { Component } from './internal/Component'
-import { Square, SquareEventListener } from './Square'
+import { Square } from './Square'
 import baseLog from '$util/log'
-import { randInt, wait } from '$util'
+import { isDefined, randInt, wait } from '$util'
 import { map as mapAsync } from '$util/async'
 import ResizeObserver from 'resize-observer-polyfill'
 
@@ -11,7 +11,6 @@ export interface GridProperties {
   colors?: string[]
   animationDelay?: number
   squareCount?: number
-  squareEventListeners?: SquareEventListener[]
 }
 
 const log = baseLog.extend('Grid')
@@ -22,7 +21,6 @@ const generateSquares = (props: Required<GridProperties>) =>
     () =>
       new Square({
         color: props.colors[randInt(props.colors.length)],
-        eventListeners: props.squareEventListeners,
       })
   )
 
@@ -38,7 +36,6 @@ const defaultProps: Required<GridProperties> = {
   colors: ['#000'],
   animationDelay: 50,
   squareCount: 102,
-  squareEventListeners: [],
 }
 
 export class Grid extends Component<HTMLDivElement> {
@@ -50,7 +47,6 @@ export class Grid extends Component<HTMLDivElement> {
     super({ tag: 'div', classList: ['grid'] })
     this.properties = { ...defaultProps, ...properties }
     log('Grid properties: %O', this.properties)
-    this.addClass('grid')
     this.resizeObserver = new ResizeObserver(() => {
       this.setSquaresPosition()
     })
@@ -70,17 +66,25 @@ export class Grid extends Component<HTMLDivElement> {
     })
   }
 
-  set colors(colors: string[]) {
-    this.properties.colors = colors
-    this.squares.forEach((square) => (square.color = colors[randInt(colors.length)]))
+  get colors(): readonly string[] {
+    return this.properties.colors
   }
 
-  get squareCount(): number {
-    return this.squares.length
+  set colors(colors: readonly string[]) {
+    this.properties.colors = [...colors]
+    this.squares.forEach((square) => (square.color = colors[randInt(colors.length)]))
   }
 
   get activeSquares(): readonly Square[] {
     return this.squares
+  }
+
+  get numTotalSquares(): number {
+    return this.properties.squareCount
+  }
+
+  set numTotalSquares(num: number) {
+    this.properties.squareCount = num
   }
 
   async removeSquare(square: Square): Promise<void> {
@@ -90,6 +94,30 @@ export class Grid extends Component<HTMLDivElement> {
     }
     log('Square %d removed', i)
     await Promise.all([this.squares.splice(i, 1)[0].destroy(true), this.setSquaresPosition(i)])
+  }
+
+  addSquareEventListener<E extends keyof HTMLElementEventMap>(
+    event: E,
+    callback: (ev: HTMLElementEventMap[E], square: Square) => unknown,
+    options?: AddEventListenerOptions
+  ) {
+    const cb = (e: Event) => {
+      if (!isHTMLDivElement(e.target) || !e.target.classList.contains('grid__square')) {
+        return
+      }
+
+      const row = parseInt(e.target.style.getPropertyValue('--row'), 10)
+      const col = parseInt(e.target.style.getPropertyValue('--col'), 10)
+
+      const square = this.squares.find((v) => v.row === row && v.col === col)
+      if (!square) {
+        return
+      }
+
+      callback(e as HTMLElementEventMap[E], square)
+    }
+
+    this.addEventListener(event, cb, options)
   }
 
   async create(parent: Component, animate: boolean): Promise<void> {
@@ -115,6 +143,14 @@ export class Grid extends Component<HTMLDivElement> {
     }
     this.removeClass('grid--no-interaction')
     this.remove()
+  }
+
+  toggleInteraction(enabled: boolean) {
+    if (enabled) {
+      this.removeClass('grid--no-interaction')
+    } else {
+      this.addClass('grid--no-interaction')
+    }
   }
 
   private async appendSquares(squares: Square[], animate: boolean): Promise<void> {
@@ -166,4 +202,8 @@ export class Grid extends Component<HTMLDivElement> {
 
     return { sideLength }
   }
+}
+
+const isHTMLDivElement = (v: unknown): v is HTMLDivElement => {
+  return isDefined(v) && (v as any).__proto__.constructor.name === 'HTMLDivElement'
 }
