@@ -49,6 +49,11 @@ export default class Stopwatch {
   }
 
   get elapsed(): number {
-    return this.totalElapsed
+    let elapsed = this.totalElapsed
+    if (this.startedAt) {
+      elapsed += this.time.now() - this.startedAt
+    }
+
+    return elapsed
   }
 }
