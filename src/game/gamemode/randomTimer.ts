@@ -1,47 +1,29 @@
-import interval from '$util/interval'
+import interval from '$util/time/interval'
 import { randInt } from '$util'
+import { Gamemode } from '.'
 
-export interface Square {
-  color: string
-  row: number
-  col: number
-}
-
-export interface Grid {
-  activeSquares: readonly Square[]
-  colors: readonly string[]
-}
-
-export abstract class Gamemode {
-  abstract shouldDestroy(grid: Grid, destroyedSquare: Square): boolean
-
-  reset(): void | Promise<void> {
-    return
-  }
-}
-
-export class RandomCount extends Gamemode {
-  shouldDestroy(grid: Grid): boolean {
-    const count = grid.activeSquares.length
-    return count > 1 && count === randInt(count + 1)
-  }
-}
-
-export interface RandomTimerParameters {
+export interface RandomTimerProps {
   minSeconds: number
   maxSeconds: number
 }
 
 export class RandomTimer extends Gamemode {
+  public static readonly NAME = 'random-timer'
+
   private readonly numIterations: number
   private hasPoppedFirstSquare = false
   private controller: AbortController | undefined
   private interval: Promise<number> | undefined
   private done = false
 
-  constructor({ minSeconds, maxSeconds }: RandomTimerParameters) {
+  constructor({ minSeconds, maxSeconds }: RandomTimerProps) {
     super()
     this.numIterations = minSeconds + randInt(maxSeconds - minSeconds + 1)
+    console.log(this.numIterations)
+  }
+
+  name() {
+    return 'random-timer' as const
   }
 
   shouldDestroy(): boolean {

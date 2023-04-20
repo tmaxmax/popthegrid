@@ -1,5 +1,5 @@
 import { Attempt } from './attempt'
-import { Gamemode } from './gamemode'
+import { GamemodeName } from './gamemode'
 
 type Counts = {
   numAttempts: number
@@ -7,12 +7,13 @@ type Counts = {
   numLosses: number
 }
 
-type GamemodeRecord<T extends Gamemode> = { gamemode: T }
-
-export type Statistics =
-  | (Counts & { gamemode?: never })
-  | (Counts & GamemodeRecord<'random'>)
-  | (Counts & GamemodeRecord<'random-timer'> & { fastestWinDuration?: number })
+export type Statistics = Counts &
+  (
+    | { gamemode?: never }
+    | { gamemode: 'random' }
+    | { gamemode: 'random-timer'; fastestWinDuration?: number }
+    | { gamemode: Exclude<string, GamemodeName> }
+  )
 
 const EMPTY_COUNTS: Counts = {
   numAttempts: 0,
@@ -37,7 +38,7 @@ export function getStatistics(data: Attempt[]): Statistics[] {
       acc[0].numWins++
       accg.numWins++
 
-      if ('gamemode' in accg && accg.gamemode === 'random-timer') {
+      if (isTimerGamemode(accg)) {
         if (!accg.fastestWinDuration || accg.fastestWinDuration > curr.duration) {
           accg.fastestWinDuration = curr.duration
         }
@@ -49,4 +50,8 @@ export function getStatistics(data: Attempt[]): Statistics[] {
 
     return acc
   }, init)
+}
+
+const isTimerGamemode = (acc: Statistics): acc is Counts & { gamemode: 'random-timer'; fastestWinDuration?: number } => {
+  return 'gamemode' in acc && acc.gamemode === 'random-timer'
 }
