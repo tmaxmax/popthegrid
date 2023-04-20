@@ -14,18 +14,18 @@ export default class Stopwatch {
   }
 
   start() {
-    if (!isDefined(this.startedAt)) {
+    if (!this.ongoing) {
       this.startedAt = this.time.now()
     }
   }
 
   pause(): number {
-    if (!isDefined(this.startedAt)) {
+    if (!this.ongoing) {
       return 0
     }
 
     const now = this.time.now()
-    const elapsed = now - this.startedAt
+    const elapsed = now - this.startedAt!
 
     this.startedAt = undefined
     this.totalElapsed += elapsed
@@ -55,5 +55,9 @@ export default class Stopwatch {
     }
 
     return elapsed
+  }
+
+  get ongoing(): boolean {
+    return isDefined(this.startedAt)
   }
 }
