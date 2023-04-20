@@ -1,4 +1,4 @@
-import interval from '$util/interval'
+import interval from '$util/time/interval'
 import { wait } from '$util'
 
 import { describe, it, expect, vi } from 'vitest'

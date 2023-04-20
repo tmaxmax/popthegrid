@@ -2,7 +2,7 @@ import './index.css'
 import interpolate from 'color-interpolate'
 
 import { Component } from '../internal/Component'
-import interval from '$util/interval'
+import interval from '$util/time/interval'
 import { EasterEggStorage, LocalStorage } from './storage'
 
 interface Response {

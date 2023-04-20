@@ -1,3 +1,5 @@
+import { Time } from '.'
+
 /**
  * Represents the parameters passed to an interval function.
  *
@@ -53,6 +55,8 @@ export interface IntervalProperties {
    * Its default value is Infinity.
    */
   iterations?: number
+  /** Used to retrieve the current time. */
+  time?: Time
 }
 
 /**
@@ -65,8 +69,10 @@ export interface IntervalProperties {
  * @param props The configuration parameters
  * @returns The number of times the callback executed
  */
-function interval({ callback, interval, leading, signal, iterations }: IntervalProperties): Promise<number> {
+function interval({ callback, interval, leading, signal, iterations, time }: IntervalProperties): Promise<number> {
   return new Promise<number>((resolve, reject) => {
+    const nower = time || performance || Date
+
     const intervalFn: IntervalFn = (() => {
       if (typeof interval === 'number') {
         return () => {
@@ -81,7 +87,7 @@ function interval({ callback, interval, leading, signal, iterations }: IntervalP
       return interval
     })()
 
-    const start = performance.now()
+    const start = nower.now()
 
     let iteration = 0
 
@@ -101,11 +107,11 @@ function interval({ callback, interval, leading, signal, iterations }: IntervalP
 
     const schedule = (time: number) => {
       const elapsed = time - start
-      const now = performance.now()
+      const now = nower.now()
       const interval = intervalFn({ elapsed, now, iteration })
       const rounded = Math.round(elapsed / interval) * interval
       const target = start + rounded + interval
-      const delay = target - performance.now()
+      const delay = target - nower.now()
       setTimeout(() => requestAnimationFrame(frame), delay)
     }
 
