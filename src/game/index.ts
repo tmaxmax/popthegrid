@@ -35,8 +35,8 @@ type GameEvent =
   | { type: 'resume' }
 
 export class Game {
-  private gen?: GameGenerator
-  private state?: State
+  private gen!: GameGenerator
+  private state!: State
 
   constructor(private readonly props: GameProps) {
     const { grid } = this.props
@@ -45,6 +45,9 @@ export class Game {
       this.sendEvent({ type: 'removeSquare', square }).catch((err) => this.props.onError(err))
     })
 
+    // NOTE: This is basically sync, as Initial has no transition
+    // when the grid was never created. This call initializes the game's
+    // gen and state fields, do not remove.
     this.setState(new Initial({ ...this.props }))
   }
 
@@ -65,8 +68,7 @@ export class Game {
   }
 
   setGamemode(gamemode: Gamemode): GamemodeSetWhen {
-    this.assertInit()
-    return this.state!.setGamemode(gamemode)
+    return this.state.setGamemode(gamemode)
   }
 
   private async setState(state: State): Promise<void> {
@@ -78,16 +80,8 @@ export class Game {
     this.state.executeCallback(this.props)
   }
 
-  private assertInit() {
-    if (!this.state || !this.gen) {
-      throw new Error('Game not initialized')
-    }
-  }
-
   private async sendEvent(ev: GameEvent) {
-    this.assertInit()
-
-    const { value, done } = this.gen!.next(ev)
+    const { value, done } = this.gen.next(ev)
     if (!done) {
       return
     } else if (!isDefined(value)) {
