@@ -2,10 +2,10 @@ import './Modal.css'
 
 import { Animated } from './internal/Animated'
 
-class ModalContent extends Animated<HTMLElement> {
-  constructor(element: HTMLElement) {
-    super({ element, alreadyExisting: true, duration: { create: '1s', destroy: '0.3s' } })
-    this.addClass('modal-content')
+class ModalContent extends Animated<HTMLDivElement> {
+  constructor(element: Animated) {
+    super({ tag: 'div', alreadyExisting: false, classList: ['modal-content'], duration: { create: '1s', destroy: '0.3s' } })
+    this.appendChild(element)
   }
 }
 
@@ -18,22 +18,23 @@ class ModalCloseButton extends Animated<HTMLButtonElement> {
 }
 
 export interface ModalProperties {
-  content: HTMLElement
+  content: Animated
   allowClose: boolean
   animateClose: boolean
+  afterClose?(): unknown
 }
 
 export class Modal extends Animated<HTMLDivElement> {
-  constructor({ content, allowClose, animateClose }: ModalProperties) {
+  constructor({ content, allowClose, animateClose, afterClose }: ModalProperties) {
     super({ tag: 'div', classList: ['modal'], duration: { create: '2s', destroy: '0.3s' } })
 
     this.appendChild(new ModalContent(content))
     if (allowClose) {
-      const hide = function (this: Modal) {
-        this.destroy(animateClose)
+      const hide = () => {
+        this.destroy(animateClose).then(afterClose)
       }
 
-      this.appendChild(new ModalCloseButton(hide.bind(this)))
+      this.appendChild(new ModalCloseButton(hide))
     }
   }
 }

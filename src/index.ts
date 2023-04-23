@@ -2,6 +2,7 @@ import './reset.css'
 import './style.css'
 
 import { Component } from '$components/internal/Component'
+import { Animated } from '$components/internal/Animated'
 import { open as openIndexedDB } from '$util/indexedDB'
 import schema from '$db/schema'
 import { assertNonNull } from '$util/assert'
@@ -87,7 +88,7 @@ const getVersionChangeModalContent = () => {
   const content = document.createElement('p')
   content.append('The game was updated! Please refresh the page.')
   root.append(content)
-  return root
+  return Animated.from(root)
 }
 
 const getVersionChangeModal = () => {
