@@ -25,17 +25,14 @@ export type AnimatedProps<T extends KnownHTMLElement> = ComponentProps<T> & {
 const CSS_VAR_NAME = 'animation-duration'
 
 export class Animated<T extends KnownHTMLElement = HTMLElement> extends Component<T> {
-  private duration!: Required<AnimationDuration>
+  private duration?: Required<AnimationDuration>
   private children: Animated[] = []
 
   constructor(props: AnimatedProps<T>) {
     super(props)
 
     // This is important, as it assigns the duration.
-    this.animationDuration = props.duration || {
-      create: '0s',
-      destroy: '0s',
-    }
+    this.animationDuration = props.duration
   }
 
   async create(parent: Component, animate: boolean): Promise<void> {
@@ -43,7 +40,7 @@ export class Animated<T extends KnownHTMLElement = HTMLElement> extends Componen
 
     const promiseList: Promise<void>[] = []
 
-    if (animate) {
+    if (animate && this.duration) {
       this.removeClass(DESTROY_ANIMATION_CLASS_NAME)
       this.addClass(CREATE_ANIMATION_CLASS_NAME)
       promiseList.push(this.waitForAnimation())
@@ -57,7 +54,7 @@ export class Animated<T extends KnownHTMLElement = HTMLElement> extends Componen
   async destroy(animate: boolean): Promise<void> {
     const promiseList: Promise<void>[] = []
 
-    if (animate) {
+    if (animate && this.duration) {
       this.removeClass(CREATE_ANIMATION_CLASS_NAME)
       this.addClass(DESTROY_ANIMATION_CLASS_NAME)
       promiseList.push(this.waitForAnimation())
@@ -70,24 +67,36 @@ export class Animated<T extends KnownHTMLElement = HTMLElement> extends Componen
     this.remove()
   }
 
-  set animationDuration(duration: DurationString | AnimationDuration) {
-    if (typeof duration === 'string') {
-      this.duration = {
-        create: duration,
-        destroy: duration,
-      }
-    } else {
-      this.duration = {
-        create: duration.create,
-        destroy: duration.destroy || duration.create,
-      }
+  set animationDuration(duration: DurationString | AnimationDuration | undefined) {
+    const cssCreateVarName = `--${CSS_VAR_NAME}-${CREATE_ANIMATION_CLASS_NAME}`
+    const cssDestroyVarName = `--${CSS_VAR_NAME}-${DESTROY_ANIMATION_CLASS_NAME}`
+
+    switch (typeof duration) {
+      case 'undefined':
+        this.duration = undefined
+        this.setStyle(cssCreateVarName, null)
+        this.setStyle(cssDestroyVarName, null)
+
+        return
+      case 'string':
+        this.duration = {
+          create: duration,
+          destroy: duration,
+        }
+        break
+      default:
+        this.duration = {
+          create: duration.create,
+          destroy: duration.destroy || duration.create,
+        }
+        break
     }
 
-    this.setStyle(`--${CSS_VAR_NAME}-${CREATE_ANIMATION_CLASS_NAME}`, this.duration.create)
-    this.setStyle(`--${CSS_VAR_NAME}-${DESTROY_ANIMATION_CLASS_NAME}`, this.duration.destroy)
+    this.setStyle(cssCreateVarName, this.duration.create)
+    this.setStyle(cssDestroyVarName, this.duration.destroy)
   }
 
-  get animationDuration(): AnimationDuration {
+  get animationDuration(): AnimationDuration | undefined {
     return this.duration
   }
 
