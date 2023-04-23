@@ -27,6 +27,7 @@ const CSS_VAR_NAME = 'animation-duration'
 export class Animated<T extends KnownHTMLElement = HTMLElement> extends Component<T> {
   private duration?: Required<AnimationDuration>
   private children: Animated[] = []
+  private op?: AbortController
 
   constructor(props: AnimatedProps<T>) {
     super(props)
@@ -36,6 +37,8 @@ export class Animated<T extends KnownHTMLElement = HTMLElement> extends Componen
   }
 
   async create(parent: Component, animate: boolean): Promise<void> {
+    const signal = this.startOperation()
+
     this.appendTo(parent)
 
     const promiseList: Promise<void>[] = []
@@ -43,7 +46,7 @@ export class Animated<T extends KnownHTMLElement = HTMLElement> extends Componen
     if (animate && this.duration) {
       this.removeClass(DESTROY_ANIMATION_CLASS_NAME)
       this.addClass(CREATE_ANIMATION_CLASS_NAME)
-      promiseList.push(this.waitForAnimation())
+      promiseList.push(this.waitForAnimation(signal))
     }
 
     promiseList.push(...this.children.map((c) => c.create(this, animate)))
@@ -52,19 +55,22 @@ export class Animated<T extends KnownHTMLElement = HTMLElement> extends Componen
   }
 
   async destroy(animate: boolean): Promise<void> {
+    const signal = this.startOperation()
     const promiseList: Promise<void>[] = []
 
     if (animate && this.duration) {
       this.removeClass(CREATE_ANIMATION_CLASS_NAME)
       this.addClass(DESTROY_ANIMATION_CLASS_NAME)
-      promiseList.push(this.waitForAnimation())
+      promiseList.push(this.waitForAnimation(signal))
     }
 
     promiseList.push(...this.children.map((c) => c.destroy(animate)))
 
     await Promise.all(promiseList)
 
-    this.remove()
+    if (!signal.aborted) {
+      this.remove()
+    }
   }
 
   set animationDuration(duration: DurationString | AnimationDuration | undefined) {
@@ -102,6 +108,12 @@ export class Animated<T extends KnownHTMLElement = HTMLElement> extends Componen
 
   protected appendChild(component: Animated) {
     this.children.push(component)
+  }
+
+  private startOperation(): AbortSignal {
+    this.op?.abort()
+    this.op = new AbortController()
+    return this.op.signal
   }
 
   static from<T extends KnownHTMLElement>(element: T, duration?: DurationString | AnimationDuration): Animated<T> {
