@@ -292,7 +292,7 @@ class End extends State {
     private props: BaseProps,
     nextGamemode: Gamemode,
     ongoingAttempt: OngoingAttempt,
-    kind: 'win' | 'lose',
+    private readonly kind: 'win' | 'lose',
     private readonly lastOp?: Promise<void>
   ) {
     super()
@@ -312,7 +312,7 @@ class End extends State {
       case 'removeSquare':
       case 'pause':
       case 'resume':
-        return new Error('Game is lost.')
+        return new Error(`Game is ${this.kind === 'win' ? 'won' : 'lost'}.`)
     }
   }
 
