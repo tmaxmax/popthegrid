@@ -42,7 +42,7 @@ export class Game {
     const { grid } = this.props
 
     grid.onSquare((square) => {
-      this.sendEvent({ type: 'removeSquare', square }, true).catch((err) => void err)
+      this.sendEvent({ type: 'removeSquare', square }).catch((err) => this.props.onError(err))
     })
 
     this.setState(new Initial({ ...this.props }))
@@ -71,8 +71,9 @@ export class Game {
 
   private async setState(state: State): Promise<void> {
     this.state = state
+    await this.state.transition()
     const newGen = this.state.run()
-    await newGen.next()
+    newGen.next()
     this.gen = newGen
     this.state.executeCallback(this.props)
   }
@@ -83,37 +84,33 @@ export class Game {
     }
   }
 
-  private async sendEvent(ev: GameEvent, useErrorCallback?: boolean) {
+  private async sendEvent(ev: GameEvent) {
     this.assertInit()
 
-    const { value, done } = await this.gen!.next(ev)
+    const { value, done } = this.gen!.next(ev)
     if (!done) {
       return
     } else if (!isDefined(value)) {
-      throw new Error('Unexpected undefined value on state generator return.')
+      const x = {} as never
+      throw new UnreachableError(x, 'Unexpected undefined value on state generator return.')
     }
 
     if (value instanceof Error) {
-      if (useErrorCallback) {
-        this.props.onError(value)
-        return
-      } else {
-        throw value
-      }
+      throw value
     }
 
-    await this.setState(value)
+    return this.setState(value)
   }
 }
 
-type GameGenerator = AsyncGenerator<void, State | Error, GameEvent>
+type GameGenerator = Generator<void, State | Error, GameEvent>
 
 abstract class State {
-  async *run(): GameGenerator {
-    let nextYield = await this.processEvent(yield)
+  *run(): GameGenerator {
+    let nextYield = this.processEvent(yield)
 
     while (!nextYield) {
-      nextYield = await this.processEvent(yield nextYield)
+      nextYield = this.processEvent(yield nextYield)
     }
 
     return nextYield
@@ -121,25 +118,19 @@ abstract class State {
 
   abstract setGamemode(gamemode: Gamemode): GamemodeSetWhen
   abstract executeCallback(cbs: Callbacks): void
-  protected abstract processEvent(event: GameEvent): Promise<void | State | Error>
+  abstract transition(): Promise<void>
+  protected abstract processEvent(event: GameEvent): void | State | Error
 }
 
 class Initial extends State {
-  private destroyDone: Promise<void>
-  private resetDone: void | Promise<void>
-
   constructor(private props: BaseProps, nextGamemode?: Gamemode) {
     super()
-    this.destroyDone = this.props.grid.destroy()
     if (nextGamemode) {
       this.props.gamemode = nextGamemode
     }
-    this.resetDone = this.props.gamemode.reset()
   }
 
-  protected async processEvent(event: GameEvent): Promise<State | Error | void> {
-    await Promise.all([this.destroyDone, this.resetDone])
-
+  protected processEvent(event: GameEvent): State | Error | void {
     switch (event.type) {
       case 'prepare':
         return new Ready(this.props)
@@ -165,22 +156,22 @@ class Initial extends State {
   executeCallback({ onGameInit }: Callbacks): void {
     onGameInit?.()
   }
+
+  async transition() {
+    await Promise.all([this.props.grid.destroy(), this.props.gamemode.reset()])
+  }
 }
 
 class Ready extends State {
   private squareWasRemoved = false
   private nextGamemode: Gamemode
-  private createDone: Promise<void>
 
   constructor(private props: BaseProps) {
     super()
     this.nextGamemode = this.props.gamemode
-    this.createDone = this.props.grid.create()
   }
 
-  protected async processEvent(event: GameEvent): Promise<State | Error | void> {
-    await this.createDone
-
+  protected processEvent(event: GameEvent): State | Error | void {
     switch (event.type) {
       case 'prepare':
         return new Error('Game is ready, already prepared.')
@@ -202,7 +193,7 @@ class Ready extends State {
     }
   }
 
-  private async onRemoveSquare(square: Square): Promise<State> {
+  private onRemoveSquare(square: Square): State {
     this.squareWasRemoved = true
     const attempt = startAttempt({ gamemode: this.props.gamemode.name(), numSquares: this.props.grid.numTotalSquares })
     const { grid, gamemode } = this.props
@@ -211,8 +202,7 @@ class Ready extends State {
     if (gamemode.shouldDestroy(grid, square)) {
       return new End(this.props, this.nextGamemode, attempt, 'lose')
     } else if (grid.activeSquares.length === 0) {
-      await done
-      return new End(this.props, this.nextGamemode, attempt, 'win')
+      return new End(this.props, this.nextGamemode, attempt, 'win', done)
     }
 
     return new Ongoing(this.props, this.nextGamemode, attempt)
@@ -233,6 +223,10 @@ class Ready extends State {
   executeCallback({ onGameReady }: Callbacks) {
     onGameReady?.()
   }
+
+  async transition() {
+    await this.props.grid.create()
+  }
 }
 
 class Ongoing extends State {
@@ -240,7 +234,7 @@ class Ongoing extends State {
     super()
   }
 
-  protected async processEvent(event: GameEvent): Promise<void | Error | State> {
+  protected processEvent(event: GameEvent): void | Error | State {
     switch (event.type) {
       case 'prepare':
         return new Error('Game is ongoing, already prepared.')
@@ -273,37 +267,40 @@ class Ongoing extends State {
     onGameStart?.({ attempt: this.attempt })
   }
 
-  private async onRemoveSquare(square: Square): Promise<State | void> {
+  private onRemoveSquare(square: Square): State | void {
     const { grid, gamemode } = this.props
 
     const done = grid.removeSquare(square)
     if (gamemode.shouldDestroy(grid, square)) {
       return new End(this.props, this.nextGamemode, this.attempt, 'lose')
     } else if (grid.activeSquares.length === 0) {
-      await done
-      return new End(this.props, this.nextGamemode, this.attempt, 'win')
+      return new End(this.props, this.nextGamemode, this.attempt, 'win', done)
     }
 
+    return
+  }
+
+  async transition() {
     return
   }
 }
 
 class End extends State {
-  private destroyDone: Promise<void>
-  private resetDone: void | Promise<void>
   private readonly attempt: Attempt
 
-  constructor(private props: BaseProps, nextGamemode: Gamemode, ongoingAttempt: OngoingAttempt, kind: 'win' | 'lose') {
+  constructor(
+    private props: BaseProps,
+    nextGamemode: Gamemode,
+    ongoingAttempt: OngoingAttempt,
+    kind: 'win' | 'lose',
+    private readonly lastOp?: Promise<void>
+  ) {
     super()
     this.attempt = ongoingAttempt.end(kind === 'win')
     this.props.gamemode = nextGamemode
-    this.resetDone = this.props.gamemode.reset()
-    this.destroyDone = this.props.grid.destroy()
   }
 
-  protected async processEvent(event: GameEvent): Promise<void | Error | State> {
-    await Promise.all([this.destroyDone, this.resetDone])
-
+  protected processEvent(event: GameEvent): void | Error | State {
     switch (event.type) {
       case 'prepare':
         return new Ready(this.props)
@@ -327,19 +324,20 @@ class End extends State {
   executeCallback({ onGameEnd }: Callbacks): void {
     onGameEnd?.({ attempt: this.attempt })
   }
+
+  async transition() {
+    await this.lastOp
+    await Promise.all([this.props.gamemode.reset(), this.props.grid.destroy()])
+  }
 }
 
 class Over extends State {
-  private destroyDone: Promise<void>
-
   constructor(private readonly props: BaseProps) {
     super()
-    this.destroyDone = this.props.grid.destroy()
   }
 
-  protected async processEvent(): Promise<void | Error | State> {
-    await this.destroyDone
-    throw new Error('Method not implemented.')
+  protected processEvent(): void | Error | State {
+    return new Error('Game over.')
   }
 
   setGamemode(): GamemodeSetWhen {
@@ -348,5 +346,9 @@ class Over extends State {
 
   executeCallback({ onGameOver }: Callbacks): void {
     onGameOver?.()
+  }
+
+  async transition() {
+    await this.props.grid.destroy()
   }
 }
