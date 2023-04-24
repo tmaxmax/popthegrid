@@ -1,15 +1,16 @@
 # example netlify.toml
 [build]
 command = "pnpm run build"
-functions = "functions"
 publish = "dist"
 
 [build.environment]
 GO_IMPORT_PATH = "github.com/tmaxmax/popthegrid"
 
-# Uncomment to use this redirect for Single Page Applications like create-react-app.
-# Not needed for static site generators.
+[[edge_functions]]
+function = "share"
+path = "/*"
+
 [[redirects]]
-from = "/*"
+from = "/"
 status = 200
 to = "/index.html"
