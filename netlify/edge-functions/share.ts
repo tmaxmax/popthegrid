@@ -58,6 +58,11 @@ export default async (request: Request, context: Context) => {
   scriptData.textContent = `sessionStorage.setItem('record-data', '${JSON.stringify({ name, gamemode, ...data })}')`
   html.head.appendChild(scriptData)
 
+  const noIndex = html.createElement('meta')
+  noIndex.setAttribute('name', 'robots')
+  noIndex.setAttribute('content', 'noindex')
+  html.head.appendChild(noIndex)
+
   const responseBody = `
     <!DOCTYPE html>
     <html>
