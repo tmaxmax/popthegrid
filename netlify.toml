@@ -7,8 +7,12 @@ publish = "dist"
 [build.environment]
 GO_IMPORT_PATH = "github.com/tmaxmax/popthegrid"
 
-# Uncomment to use this redirect for Single Page Applications like create-react-app.
-# Not needed for static site generators.
+[[redirects]]
+from = "/share/*"
+to = "/.netlify/functions/share/:splat"
+status = 200
+force = true
+
 [[redirects]]
 from = "/*"
 status = 200
