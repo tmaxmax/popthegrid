@@ -26,7 +26,8 @@ export function getStatistics(data: Attempt[]): Statistics[] {
   return data.reduce((acc, curr) => {
     let accg = acc.find((s) => 'gamemode' in s && s.gamemode === curr.gamemode)
     if (!accg) {
-      acc.push({ gamemode: curr.gamemode, ...EMPTY_COUNTS })
+      // FIXME: Remove this and find proper solution
+      acc.push({ gamemode: curr.gamemode as GamemodeName, ...EMPTY_COUNTS })
       accg = acc[acc.length - 1]
     }
 
