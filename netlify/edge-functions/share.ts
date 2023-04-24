@@ -1,77 +1,47 @@
-import { DOMParser, initParser, HTMLDocument } from 'https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm-noinit.ts'
 import type { Context } from 'https://edge.netlify.com'
-import humanizeDuration from 'https://esm.sh/humanize-duration@3.28.0'
-import { parse } from 'https://deno.land/x/content_type@1.0.1/mod.ts'
+import { createOrChange, getContentType, parseHTML, toUpper, toResponseBody, formatDuration } from '../edge/utils.ts'
 
 export default async (request: Request, context: Context) => {
   const url = new URL(request.url)
   const baseURL = `${url.protocol}//${url.host}`
+
   const code = getCodeFromPath(url.pathname)
   if (!code || !(code in mockCodes)) {
     return
   }
 
   const response = await context.next(new Request(baseURL))
-  const contentType = response.headers.get('Content-Type')
-  const parsedContentType = contentType != null && parse(contentType)
-
-  if (!parsedContentType || parsedContentType.type !== 'text/html') {
+  const contentType = getContentType(response.headers)
+  if (contentType.type !== 'text/html') {
     return response
   }
 
-  const { name, gamemode, ...data } = mockCodes[code]
   const text = await response.text()
-
-  await initParser()
-  const html = new DOMParser().parseFromString(text, 'text/html')
+  const html = await parseHTML(text, contentType)
   if (!html) {
     return new Response(text, response)
   }
 
-  let description: string
-  switch (gamemode) {
-    case 'random':
-      description = `be more lucky than your friend${name ? ` ${name}` : ``}! They were lucky ${data.numWins} times.`
-      break
-    case 'random-timer':
-      description = `beat your friend${name ? ` ${name}` : ``} on time! He won in ${formatDuration(data.fastestWinDuration as number)}.`
-      break
-    default:
-      throw new Error(`Unknown gamemode ${gamemode}`)
-  }
+  const record = mockCodes[code]
+  const description = getDescription(record)
 
-  const objective = html.querySelector('.greeting > p')!
-  objective.textContent = `Objective: ${description}`
+  createOrChange(
+    html.head,
+    { query: '.greeting > p', text: `Objective: ${description}` },
+    { query: 'meta[name="description"], meta[property="og:description"]', assert: 2, attrs: { content: toUpper(description) } },
+    { query: 'meta[property="og:url"]', attrs: { content: `${baseURL}/${code}` } },
+    { tag: 'script', html: `sessionStorage.setItem('record-data', '${JSON.stringify(record)}')` },
+    ...[
+      { property: 'og:image', content: `/og/${record.gamemode}.jpg` },
+      { property: 'og:image:type', content: 'image/jpeg' },
+      { property: 'og:image:width', content: '1200' },
+      { property: 'og:image:height', content: '627' },
+      { property: 'og:image:alt', content: `Pop the grid: ${metaAlts[record.gamemode]}` },
+      { name: 'robots', content: 'noindex' },
+    ].map((attrs) => ({ tag: 'meta', attrs }))
+  )
 
-  const descriptionTags = [html.querySelector('meta[name="description"]')!, html.querySelector('meta[property="og:description"]')!]
-  for (const tag of descriptionTags) {
-    tag.setAttribute('content', toUpper(description))
-  }
-
-  const urlTag = html.querySelector('meta[property="og:url"]')!
-  const urlNoParams = new URL(`/${code}`, baseURL)
-  urlTag.setAttribute('content', urlNoParams.toString())
-
-  appendImageMetaTags(html, gamemode)
-
-  const scriptData = html.createElement('script')
-  scriptData.textContent = `sessionStorage.setItem('record-data', '${JSON.stringify({ name, gamemode, ...data })}')`
-  html.head.appendChild(scriptData)
-
-  const noIndex = html.createElement('meta')
-  noIndex.setAttribute('name', 'robots')
-  noIndex.setAttribute('content', 'noindex')
-  html.head.appendChild(noIndex)
-
-  const responseBody = `
-    <!DOCTYPE html>
-    <html>
-      <head>${html.head.innerHTML}</head>
-      <body>${html.body.innerHTML}</body>
-    </html>
-  `
-
-  return new Response(responseBody, response)
+  return new Response(toResponseBody(html), response)
 }
 
 const getCodeFromPath = (path: string): string | undefined => {
@@ -81,30 +51,6 @@ const getCodeFromPath = (path: string): string | undefined => {
   }
 
   return code
-}
-
-const appendImageMetaTags = (document: HTMLDocument, gamemode: string) => {
-  const image = document.createElement('meta')
-  image.setAttribute('property', 'og:image')
-  image.setAttribute('content', `/og/${gamemode}.jpg`)
-
-  const type = document.createElement('meta')
-  type.setAttribute('property', 'og:image:type')
-  type.setAttribute('content', 'image/jpeg')
-
-  const width = document.createElement('meta')
-  width.setAttribute('property', 'og:image:width')
-  width.setAttribute('content', '1200')
-
-  const height = document.createElement('meta')
-  height.setAttribute('property', 'og:image:height')
-  height.setAttribute('content', '627')
-
-  const alt = document.createElement('meta')
-  alt.setAttribute('property', 'og:image:alt')
-  alt.setAttribute('content', `Pop the grid: ${metaAlts[gamemode]}`)
-
-  document.head.append(image, type, width, height, alt)
 }
 
 const mockCodes: Record<string, { gamemode: string; name?: string; [key: string]: unknown }> = {
@@ -119,11 +65,18 @@ const mockCodes: Record<string, { gamemode: string; name?: string; [key: string]
   },
 }
 
+const getDescription = ({ name, gamemode, ...data }: (typeof mockCodes)[string]) => {
+  switch (gamemode) {
+    case 'random':
+      return `be more lucky than your friend${name ? ` ${name}` : ``}! They were lucky ${data.numWins} times.`
+    case 'random-timer':
+      return `beat your friend${name ? ` ${name}` : ``} on time! He won in ${formatDuration(data.fastestWinDuration as number)}.`
+    default:
+      throw new Error(`Unknown gamemode ${gamemode}`)
+  }
+}
+
 const metaAlts: Record<string, string> = {
   random: 'be more lucky than me.',
   'random-timer': 'beat me on time.',
 }
-
-const formatDuration = humanizeDuration.humanizer({ units: ['s'], maxDecimalPoints: 2 })
-
-const toUpper = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
