@@ -44,28 +44,32 @@ export default async (request: Request, context: Context) => {
   return new Response(toResponseBody(html), response)
 }
 
-const getCodeFromPath = (path: string): string | undefined => {
+type Code = string & { __brand: 'code' }
+
+const getCodeFromPath = (path: string): Code | undefined => {
   const [first, code, ...rest] = path.split('/')
-  if (first !== '' || rest.length > 0) {
-    return undefined
+  if (first !== '' || !isCode(code) || rest.length > 0) {
+    return
   }
 
   return code
 }
 
-const mockCodes: Record<string, { gamemode: string; name?: string; [key: string]: unknown }> = {
-  r4nd0mJh: {
+const isCode = (s: string): s is Code => /^[A-Za-z0-9]{6}$/.test(s)
+
+const mockCodes: Record<Code, { gamemode: string; name?: string; [key: string]: unknown }> = {
+  ['r4nd0m' as Code]: {
     gamemode: 'random',
     numWins: 5,
   },
-  t1m3rMch: {
+  ['t1m3rM' as Code]: {
     gamemode: 'random-timer',
     name: 'Michael',
     fastestWinDuration: 5450,
   },
 }
 
-const getDescription = ({ name, gamemode, ...data }: (typeof mockCodes)[string]) => {
+const getDescription = ({ name, gamemode, ...data }: (typeof mockCodes)[Code]) => {
   switch (gamemode) {
     case 'random':
       return `be more lucky than your friend${name ? ` ${name}` : ``}! They were lucky ${data.numWins} times.`
