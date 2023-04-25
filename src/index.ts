@@ -40,22 +40,9 @@ const game = new Game({
   onError(err) {
     console.error(err)
   },
-  onGameInit() {
-    console.log('Initialized')
-  },
-  onGameReady() {
-    console.log('Ready')
-  },
-  onGameStart(data) {
-    console.log('Started:', data)
-  },
   onGameEnd({ attempt }) {
-    console.log('Ended:', attempt)
     insertAttempt(db, attempt)
     game.prepare()
-  },
-  onGameOver() {
-    console.log('Over')
   },
 })
 
