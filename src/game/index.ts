@@ -38,6 +38,7 @@ type GameEvent =
 export class Game {
   private gen!: GameGenerator
   private state!: State
+  private currentTransition?: Promise<void>
 
   constructor(private readonly props: GameProps) {
     const { grid } = this.props
@@ -72,12 +73,20 @@ export class Game {
     return this.state.setGamemode(gamemode)
   }
 
+  get transition(): Promise<void> | undefined {
+    return this.currentTransition
+  }
+
   private async setState(state: State): Promise<void> {
     this.state = state
+    this.currentTransition = (async () => {
     await this.state.transition()
     const newGen = this.state.run()
     newGen.next()
     this.gen = newGen
+    })()
+    await this.currentTransition
+    this.currentTransition = undefined
     this.state.executeCallback(this.props)
   }
 
