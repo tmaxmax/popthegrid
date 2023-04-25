@@ -1,4 +1,5 @@
 import { Time } from '.'
+import { isDefined } from '..'
 
 /**
  * Represents the parameters passed to an interval function.
@@ -40,7 +41,7 @@ export interface IntervalProperties {
    * The distance between two repetitions, either a value in milliseconds
    * or a function that returns a value in milliseconds. Defaults to 0.
    */
-  interval?: number | IntervalFn
+  interval?: number
   /**
    * An optional flag to indicate if the first repetition occurs instantly
    * or after `interval`
@@ -57,6 +58,13 @@ export interface IntervalProperties {
   iterations?: number
   /** Used to retrieve the current time. */
   time?: Time
+  raf?: typeof requestAnimationFrame
+}
+
+export interface Interval {
+  pause(): void
+  resume(): void
+  done: Promise<number>
 }
 
 /**
@@ -69,29 +77,42 @@ export interface IntervalProperties {
  * @param props The configuration parameters
  * @returns The number of times the callback executed
  */
-function interval({ callback, interval, leading, signal, iterations, time }: IntervalProperties): Promise<number> {
-  return new Promise<number>((resolve, reject) => {
+function interval({
+  callback,
+  interval: providedInterval,
+  leading,
+  signal,
+  iterations,
+  time,
+  raf: providedRAF,
+}: IntervalProperties): Interval {
+  let pause: () => void, resume: () => void
+
+  const done = new Promise<number>((resolve, reject) => {
+    const interval = Math.floor(providedInterval || 0)
     const nower = time || performance || Date
-
-    const intervalFn: IntervalFn = (() => {
-      if (typeof interval === 'number') {
-        return () => {
-          return interval
-        }
-      }
-      if (typeof interval === 'undefined') {
-        return () => {
-          return 0
-        }
-      }
-      return interval
-    })()
-
+    const raf = providedRAF || requestAnimationFrame
     const start = nower.now()
 
     let iteration = 0
+    let timeoutID: TimeoutID | undefined
+    let paused = false
+    let lastTime: number | undefined
+    let nextTime: number | undefined
+
+    signal?.addEventListener('abort', () => {
+      if (paused) {
+        resolve(iteration)
+      } else if (isDefined(timeoutID)) {
+        clearTimeout(timeoutID)
+        resolve(iteration)
+      }
+    })
 
     const frame = async (time: number) => {
+      timeoutID = undefined
+      lastTime = undefined
+
       if (signal?.aborted || iteration >= (iterations ?? Infinity)) {
         resolve(iteration)
         return
@@ -99,20 +120,56 @@ function interval({ callback, interval, leading, signal, iterations, time }: Int
       try {
         await callback(iteration)
         iteration++
-        schedule(time)
+        if (!paused) {
+          schedule(time)
+        }
       } catch (e) {
         reject(e)
       }
     }
 
-    const schedule = (time: number) => {
-      const elapsed = time - start
+    const getTargetTime = (time: number, previousTime?: number) => {
+      if (nextTime) {
+        const target = nextTime
+        nextTime = undefined
+
+        return target
+      }
+
+      const target = time + interval
       const now = nower.now()
-      const interval = intervalFn({ elapsed, now, iteration })
-      const rounded = Math.round(elapsed / interval) * interval
-      const target = start + rounded + interval
-      const delay = target - nower.now()
-      setTimeout(() => requestAnimationFrame(frame), delay)
+
+      if (previousTime) {
+        return Math.max(Math.floor(target - (time - previousTime) - now), 0)
+      }
+
+      return Math.max(Math.floor(target - now), 0)
+    }
+
+    const schedule = (time: number) => {
+      lastTime = time
+      timeoutID = setTimeout(() => raf(frame), getTargetTime(time))
+    }
+
+    pause = () => {
+      if (paused) {
+        return
+      }
+
+      paused = true
+      clearTimeout(timeoutID)
+      timeoutID = undefined
+      nextTime = getTargetTime(nower.now(), lastTime)
+      lastTime = undefined
+    }
+
+    resume = () => {
+      if (!paused) {
+        return
+      }
+
+      paused = false
+      schedule(nower.now())
     }
 
     if (leading) {
@@ -121,6 +178,14 @@ function interval({ callback, interval, leading, signal, iterations, time }: Int
       schedule(start)
     }
   })
+
+  return {
+    done,
+    pause: pause!,
+    resume: resume!,
+  }
 }
 
 export default interval
+
+type TimeoutID = ReturnType<typeof setTimeout>

@@ -39,7 +39,7 @@ export class SillyName extends Component {
         interval: 2000,
         leading: true,
         signal: this.controller.signal,
-      }).catch((e) => {
+      }).done.catch((e) => {
         console.error(e)
         this.text = 'Made by Teodor Maxim'
       })

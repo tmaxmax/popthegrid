@@ -1,4 +1,4 @@
-import interval from '$util/time/interval'
+import interval, { Interval } from '$util/time/interval'
 import { randInt } from '$util'
 import { Gamemode } from '.'
 
@@ -13,7 +13,7 @@ export class RandomTimer extends Gamemode {
   private readonly numIterations: number
   private hasPoppedFirstSquare = false
   private controller: AbortController | undefined
-  private interval: Promise<number> | undefined
+  private interval?: Interval
   private done = false
 
   constructor({ minSeconds, maxSeconds }: RandomTimerProps) {
@@ -48,7 +48,7 @@ export class RandomTimer extends Gamemode {
     }
 
     this.controller.abort()
-    await this.interval
+    await this.interval.done
 
     this.done = false
     this.interval = undefined
