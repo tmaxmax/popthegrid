@@ -121,6 +121,9 @@ export class Grid extends Component<HTMLDivElement> {
   }
 
   async create(parent: Component, animate: boolean): Promise<void> {
+    if (this.activeSquares.length > 0) {
+      return
+    }
     log('Creating grid')
     this.appendTo(parent)
     this.resizeObserver.observe(this.element)
