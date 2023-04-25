@@ -1,0 +1,10 @@
+a.redirect {
+  font-weight: bold;
+  text-decoration: inherit;
+  color: inherit;
+  transition: color 0.1s ease-in;
+}
+
+a.redirect:hover {
+  color: var(--color-heading);
+}
