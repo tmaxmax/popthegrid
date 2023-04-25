@@ -18,7 +18,6 @@ export class RandomTimer extends Gamemode {
   constructor({ minSeconds, maxSeconds }: RandomTimerProps) {
     super()
     this.numIterations = minSeconds + randInt(maxSeconds - minSeconds + 1)
-    console.log(this.numIterations)
   }
 
   name() {
