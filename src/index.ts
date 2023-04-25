@@ -17,11 +17,16 @@ import { Redirect } from '$components/Redirect'
 import { gamemodes } from './gamemode'
 import { clearSharedRecord, getSharedRecord } from '$share/record'
 import { createMenu } from './menu'
+import { configureTitle } from '$share/name'
 
 const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
   assertNonNull(elem, `${name} doesn't exist in the HTML document!`)
   return Component.from(elem)
 }
+
+const title = document.querySelector('#title')
+assertNonNull(title)
+configureTitle(title)
 
 const objective = componentFrom(document.querySelector<HTMLParagraphElement>('#objective'), 'Objective')
 const gridParent = componentFrom(document.querySelector<HTMLElement>('.grid__parent'), 'Grid parent')

@@ -40,6 +40,11 @@
   }
 }
 
+.modal-content {
+  height: calc(100% - 6rem);
+  width: calc(100% - 2 * 2rem);
+}
+
 .modal.hidden {
   animation-name: modal--hide;
   animation-timing-function: ease-out;
@@ -90,8 +95,8 @@
   right: 0rem;
   margin-top: 1rem;
   margin-right: 1rem;
-  width: 3rem;
-  height: 3rem;
+  width: calc(3rem + 0.6vh);
+  height: calc(3rem + 0.6vh);
   border: none;
   background: none;
   cursor: pointer;
@@ -102,10 +107,11 @@
   content: '\00d7';
   font-weight: bold;
   font-family: var(--font-body);
-  font-size: 4rem;
+  font-size: calc(3rem + 0.6vh);
   line-height: 0.69;
   margin-left: 0.04rem;
   color: var(--color-body);
+  transition: color 0.1s ease-in;
 }
 
 .modal-close-button:hover::after {
