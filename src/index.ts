@@ -56,7 +56,7 @@ const gamemodePicker = new Fieldset({
   values: entries(gamemodes).map(([name, { display }]) => ({
     name: display,
     value: name,
-    default: record?.gamemode === name ?? name === 'random',
+    default: record ? record.gamemode === name : name === 'random',
   })),
 })
 
