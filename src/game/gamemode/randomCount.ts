@@ -1,4 +1,4 @@
-import { Grid } from '$game/grid'
+import type { Grid } from '$game/grid'
 import { randInt } from '$util/index'
 import { Gamemode } from '.'
 

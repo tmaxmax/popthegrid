@@ -10,12 +10,13 @@ import { assertNonNull } from '$util/assert'
 import { Modal } from '$components/Modal'
 import { Fieldset } from '$components/Input/Fieldset'
 import { Game } from '$game'
-import { GamemodeName } from '$game/gamemode'
+import type { GamemodeName } from '$game/gamemode'
 import { DOMGrid } from '$game/grid/dom'
 import { insertAttempt } from '$db/attempt'
 import { Redirect } from '$components/Redirect'
 import { gamemodes } from './gamemode'
 import { clearSharedRecord, getSharedRecord } from './share'
+import { createMenu } from './menu'
 
 const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
   assertNonNull(elem, `${name} doesn't exist in the HTML document!`)
@@ -110,6 +111,7 @@ const main = async () => {
 
   await gamemodePicker.create(footer, false)
   await game.prepare()
+  await createMenu({ animateClose: true }).create(Component.body, true)
 }
 
 main()

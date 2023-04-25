@@ -1,6 +1,7 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vite'
 import path from 'path'
+import { svelte } from '@sveltejs/vite-plugin-svelte'
 
 export default defineConfig({
   resolve: {
@@ -16,4 +17,5 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./setup-vitest.js'],
   },
+  plugins: [svelte()],
 })

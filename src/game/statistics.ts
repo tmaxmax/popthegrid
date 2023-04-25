@@ -1,4 +1,4 @@
-import { Attempt } from './attempt'
+import type { Attempt } from './attempt'
 
 type Counts = {
   numAttempts: number

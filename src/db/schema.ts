@@ -1,4 +1,5 @@
-import { Schema, Migration, createConfigurator } from '$util/indexedDB/schema'
+import { createConfigurator } from '$util/indexedDB/schema'
+import type { Schema, Migration } from '$util/indexedDB/schema'
 import { ATTEMPTS_STORE } from './attempt'
 
 const migrations: Migration[] = [

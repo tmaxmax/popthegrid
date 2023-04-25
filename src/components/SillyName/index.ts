@@ -3,7 +3,8 @@ import interpolate from 'color-interpolate'
 
 import { Component } from '../internal/Component'
 import interval from '$util/time/interval'
-import { EasterEggStorage, LocalStorage } from './storage'
+import { LocalStorage } from './storage'
+import type { EasterEggStorage } from './storage'
 
 interface Response {
   name: string

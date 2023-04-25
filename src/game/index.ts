@@ -1,7 +1,8 @@
 import { UnreachableError, isDefined } from '$util/index'
-import { Attempt, OngoingAttempt, startAttempt } from './attempt'
+import { startAttempt } from './attempt'
+import type { Attempt, OngoingAttempt } from './attempt'
 import { Gamemode } from './gamemode'
-import { Grid, Square } from './grid'
+import type { Grid, Square } from './grid'
 
 export interface OnGameEndData {
   attempt: Attempt

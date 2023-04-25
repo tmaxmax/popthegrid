@@ -1,4 +1,4 @@
-import { Attempt } from '$game/attempt'
+import type { Attempt } from '$game/attempt'
 import { fromRequest } from '$util/indexedDB'
 import { transact } from '$util/indexedDB/transact'
 

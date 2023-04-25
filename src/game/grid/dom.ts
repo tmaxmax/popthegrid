@@ -1,7 +1,7 @@
 import { Component } from '$components/internal/Component'
 import { Grid as GridComponent } from '$components/Grid'
 import { Square as SquareComponent } from '$components/Square'
-import { Grid, GridProps, Square } from '.'
+import type { Grid, GridProps, Square } from '.'
 
 export class DOMGrid implements Grid {
   private readonly grid: GridComponent

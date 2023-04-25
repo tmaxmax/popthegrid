@@ -1,11 +1,27 @@
 import './Modal.css'
 
 import { Animated } from './internal/Animated'
+import { SvelteComponent } from 'svelte'
+
+export interface SvelteComponentFactory {
+  (target: Element): SvelteComponent
+}
 
 class ModalContent extends Animated<HTMLDivElement> {
-  constructor(element: Animated) {
+  private svelteComponent?: SvelteComponent
+
+  constructor(element: Animated | SvelteComponentFactory) {
     super({ tag: 'div', alreadyExisting: false, classList: ['modal-content'], duration: { create: '1s', destroy: '0.3s' } })
-    this.appendChild(element)
+    if (element instanceof Animated) {
+      this.appendChild(element)
+    } else {
+      this.svelteComponent = element(this.element)
+    }
+  }
+
+  async destroy(animate: boolean) {
+    await super.destroy(animate)
+    this.svelteComponent?.$destroy()
   }
 }
 
@@ -17,7 +33,7 @@ class ModalCloseButton extends Animated<HTMLButtonElement> {
   }
 }
 
-export type ModalProperties = { content: Animated } & (
+export type ModalProperties = { content: Animated | SvelteComponentFactory } & (
   | { allowClose: false }
   | {
       allowClose: true

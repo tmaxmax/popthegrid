@@ -1,4 +1,4 @@
-import { Time } from '.'
+import type { Time } from '.'
 import { isDefined } from '..'
 
 export default class Stopwatch {

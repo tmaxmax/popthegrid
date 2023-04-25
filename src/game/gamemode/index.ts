@@ -1,4 +1,4 @@
-import { Grid, Square } from '../grid'
+import type { Grid, Square } from '../grid'
 import { RandomCount } from './randomCount'
 import { RandomTimer } from './randomTimer'
 

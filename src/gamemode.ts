@@ -1,4 +1,5 @@
-import { Gamemode, GamemodeName } from '$game/gamemode'
+import { Gamemode } from '$game/gamemode'
+import type { GamemodeName } from '$game/gamemode'
 import { RandomCount } from '$game/gamemode/randomCount'
 import { RandomTimer } from '$game/gamemode/randomTimer'
 

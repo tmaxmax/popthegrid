@@ -1,4 +1,5 @@
-import interval, { Interval } from '$util/time/interval'
+import interval from '$util/time/interval'
+import type { Interval } from '$util/time/interval'
 import { randInt } from '$util'
 import { Gamemode } from '.'
 
