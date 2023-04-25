@@ -11,5 +11,5 @@ export abstract class Gamemode {
     return
   }
 
-  abstract name(): string
+  abstract name(): GamemodeName
 }

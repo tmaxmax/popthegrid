@@ -8,13 +8,13 @@ export interface OngoingAttempt {
 
   readonly numSquares: number
   readonly startedAt: Date
-  readonly gamemode: string
+  readonly gamemode: GamemodeName
   readonly elapsed: number
   readonly paused: boolean
 }
 
 export interface Attempt {
-  gamemode: string
+  gamemode: GamemodeName
   startedAt: Date
   /** In milliseconds. */
   duration: number
@@ -24,7 +24,7 @@ export interface Attempt {
 }
 
 export interface StartAttemptProps {
-  gamemode: string | GamemodeName
+  gamemode: GamemodeName
   numSquares: number
 }
 
