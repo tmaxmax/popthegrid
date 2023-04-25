@@ -27,7 +27,7 @@ export default async (request: Request, context: Context) => {
 
   createOrChange(
     html.head,
-    { query: '.greeting > p', text: `Objective: ${description}` },
+    { query: '#objective', text: `Objective: ${description}` },
     { query: 'meta[name="description"], meta[property="og:description"]', assert: 2, attrs: { content: toUpper(description) } },
     { query: 'meta[property="og:url"]', attrs: { content: `${baseURL}/${code}` } },
     { tag: 'script', html: `sessionStorage.setItem('record-data', '${JSON.stringify(record)}')` },
