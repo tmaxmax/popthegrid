@@ -1,8 +1,5 @@
+import { Time } from '.'
 import { isDefined } from '..'
-
-export interface Time {
-  now(): number
-}
 
 export default class Stopwatch {
   private startedAt: number | undefined
