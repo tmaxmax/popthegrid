@@ -4,29 +4,34 @@ import './style.css'
 import { Component } from '$components/internal/Component'
 import { Animated } from '$components/internal/Animated'
 import { open as openIndexedDB } from '$util/indexedDB'
+import { entries } from '$util/objects'
 import schema from '$db/schema'
 import { assertNonNull } from '$util/assert'
 import { Modal } from '$components/Modal'
 import { Fieldset } from '$components/Input/Fieldset'
-import { RandomCount } from '$game/gamemode/randomCount'
 import { Game } from '$game'
 import { GamemodeName } from '$game/gamemode'
 import { DOMGrid } from '$game/grid/dom'
-import { RandomTimer } from '$game/gamemode/randomTimer'
 import { insertAttempt } from '$db/attempt'
+import { Redirect } from '$components/Redirect'
+import { gamemodes } from './gamemode'
+import { clearSharedRecord, getSharedRecord } from './share'
 
 const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
   assertNonNull(elem, `${name} doesn't exist in the HTML document!`)
   return Component.from(elem)
 }
 
+const objective = componentFrom(document.querySelector<HTMLParagraphElement>('#objective'), 'Objective')
 const gridParent = componentFrom(document.querySelector<HTMLElement>('.grid__parent'), 'Grid parent')
 const footer = componentFrom(document.querySelector('footer'), 'Footer')
 
 const NUM_COLORS = 5
 
+const record = getSharedRecord()
+
 const game = new Game({
-  gamemode: new RandomCount(),
+  gamemode: gamemodes[record?.gamemode || 'random'].create(),
   grid: new DOMGrid({
     numTotalSquares: 48,
     colors: Array.from({ length: NUM_COLORS }, (_, i) => `var(--color-square-${i + 1})`),
@@ -58,26 +63,13 @@ const gamemodePicker = new Fieldset({
   name: 'gamemode',
   legend: 'Gamemode',
   onChange(name: GamemodeName) {
-    switch (name) {
-      case 'random':
-        game.setGamemode(new RandomCount())
-        break
-      case 'random-timer':
-        game.setGamemode(new RandomTimer({ minSeconds: 4, maxSeconds: 9 }))
-        break
-    }
+    game.setGamemode(gamemodes[name].create())
   },
-  values: [
-    {
-      name: 'Luck',
-      value: 'random',
-      default: true,
-    },
-    {
-      name: 'Time (4–9 seconds)',
-      value: 'random-timer',
-    },
-  ],
+  values: entries(gamemodes).map(([name, { display }]) => ({
+    name: display,
+    value: name,
+    default: record?.gamemode === name ?? name === 'random',
+  })),
 })
 
 const getVersionChangeModalContent = () => {
@@ -95,16 +87,37 @@ const getVersionChangeModal = () => {
   return new Modal({ content: getVersionChangeModalContent(), allowClose: true, animateClose: true })
 }
 
+const getRecordClearRedirect = () => {
+  const element = document.createElement('span')
+  element.append('Done')
+  element.style.paddingLeft = '0.4rem'
+
+  return new Redirect({
+    href: '/',
+    title: 'This will reload the page and end the current game.',
+    content: Animated.from(element),
+    async on() {
+      clearSharedRecord()
+      await game.forceEnd()
+    },
+  })
+}
+
 let db: IDBDatabase
 
 const main = async () => {
   db = await openIndexedDB(window.indexedDB, {
     schema,
     onVersionChange() {
-      game.forceEnd(false)
+      game.forceEnd()
       getVersionChangeModal().create(Component.body, true)
     },
   })
+
+  if (record) {
+    await getRecordClearRedirect().create(objective, false)
+  }
+
   await gamemodePicker.create(footer, false)
   await game.prepare()
 }

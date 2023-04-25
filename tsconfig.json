@@ -21,6 +21,7 @@
       "$db/*": ["./src/db/*"],
       "$game": ["./src/game/index.ts"],
       "$game/*": ["./src/game/*"],
+      "$edge/*": ["./netlify/edge/*"],
     }
   },
   "include": ["src"]

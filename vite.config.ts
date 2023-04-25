@@ -9,6 +9,7 @@ export default defineConfig({
       $components: path.resolve(__dirname, 'src', 'components'),
       $db: path.resolve(__dirname, 'src', 'db'),
       $game: path.resolve(__dirname, 'src', 'game'),
+      $edge: path.resolve(__dirname, 'netlify', 'edge'),
     },
   },
   test: {
