@@ -16,7 +16,8 @@ import { insertAttempt } from '$db/attempt'
 import { Redirect } from '$components/Redirect'
 import { gamemodes } from './gamemode'
 import { clearSharedRecord, getSharedRecord } from '$share/record'
-import { createMenu } from './menu'
+import { openMenu } from './menu'
+import MenuAccess from './menu/MenuAccess.svelte'
 import { configureTitle } from '$share/name'
 
 const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
@@ -30,7 +31,9 @@ configureTitle(title)
 
 const objective = componentFrom(document.querySelector<HTMLParagraphElement>('#objective'), 'Objective')
 const gridParent = componentFrom(document.querySelector<HTMLElement>('.grid__parent'), 'Grid parent')
-const footer = componentFrom(document.querySelector('footer'), 'Footer')
+
+const footer = document.querySelector('footer')
+assertNonNull(footer)
 
 const NUM_COLORS = 5
 
@@ -99,6 +102,17 @@ const getRecordClearRedirect = () => {
   })
 }
 
+new MenuAccess({
+  target: footer,
+  props: {
+    onClick: () =>
+      openMenu({
+        animate: true,
+        game,
+      }),
+  },
+})
+
 let db: IDBDatabase
 
 const main = async () => {
@@ -114,9 +128,7 @@ const main = async () => {
     await getRecordClearRedirect().create(objective, false)
   }
 
-  await gamemodePicker.create(footer, false)
   await game.prepare()
-  await createMenu({ animateClose: true }).create(Component.body, true)
 }
 
 main()
