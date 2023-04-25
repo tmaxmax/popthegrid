@@ -10,6 +10,7 @@ export default defineConfig({
       $components: path.resolve(__dirname, 'src', 'components'),
       $db: path.resolve(__dirname, 'src', 'db'),
       $game: path.resolve(__dirname, 'src', 'game'),
+      $share: path.resolve(__dirname, 'src', 'share'),
       $edge: path.resolve(__dirname, 'netlify', 'edge'),
     },
   },

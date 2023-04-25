@@ -15,7 +15,7 @@ import { DOMGrid } from '$game/grid/dom'
 import { insertAttempt } from '$db/attempt'
 import { Redirect } from '$components/Redirect'
 import { gamemodes } from './gamemode'
-import { clearSharedRecord, getSharedRecord } from './share'
+import { clearSharedRecord, getSharedRecord } from '$share/record'
 import { createMenu } from './menu'
 
 const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {

@@ -24,6 +24,7 @@
       "$game": ["./src/game/index.ts"],
       "$game/*": ["./src/game/*"],
       "$edge/*": ["./netlify/edge/*"],
+      "$share/*": ["./src/share/*"],
     }
   },
   "include": ["src"]
