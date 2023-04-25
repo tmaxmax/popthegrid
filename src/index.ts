@@ -84,7 +84,10 @@ const getVersionChangeModalContent = () => {
 }
 
 const getVersionChangeModal = () => {
-  return new Modal({ content: getVersionChangeModalContent(), allowClose: true, animateClose: true })
+  return new Modal({
+    content: getVersionChangeModalContent(),
+    allowClose: false,
+  })
 }
 
 const getRecordClearRedirect = () => {
