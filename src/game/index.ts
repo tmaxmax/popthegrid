@@ -124,7 +124,7 @@ class Initial extends State {
     }
   }
 
-  protected processEvent(event: GameEvent): State | Error | void {
+  protected processEvent(event: GameEvent): void | State | Error {
     switch (event.type) {
       case 'prepare':
         return new Ready(this.props)
@@ -165,7 +165,7 @@ class Ready extends State {
     this.nextGamemode = this.props.gamemode
   }
 
-  protected processEvent(event: GameEvent): State | Error | void {
+  protected processEvent(event: GameEvent): void | State | Error {
     switch (event.type) {
       case 'prepare':
         return new Error('Game is ready, already prepared.')
@@ -228,7 +228,7 @@ class Ongoing extends State {
     super()
   }
 
-  protected processEvent(event: GameEvent): void | Error | State {
+  protected processEvent(event: GameEvent): void | State | Error {
     switch (event.type) {
       case 'prepare':
         return new Error('Game is ongoing, already prepared.')
@@ -294,7 +294,7 @@ class End extends State {
     this.props.gamemode = nextGamemode
   }
 
-  protected processEvent(event: GameEvent): void | Error | State {
+  protected processEvent(event: GameEvent): void | State | Error {
     switch (event.type) {
       case 'prepare':
         return new Ready(this.props)
@@ -330,7 +330,7 @@ class Over extends State {
     super()
   }
 
-  protected processEvent(): void | Error | State {
+  protected processEvent(): void | State | Error {
     return new Error('Game over.')
   }
 
