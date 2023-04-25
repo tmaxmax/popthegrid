@@ -1,5 +1,6 @@
 import type { Context } from 'https://edge.netlify.com'
 import { createOrChange, getContentType, parseHTML, toUpper, toResponseBody, formatDuration } from '../edge/utils.ts'
+import { Code, GameRecord, getCodeFromPath, storageKey } from '../edge/share.ts'
 
 export default async (request: Request, context: Context) => {
   const url = new URL(request.url)
@@ -30,7 +31,7 @@ export default async (request: Request, context: Context) => {
     { query: '#objective', text: `Objective: ${description}` },
     { query: 'meta[name="description"], meta[property="og:description"]', assert: 2, attrs: { content: toUpper(description) } },
     { query: 'meta[property="og:url"]', attrs: { content: `${baseURL}/${code}` } },
-    { tag: 'script', html: `sessionStorage.setItem('record-data', '${JSON.stringify(record)}')` },
+    { tag: 'script', html: `sessionStorage.setItem('${storageKey}', '${JSON.stringify(record)}')` },
     ...[
       { property: 'og:image', content: `/og/${record.gamemode}.jpg` },
       { property: 'og:image:type', content: 'image/jpeg' },
@@ -44,20 +45,7 @@ export default async (request: Request, context: Context) => {
   return new Response(toResponseBody(html), response)
 }
 
-type Code = string & { __brand: 'code' }
-
-const getCodeFromPath = (path: string): Code | undefined => {
-  const [first, code, ...rest] = path.split('/')
-  if (first !== '' || !isCode(code) || rest.length > 0) {
-    return
-  }
-
-  return code
-}
-
-const isCode = (s: string): s is Code => /^[A-Za-z0-9]{6}$/.test(s)
-
-const mockCodes: Record<Code, { gamemode: string; name?: string; [key: string]: unknown }> = {
+const mockCodes: Record<Code, GameRecord> = {
   ['r4nd0m' as Code]: {
     gamemode: 'random',
     numWins: 5,
@@ -69,14 +57,16 @@ const mockCodes: Record<Code, { gamemode: string; name?: string; [key: string]: 
   },
 }
 
-const getDescription = ({ name, gamemode, ...data }: (typeof mockCodes)[Code]) => {
-  switch (gamemode) {
+const getDescription = (r: GameRecord) => {
+  const name = r.name || 'your friend'
+
+  switch (r.gamemode) {
     case 'random':
-      return `be more lucky than your friend${name ? ` ${name}` : ``}! They were lucky ${data.numWins} times.`
+      return `be more lucky than ${name}! They were lucky ${r.numWins} times.`
     case 'random-timer':
-      return `beat your friend${name ? ` ${name}` : ``} on time! He won in ${formatDuration(data.fastestWinDuration as number)}.`
+      return `beat ${name} on time! They won in ${formatDuration(r.fastestWinDuration)}.`
     default:
-      throw new Error(`Unknown gamemode ${gamemode}`)
+      throw new Error(`Unknown gamemode ${(r as GameRecord).gamemode}`)
   }
 }
 
