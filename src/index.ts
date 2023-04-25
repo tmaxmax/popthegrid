@@ -55,7 +55,7 @@ const game = new Game({
   },
 })
 
-const gamemodePicker = new Fieldset({
+new Fieldset({
   name: 'gamemode',
   legend: 'Gamemode',
   onChange(name: GamemodeName) {
