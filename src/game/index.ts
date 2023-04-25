@@ -241,10 +241,12 @@ class Ongoing extends State {
         return this.onRemoveSquare(event.square)
       case 'pause':
         this.attempt.pause()
+        this.props.gamemode.pause()
         this.props.grid.toggleInteraction(false)
         return
       case 'resume':
         this.attempt.resume()
+        this.props.gamemode.resume()
         this.props.grid.toggleInteraction(true)
         return
       default:

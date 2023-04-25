@@ -6,10 +6,17 @@ export type GamemodeName = ReturnType<RandomCount['name']> | ReturnType<RandomTi
 
 export abstract class Gamemode {
   abstract shouldDestroy(grid: Grid, destroyedSquare: Square): boolean
+  abstract name(): GamemodeName
 
   reset(): void | Promise<void> {
     return
   }
 
-  abstract name(): GamemodeName
+  pause() {
+    return
+  }
+
+  resume() {
+    return
+  }
 }

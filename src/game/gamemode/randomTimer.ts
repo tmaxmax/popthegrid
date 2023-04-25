@@ -8,11 +8,9 @@ export interface RandomTimerProps {
 }
 
 export class RandomTimer extends Gamemode {
-  public static readonly NAME = 'random-timer'
-
   private readonly numIterations: number
   private hasPoppedFirstSquare = false
-  private controller: AbortController | undefined
+  private controller?: AbortController
   private interval?: Interval
   private done = false
 
@@ -33,13 +31,21 @@ export class RandomTimer extends Gamemode {
         signal: this.controller.signal,
         iterations: this.numIterations + 1, // the interval is non-inclusive
         interval: 1000,
-        callback: this.markAsDone.bind(this),
+        callback: (i) => this.markAsDone(i),
         leading: true,
       })
       this.hasPoppedFirstSquare = true
     }
 
     return this.done
+  }
+
+  pause() {
+    this.interval?.pause()
+  }
+
+  resume() {
+    this.interval?.resume()
   }
 
   async reset() {
