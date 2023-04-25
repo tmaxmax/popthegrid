@@ -17,21 +17,23 @@ class ModalCloseButton extends Animated<HTMLButtonElement> {
   }
 }
 
-export interface ModalProperties {
-  content: Animated
-  allowClose: boolean
-  animateClose: boolean
-  afterClose?(): unknown
-}
+export type ModalProperties = { content: Animated } & (
+  | { allowClose: false }
+  | {
+      allowClose: true
+      animateClose: boolean
+      afterClose?(): unknown
+    }
+)
 
 export class Modal extends Animated<HTMLDivElement> {
-  constructor({ content, allowClose, animateClose, afterClose }: ModalProperties) {
+  constructor(props: ModalProperties) {
     super({ tag: 'div', classList: ['modal'], duration: { create: '2s', destroy: '0.3s' } })
 
-    this.appendChild(new ModalContent(content))
-    if (allowClose) {
+    this.appendChild(new ModalContent(props.content))
+    if (props.allowClose) {
       const hide = () => {
-        this.destroy(animateClose).then(afterClose)
+        this.destroy(props.animateClose).then(props.afterClose)
       }
 
       this.appendChild(new ModalCloseButton(hide))
