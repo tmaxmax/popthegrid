@@ -1,8 +1,8 @@
-import { ThemeName } from '../../src/theme.ts'
-
 export type Code = string & { __brand: 'code' }
 
 export type GamemodeName = 'random' | 'random-timer' // keep in sync with FE
+
+export type ThemeName = 'candy' | 'blood' // keep in sync with FE
 
 export type GameRecord = { name?: string; theme: ThemeName } & (
   | { gamemode: 'random'; numWins: number }
