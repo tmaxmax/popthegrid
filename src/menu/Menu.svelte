@@ -1,11 +1,14 @@
 <script lang="ts">
   import NameInput from './internal/NameInput.svelte';
+  import Gamemode from './internal/Gamemode.svelte';
   import { name } from './internal/name';
   import { createEventStore } from './internal/event';
   import { type Game } from '$game';
+  import { type GameRecord } from '$edge/share';
   import { fade } from 'svelte/transition';
 
   export let game: Game;
+  export let record: GameRecord | undefined;
 
   const events = createEventStore(game.events);
 
@@ -22,6 +25,7 @@
     {/key}
   </p>
   <h2>Settings</h2>
+  <Gamemode {game} {record} />
   <h2>Statistics</h2>
 </section>
 
@@ -40,7 +44,7 @@
 
   .game-status {
     display: grid;
-    }
+  }
 
   .game-status span {
     grid-area: 1 / 1 / 2 / 2;
