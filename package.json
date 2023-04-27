@@ -33,6 +33,7 @@
     "color-interpolate": "^1.0.5",
     "debug": "^4.3.4",
     "resize-observer-polyfill": "^1.5.1",
+    "svelte-confetti": "^1.2.2",
     "svelte-material-icons": "^3.0.4"
   }
 }

@@ -1,17 +1,26 @@
 <script lang="ts">
   import Edit from 'svelte-material-icons/PuzzleEdit.svelte';
+  import Win from 'svelte-material-icons/Trophy.svelte';
   import { Modal } from '$components/Modal';
   import Menu from './Menu.svelte';
   import { Component } from '$components/internal/Component';
   import { type ComponentProps } from 'svelte';
+  import { createEventStore } from './internal/event';
+  // @ts-expect-error Library has no type definitions.
+  import { Confetti } from 'svelte-confetti';
+  import { fade } from 'svelte/transition';
 
   export let props: ComponentProps<Menu>;
 
   const { game } = props;
   const event = game.events;
+  const eventOutput = createEventStore(event, { short: true });
 
   $: isError = $event.name === 'error';
   $: display = isError ? 'Something went wrong' : 'Your game';
+  $: isWin =
+    (($event.name === 'transitionstart' || $event.name === 'transitionend') && $event.to === 'win') ||
+    ($event.name === 'transitionstart' && $event.from === 'win');
 
   let disabled = false;
 
@@ -59,9 +68,19 @@
   };
 </script>
 
-<button {disabled} class:error={isError} on:click={handler}>
-  <Edit class="your-game-icon" />
-  <span>{display}</span>
+<button {disabled} class:error={isError} class:win={isWin} on:click={handler}>
+  {#if isWin}
+    <div transition:fade={{ duration: 100 }}>
+      <Win class="your-game-icon" />
+      <span>You won!</span>
+      <span class="confetti"><Confetti /></span>
+    </div>
+  {:else}
+    <div transition:fade={{ duration: 100 }}>
+      <Edit class="your-game-icon" />
+      <span>{display} • {$eventOutput.message}</span>
+    </div>
+  {/if}
 </button>
 
 <style>
@@ -71,13 +90,28 @@
     margin: 0;
     color: var(--color-body);
     font-family: var(--font-body);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: grid;
     font-size: 1em;
     padding: 0.6em 1em;
     cursor: pointer;
     transition: all 0.1s ease-in;
+  }
+
+  button.win {
+    color: var(--color-assurance);
+  }
+
+  div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-area: 1 / 1 / 2 / 2;
+    position: relative;
+  }
+
+  .confetti {
+    position: absolute;
+    left: 50%;
   }
 
   button:disabled {

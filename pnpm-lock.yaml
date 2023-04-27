@@ -16,6 +16,7 @@ specifiers:
   prettier-plugin-svelte: ^2.10.0
   resize-observer-polyfill: ^1.5.1
   svelte: ^3.58.0
+  svelte-confetti: ^1.2.2
   svelte-material-icons: ^3.0.4
   typescript: ^5.0.4
   vite: ^4.2.0
@@ -26,6 +27,7 @@ dependencies:
   color-interpolate: 1.0.5
   debug: 4.3.4
   resize-observer-polyfill: 1.5.1
+  svelte-confetti: 1.2.2
   svelte-material-icons: 3.0.4_svelte@3.58.0
 
 devDependencies:
@@ -2378,6 +2380,10 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
     dev: true
+
+  /svelte-confetti/1.2.2:
+    resolution: {integrity: sha512-LkvWO732jRNmYykWi0IOK7xoBX241p+p+tC7Ef1EcO3TK9b9lpB/vYqKkcwVya+onG2SgQsX2g+JVbVKxq5ixQ==}
+    dev: false
 
   /svelte-hmr/0.15.1_svelte@3.58.0:
     resolution: {integrity: sha512-BiKB4RZ8YSwRKCNVdNxK/GfY+r4Kjgp9jCLEy0DuqAKfmQtpL38cQK3afdpjw4sqSs4PLi3jIPJIFp259NkZtA==}
