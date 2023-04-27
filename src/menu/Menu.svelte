@@ -18,7 +18,7 @@
 
 <section>
   <div class="align-name-input">
-    <NameInput bind:value on:change={() => ($name = value)} />
+    <NameInput pretentious={!!record} bind:value on:change={() => ($name = value)} />
   </div>
   <p class="game-status" class:error={$events.isError}>
     {#key $events.message}

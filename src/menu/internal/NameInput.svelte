@@ -9,12 +9,13 @@
   };
 
   export let value: string | undefined;
+  export let pretentious = false;
 
   $: empty = (value || '') === '';
 </script>
 
 <label for={name} data-value={value} title="Your name is used for sharing records.">
-  <span class="message">Howdy,</span>
+  <span class="message">{pretentious ? 'Well' : 'Howdy'},</span>
   <input type="text" class:empty {name} {id} size="1" placeholder="…" bind:value aria-label="Your name" on:blur={onBlur} on:change />
 </label>
 

@@ -1,5 +1,5 @@
 import type { Context } from 'https://edge.netlify.com'
-import { createOrChange, getContentType, parseHTML, toUpper, toResponseBody, formatDuration } from '../edge/utils.ts'
+import { createOrChange, getContentType, parseHTML, makePossessive, toResponseBody, formatDuration } from '../edge/utils.ts'
 import { Code, GameRecord, getCodeFromPath, storageKey } from '../edge/share.ts'
 
 export default async (request: Request, context: Context) => {
@@ -28,8 +28,8 @@ export default async (request: Request, context: Context) => {
 
   createOrChange(
     html.head,
-    { query: '#objective', text: `Objective: ${description}` },
-    { query: 'meta[name="description"], meta[property="og:description"]', assert: 2, attrs: { content: toUpper(description) } },
+    { query: '#objective', text: description },
+    { query: 'meta[name="description"], meta[property="og:description"]', assert: 2, attrs: { content: description } },
     { query: 'meta[property="og:url"]', attrs: { content: `${baseURL}/${code}` } },
     { tag: 'script', html: `sessionStorage.setItem('${storageKey}', '${JSON.stringify(record)}')` },
     ...[
@@ -61,12 +61,13 @@ const mockCodes: Record<Code, GameRecord> = {
 
 const getDescription = (r: GameRecord) => {
   const name = r.name || 'your friend'
+  const root = `You're in ${makePossessive(name)} world:`
 
   switch (r.gamemode) {
     case 'random':
-      return `be more lucky than ${name}! They were lucky ${r.numWins} times.`
+      return `${root} be luckier! They won ${r.numWins} times.`
     case 'random-timer':
-      return `beat ${name} on time! They won in ${formatDuration(r.fastestWinDuration)}.`
+      return `${root} be quicker! They won in ${formatDuration(r.fastestWinDuration)}.`
     default:
       throw new Error(`Unknown gamemode ${(r as GameRecord).gamemode}`)
   }

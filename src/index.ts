@@ -34,7 +34,7 @@ const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Com
 
 const title = document.querySelector('#title')
 assertNonNull(title)
-configureTitle(title)
+configureTitle(title, !!record)
 
 const objective = componentFrom(document.querySelector<HTMLParagraphElement>('#objective'), 'Objective')
 const gridParent = componentFrom(document.querySelector<HTMLElement>('.grid__parent'), 'Grid parent')

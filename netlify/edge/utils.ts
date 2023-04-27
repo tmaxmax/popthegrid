@@ -95,3 +95,10 @@ export const toResponseBody = (document: HTMLDocument) => `
 export const toUpper = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
 export const formatDuration = humanizeDuration.humanizer({ units: ['s'], maxDecimalPoints: 2 })
+
+export const makePossessive = (s: string) => {
+  if (s.endsWith('s') || s.endsWith('z')) {
+    return s + "'"
+  }
+  return s + "'s"
+}
