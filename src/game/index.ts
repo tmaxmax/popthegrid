@@ -1,4 +1,5 @@
 import { UnreachableError, isDefined } from '$util/index'
+import { writable, type Readable, type Writable } from 'svelte/store'
 import { startAttempt } from './attempt'
 import type { Attempt, OngoingAttempt } from './attempt'
 import { Gamemode } from './gamemode'
@@ -28,6 +29,19 @@ type Callbacks = Omit<GameProps, 'grid' | 'gamemode' | 'onError'>
 
 export type GamemodeSetWhen = 'now' | 'next-game'
 
+export type StateName = 'initial' | 'ready' | 'ongoing' | 'win' | 'lose' | 'over'
+
+export type Event =
+  | {
+      name: 'transitionstart' | 'transitionend'
+      from?: StateName
+      to: StateName
+    }
+  | {
+      name: 'error'
+      error: Error
+    }
+
 type GameEvent =
   | { type: 'prepare' }
   | { type: 'removeSquare'; square: Square }
@@ -38,7 +52,7 @@ type GameEvent =
 export class Game {
   private gen!: GameGenerator
   private state!: State
-  private currentTransition?: Promise<void>
+  private dispatchedEvents: Writable<Event>
 
   constructor(private readonly props: GameProps) {
     const { grid } = this.props
@@ -46,6 +60,8 @@ export class Game {
     grid.onSquare((square) => {
       this.sendEvent({ type: 'removeSquare', square }).catch((err) => this.props.onError(err))
     })
+
+    this.dispatchedEvents = writable<Event>(undefined)
 
     // NOTE: This is basically sync, as Initial has no transition
     // when the grid was never created. This call initializes the game's
@@ -73,20 +89,32 @@ export class Game {
     return this.state.setGamemode(gamemode)
   }
 
-  get transition(): Promise<void> | undefined {
-    return this.currentTransition
+  get events(): Readable<Event> {
+    return { subscribe: this.dispatchedEvents.subscribe }
   }
 
   private async setState(state: State): Promise<void> {
+    const previousStateName = this.state?.name
+
     this.state = state
-    this.currentTransition = (async () => {
+
+    this.dispatchedEvents.set({
+      name: 'transitionstart',
+      from: previousStateName,
+      to: this.state.name,
+    })
+
     await this.state.transition()
     const newGen = this.state.run()
     newGen.next()
     this.gen = newGen
-    })()
-    await this.currentTransition
-    this.currentTransition = undefined
+
+    this.dispatchedEvents.set({
+      name: 'transitionend',
+      from: previousStateName,
+      to: this.state.name,
+    })
+
     this.state.executeCallback(this.props)
   }
 
@@ -96,10 +124,13 @@ export class Game {
       return
     } else if (!isDefined(value)) {
       const x = {} as never
-      throw new UnreachableError(x, 'Unexpected undefined value on state generator return.')
+      const error = new UnreachableError(x, 'Unexpected undefined value on state generator return.')
+      this.dispatchedEvents.set({ name: 'error', error })
+      throw error
     }
 
     if (value instanceof Error) {
+      this.dispatchedEvents.set({ name: 'error', error: value })
       throw value
     }
 
@@ -110,6 +141,8 @@ export class Game {
 type GameGenerator = Generator<void, State | Error, GameEvent>
 
 abstract class State {
+  constructor(public readonly name: StateName) {}
+
   *run(): GameGenerator {
     let nextYield = this.processEvent(yield)
 
@@ -128,7 +161,7 @@ abstract class State {
 
 class Initial extends State {
   constructor(private props: BaseProps, nextGamemode?: Gamemode) {
-    super()
+    super('initial')
     if (nextGamemode) {
       this.props.gamemode = nextGamemode
     }
@@ -171,7 +204,7 @@ class Ready extends State {
   private nextGamemode: Gamemode
 
   constructor(private props: BaseProps) {
-    super()
+    super('ready')
     this.nextGamemode = this.props.gamemode
   }
 
@@ -235,7 +268,7 @@ class Ready extends State {
 
 class Ongoing extends State {
   constructor(private readonly props: BaseProps, private nextGamemode: Gamemode, private readonly attempt: OngoingAttempt) {
-    super()
+    super('ongoing')
   }
 
   protected processEvent(event: GameEvent): void | State | Error {
@@ -301,7 +334,7 @@ class End extends State {
     private readonly kind: 'win' | 'lose',
     private readonly lastOp?: Promise<void>
   ) {
-    super()
+    super(kind)
     this.attempt = ongoingAttempt.end(kind === 'win')
     this.props.gamemode = nextGamemode
   }
@@ -339,7 +372,7 @@ class End extends State {
 
 class Over extends State {
   constructor(private readonly props: BaseProps) {
-    super()
+    super('over')
   }
 
   protected processEvent(): void | State | Error {
