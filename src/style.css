@@ -1,14 +1,19 @@
 :root {
-  --color-background: #000f1e;
-  --color-heading: #f6f4f3;
-  --color-body: #cecaca;
-  --color-square-1: #fdc5f5;
-  --color-square-2: #f7aef8;
-  --color-square-3: #b388eb;
-  --color-square-4: #8093f1;
-  --color-square-5: #72ddf7;
-  --color-assurance: #0cce6b;
-  --color-danger: #ef2d56;
+  /* These are set through Javascript.
+  Do not change the variable names without changing src/theme.ts too! */
+  --color-background: none;
+  /* The following two are used by modal animations. */
+  --color-background-transparent: none;
+  --color-background-opaque: none;
+  --color-heading: none;
+  --color-body: none;
+  --color-square-1: none;
+  --color-square-2: none;
+  --color-square-3: none;
+  --color-square-4: none;
+  --color-square-5: none;
+  --color-assurance: none;
+  --color-danger: none;
   --weight-heading: 800;
   --weight-body: 450;
   --font-heading: 'Poppins', sans-serif;

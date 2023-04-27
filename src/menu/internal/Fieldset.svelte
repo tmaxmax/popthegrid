@@ -12,9 +12,10 @@
   export let name: string;
   export let disabled = false;
   export let selectedValue: T;
+  export let margin = false;
 </script>
 
-<fieldset class:disabled on:change>
+<fieldset class:disabled class:margin on:change>
   {#if $$slots.legend}
     <legend>
       <slot name="legend" />
@@ -48,6 +49,10 @@
 
   fieldset:hover:not(.disabled) {
     color: var(--color-heading);
+  }
+
+  fieldset.margin {
+    margin-top: 0.4em;
   }
 
   legend {

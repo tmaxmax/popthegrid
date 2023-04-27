@@ -9,19 +9,19 @@
   justify-content: center;
   z-index: 100;
   visibility: visible;
-  background-color: #000f1e99;
+  background-color: var(--color-background-opaque);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
 @keyframes modal--show {
   from {
-    background-color: #000f1e00;
+    background-color: var(--color-background-transparent);
     -webkit-backdrop-filter: blur(0px);
     backdrop-filter: blur(0px);
   }
   to {
-    background-color: #000f1e99;
+    background-color: var(--color-background-opaque);
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
   }
@@ -29,12 +29,12 @@
 
 @keyframes modal--hide {
   from {
-    background-color: #000f1e99;
+    background-color: var(--color-background-opaque);
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
   }
   to {
-    background-color: #000f1e00;
+    background-color: var(--color-background-transparent);
     -webkit-backdrop-filter: blur(0px);
     backdrop-filter: blur(0px);
   }

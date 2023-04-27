@@ -6,6 +6,7 @@
   import { type Game } from '$game';
   import { type GameRecord } from '$edge/share';
   import { fade } from 'svelte/transition';
+  import Theme from './internal/Theme.svelte';
 
   export let game: Game;
   export let record: GameRecord | undefined;
@@ -26,6 +27,7 @@
   </p>
   <h2>Settings</h2>
   <Gamemode {game} {record} />
+  <Theme />
   <h2>Statistics</h2>
 </section>
 

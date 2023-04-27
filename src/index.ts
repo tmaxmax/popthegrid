@@ -15,6 +15,15 @@ import { gamemodes } from './gamemode'
 import { clearSharedRecord, getSharedRecord } from '$share/record'
 import MenuAccess from './menu/MenuAccess.svelte'
 import { configureTitle } from './menu'
+import { getTheme, setTheme, defaultTheme, listenToThemeChanges } from './theme'
+
+try {
+  setTheme(getTheme(), { onlyCSS: true })
+} catch {
+  setTheme(defaultTheme)
+}
+
+listenToThemeChanges((themeName) => setTheme(themeName, { onlyCSS: true }))
 
 const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
   assertNonNull(elem, `${name} doesn't exist in the HTML document!`)
