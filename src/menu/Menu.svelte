@@ -28,6 +28,9 @@
   @media (min-width: 560px) {
     .align-name-input {
       display: block;
+    }
+
+    section {
       padding: 0 0.6rem;
     }
   }
