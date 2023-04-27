@@ -9,6 +9,8 @@
   <div class="align-name-input">
     <NameInput bind:value on:change={() => ($name = value)} />
   </div>
+  <h2>Settings</h2>
+  <h2>Statistics</h2>
 </section>
 
 <style>
@@ -23,6 +25,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  h2 {
+    margin-top: 0.8em;
   }
 
   @media (min-width: 560px) {
