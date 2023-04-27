@@ -9,7 +9,6 @@
   <div class="align-name-input">
     <NameInput bind:value on:change={() => ($name = value)} />
   </div>
-  <hr />
 </section>
 
 <style>
@@ -18,12 +17,6 @@
     max-width: 920px;
     height: 100%;
     margin: 0 auto;
-  }
-
-  hr {
-    border: 0;
-    height: 0;
-    border-top: 1px solid var(--color-body);
   }
 
   .align-name-input {
