@@ -36,7 +36,6 @@ h1,
 h2 {
   font-family: var(--font-heading);
   font-weight: var(--weight-heading);
-  text-align: center;
   letter-spacing: 0.003em;
   color: var(--color-heading);
 }
@@ -44,10 +43,17 @@ h2 {
 p {
   font-family: var(--font-body);
   font-weight: var(--weight-body);
-  text-align: center;
-  margin: 0.3em;
   letter-spacing: -0.0004em;
   color: var(--color-body);
+}
+
+#title {
+  text-align: center;
+}
+
+#objective {
+  text-align: center;
+  margin: 0.3em;
 }
 
 .noselect {
