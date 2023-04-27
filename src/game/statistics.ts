@@ -7,7 +7,7 @@ type Counts = {
 }
 
 export type Statistics = Counts &
-  ({ gamemode?: never } | { gamemode: 'random' } | { gamemode: 'random-timer'; fastestWinDuration?: number })
+  ({ gamemode?: never } | { gamemode: 'random' } | { gamemode: 'random-timer' | 'same-square'; fastestWinDuration?: number })
 
 const EMPTY_COUNTS: Counts = {
   numAttempts: 0,
@@ -32,7 +32,7 @@ export function getStatistics(data: Attempt[]): Statistics[] {
       acc[0].numWins++
       accg.numWins++
 
-      if ('gamemode' in accg && accg.gamemode === 'random-timer') {
+      if ('gamemode' in accg && (accg.gamemode === 'random-timer' || accg.gamemode === 'same-square')) {
         if (!accg.fastestWinDuration || accg.fastestWinDuration > curr.duration) {
           accg.fastestWinDuration = curr.duration
         }

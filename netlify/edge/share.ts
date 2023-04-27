@@ -1,12 +1,12 @@
 export type Code = string & { __brand: 'code' }
 
-export type GamemodeName = 'random' | 'random-timer' // keep in sync with FE
+export type GamemodeName = 'random' | 'random-timer' | 'same-square' // keep in sync with FE
 
 export type ThemeName = 'candy' | 'blood' // keep in sync with FE
 
 export type GameRecord = { name?: string; theme: ThemeName } & (
   | { gamemode: 'random'; numWins: number }
-  | { gamemode: 'random-timer'; fastestWinDuration: number }
+  | { gamemode: 'random-timer' | 'same-square'; fastestWinDuration: number }
 )
 
 export const getCodeFromPath = (path: string): Code | undefined => {

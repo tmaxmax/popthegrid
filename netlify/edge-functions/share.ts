@@ -1,6 +1,6 @@
 import type { Context } from 'https://edge.netlify.com'
 import { createOrChange, getContentType, parseHTML, makePossessive, toResponseBody, formatDuration } from '../edge/utils.ts'
-import { Code, GameRecord, getCodeFromPath, storageKey } from '../edge/share.ts'
+import { Code, GameRecord, GamemodeName, getCodeFromPath, storageKey } from '../edge/share.ts'
 
 export default async (request: Request, context: Context) => {
   const url = new URL(request.url)
@@ -57,6 +57,12 @@ const mockCodes: Record<Code, GameRecord> = {
     fastestWinDuration: 5450,
     theme: 'blood',
   },
+  ['s4m3sQ' as Code]: {
+    gamemode: 'same-square',
+    name: 'Hans',
+    fastestWinDuration: 6000,
+    theme: 'blood',
+  },
 }
 
 const getDescription = (r: GameRecord) => {
@@ -68,12 +74,15 @@ const getDescription = (r: GameRecord) => {
       return `${root} be luckier! They won ${r.numWins} times.`
     case 'random-timer':
       return `${root} be quicker! They won in ${formatDuration(r.fastestWinDuration)}.`
+    case 'same-square':
+      return `${root} zerstöre schneller die gleiche Karos! They did it in ${formatDuration(r.fastestWinDuration)}.`
     default:
       throw new Error(`Unknown gamemode ${(r as GameRecord).gamemode}`)
   }
 }
 
-const metaAlts: Record<string, string> = {
+const metaAlts: Record<GamemodeName, string> = {
   random: 'be more lucky than me.',
   'random-timer': 'beat me on time.',
+  'same-square': 'destroy faster the same squares.',
 }
