@@ -17,8 +17,10 @@ import MenuAccess from './menu/MenuAccess.svelte'
 import { configureTitle } from './menu'
 import { getTheme, setTheme, defaultTheme, listenToThemeChanges } from './theme'
 
+const record = getSharedRecord()
+
 try {
-  setTheme(getTheme(), { onlyCSS: true })
+  setTheme(record?.theme || getTheme(), { onlyCSS: true })
 } catch {
   setTheme(defaultTheme)
 }
@@ -41,8 +43,6 @@ const footer = document.querySelector('footer')
 assertNonNull(footer)
 
 const NUM_COLORS = 5
-
-const record = getSharedRecord()
 
 const game = new Game({
   gamemode: gamemodes[record?.gamemode || 'random'].create(),

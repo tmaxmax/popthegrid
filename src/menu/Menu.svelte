@@ -27,7 +27,7 @@
   </p>
   <h2>Settings</h2>
   <Gamemode {game} {record} />
-  <Theme />
+  <Theme {record} />
   <h2>Statistics</h2>
 </section>
 

@@ -33,7 +33,7 @@ export default async (request: Request, context: Context) => {
     { query: 'meta[property="og:url"]', attrs: { content: `${baseURL}/${code}` } },
     { tag: 'script', html: `sessionStorage.setItem('${storageKey}', '${JSON.stringify(record)}')` },
     ...[
-      { property: 'og:image', content: `/og/${record.gamemode}.jpg` },
+      { property: 'og:image', content: `/og/${record.gamemode}-${record.theme}.jpg` },
       { property: 'og:image:type', content: 'image/jpeg' },
       { property: 'og:image:width', content: '1200' },
       { property: 'og:image:height', content: '627' },
@@ -49,11 +49,13 @@ const mockCodes: Record<Code, GameRecord> = {
   ['r4nd0m' as Code]: {
     gamemode: 'random',
     numWins: 5,
+    theme: 'candy',
   },
   ['t1m3rM' as Code]: {
     gamemode: 'random-timer',
     name: 'Michael',
     fastestWinDuration: 5450,
+    theme: 'blood',
   },
 }
 

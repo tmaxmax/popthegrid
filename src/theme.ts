@@ -1,4 +1,10 @@
-import { entries } from '$util/objects'
+type Entries<T> = {
+  [K in keyof T]: [K, T[K]]
+}[keyof T][]
+
+function entries<T extends Record<string, unknown>>(o: T): Entries<T> {
+  return Object.entries(o) as Entries<T>
+}
 
 export interface Theme {
   display: string

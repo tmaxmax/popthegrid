@@ -37,12 +37,23 @@
 
   const options = getThemeOptions();
   const theme = createThemeStore();
+  const isThemeOverrided = writable(false);
 </script>
 
 <script lang="ts">
   import Fieldset from './Fieldset.svelte';
+  import type { GameRecord } from '$edge/share';
+
+  export let record: GameRecord | undefined;
+
+  let selectedTheme = $isThemeOverrided ? $theme : record?.theme || $theme;
+
+  const onChange = () => {
+    $theme = selectedTheme;
+    $isThemeOverrided = true;
+  };
 </script>
 
-<Fieldset margin name="theme" {options} bind:selectedValue={$theme}>
+<Fieldset margin name="theme" {options} bind:selectedValue={selectedTheme} on:change={onChange}>
   <span slot="legend">Theme:</span>
 </Fieldset>
