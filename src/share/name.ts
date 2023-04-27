@@ -40,19 +40,3 @@ export const setName = (value: string | undefined) => {
 export const getName = () => {
   return localStorage.getItem(key) ?? undefined
 }
-
-export const configureTitle = (element: Element) => {
-  const originalText = element.textContent
-  const set = (name: string | undefined) => {
-    if (name) {
-      element.textContent = `Welcome, ${name}!`
-    } else {
-      element.textContent = originalText
-    }
-  }
-
-  const name = getName()
-  set(name)
-
-  return listenToNameChanges((v) => set(v.newValue))
-}
