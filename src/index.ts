@@ -4,13 +4,10 @@ import './style.css'
 import { Component } from '$components/internal/Component'
 import { Animated } from '$components/internal/Animated'
 import { open as openIndexedDB } from '$util/indexedDB'
-import { entries } from '$util/objects'
 import schema from '$db/schema'
 import { assertNonNull } from '$util/assert'
 import { Modal } from '$components/Modal'
-import { Fieldset } from '$components/Input/Fieldset'
 import { Game } from '$game'
-import type { GamemodeName } from '$game/gamemode'
 import { DOMGrid } from '$game/grid/dom'
 import { insertAttempt } from '$db/attempt'
 import { Redirect } from '$components/Redirect'
@@ -52,19 +49,6 @@ const game = new Game({
     insertAttempt(db, attempt)
     game.prepare()
   },
-})
-
-new Fieldset({
-  name: 'gamemode',
-  legend: 'Gamemode',
-  onChange(name: GamemodeName) {
-    game.setGamemode(gamemodes[name].create())
-  },
-  values: entries(gamemodes).map(([name, { display }]) => ({
-    name: display,
-    value: name,
-    default: record ? record.gamemode === name : name === 'random',
-  })),
 })
 
 const getVersionChangeModalContent = () => {
