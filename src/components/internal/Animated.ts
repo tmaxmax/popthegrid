@@ -38,11 +38,10 @@ export class Animated<T extends KnownHTMLElement = HTMLElement> extends Componen
   }
 
   async create(parent: Component, animate: boolean): Promise<void> {
-    const signal = this.startOperation()
+    const { signal, aborted } = this.startOperation()
+    const promiseList: Promise<void>[] = []
 
     this.appendTo(parent)
-
-    const promiseList: Promise<void>[] = []
 
     if (animate && this.duration) {
       this.removeClass(DESTROY_ANIMATION_CLASS_NAME)
@@ -52,11 +51,11 @@ export class Animated<T extends KnownHTMLElement = HTMLElement> extends Componen
 
     promiseList.push(...this.children.map((c) => c.create(this, animate)))
 
-    await Promise.all(promiseList)
+    await Promise.race([Promise.all(promiseList), aborted])
   }
 
   async destroy(animate: boolean): Promise<void> {
-    const signal = this.startOperation()
+    const { signal, aborted } = this.startOperation()
     const promiseList: Promise<void>[] = []
 
     if (animate && this.duration) {
@@ -67,7 +66,7 @@ export class Animated<T extends KnownHTMLElement = HTMLElement> extends Componen
 
     promiseList.push(...this.children.map((c) => c.destroy(animate)))
 
-    await Promise.all(promiseList)
+    await Promise.race([Promise.all(promiseList), aborted])
 
     if (!signal.aborted) {
       this.remove()
@@ -111,10 +110,12 @@ export class Animated<T extends KnownHTMLElement = HTMLElement> extends Componen
     this.children.push(component)
   }
 
-  private startOperation(): AbortSignal {
+  private startOperation() {
     this.op?.abort()
     this.op = new AbortController()
-    return this.op.signal
+    const signal = this.op.signal
+    const aborted = new Promise<void>((resolve) => (signal.onabort = () => resolve()))
+    return { signal, aborted }
   }
 
   static from<T extends KnownHTMLElement>(element: T, duration?: DurationString | AnimationDuration): Animated<T> {
