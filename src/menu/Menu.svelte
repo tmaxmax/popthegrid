@@ -1,6 +1,6 @@
 <script lang="ts">
   import NameInput from './internal/NameInput.svelte';
-  import { name } from './name';
+  import { name } from './internal/name';
 
   $: value = $name;
 </script>
