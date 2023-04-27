@@ -3,6 +3,7 @@
   import { name } from './internal/name';
   import { createEventStore } from './internal/event';
   import { type Game } from '$game';
+  import { fade } from 'svelte/transition';
 
   export let game: Game;
 
@@ -15,7 +16,11 @@
   <div class="align-name-input">
     <NameInput bind:value on:change={() => ($name = value)} />
   </div>
-  <p class:error={$events.isError}>{$events.message}</p>
+  <p class="game-status" class:error={$events.isError}>
+    {#key $events.message}
+      <span transition:fade={{ duration: 100 }}>{$events.message}</span>
+    {/key}
+  </p>
   <h2>Settings</h2>
   <h2>Statistics</h2>
 </section>
@@ -28,21 +33,20 @@
     margin: 0 auto;
   }
 
-  .align-name-input {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
   h2 {
     margin-top: 0.8em;
+    margin-bottom: 0.4em;
+  }
+
+  .game-status {
+    display: grid;
+    }
+
+  .game-status span {
+    grid-area: 1 / 1 / 2 / 2;
   }
 
   @media (min-width: 560px) {
-    .align-name-input {
-      display: block;
-    }
-
     section {
       padding: 0 0.6rem;
     }
