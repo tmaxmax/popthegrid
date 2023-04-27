@@ -103,7 +103,7 @@ const getRecordClearRedirect = () => {
 
 new MenuAccess({
   target: footer,
-  props: { game },
+  props: { props: { game } },
 })
 
 let db: IDBDatabase

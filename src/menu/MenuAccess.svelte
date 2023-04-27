@@ -1,12 +1,13 @@
 <script lang="ts">
   import Edit from 'svelte-material-icons/PuzzleEdit.svelte';
-  import { type Game } from '$game';
   import { Modal } from '$components/Modal';
   import Menu from './Menu.svelte';
   import { Component } from '$components/internal/Component';
+  import { type ComponentProps } from 'svelte';
 
-  export let game: Game;
+  export let props: ComponentProps<Menu>;
 
+  const { game } = props;
   const event = game.events;
 
   $: isError = $event.name === 'error';
@@ -22,7 +23,7 @@
     disabled = true;
 
     const modal = new Modal({
-      content: (target) => new Menu({ target, props: { game } }),
+      content: (target) => new Menu({ target, props }),
       allowClose: true,
       animateClose: true,
       afterClose() {
