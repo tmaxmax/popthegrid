@@ -16,7 +16,6 @@ import { insertAttempt } from '$db/attempt'
 import { Redirect } from '$components/Redirect'
 import { gamemodes } from './gamemode'
 import { clearSharedRecord, getSharedRecord } from '$share/record'
-import { openMenu } from './menu'
 import MenuAccess from './menu/MenuAccess.svelte'
 import { configureTitle } from '$share/name'
 
@@ -104,13 +103,7 @@ const getRecordClearRedirect = () => {
 
 new MenuAccess({
   target: footer,
-  props: {
-    onClick: () =>
-      openMenu({
-        animate: true,
-        game,
-      }),
-  },
+  props: { game },
 })
 
 let db: IDBDatabase

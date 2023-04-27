@@ -1,10 +1,67 @@
 <script lang="ts">
-  import Icon from 'svelte-material-icons/PuzzleEdit.svelte';
+  import Edit from 'svelte-material-icons/PuzzleEdit.svelte';
+  import { type Game } from '$game';
+  import { Modal } from '$components/Modal';
+  import Menu from './Menu.svelte';
+  import { Component } from '$components/internal/Component';
 
-  export let onClick: () => unknown;
+  export let game: Game;
+
+  const event = game.events;
+
+  $: isError = $event.name === 'error';
+  $: display = isError ? 'Something went wrong' : 'Your game';
+
+  let disabled = false;
+
+  const handler = async () => {
+    if (disabled || isError) {
+      return;
+    }
+
+    disabled = true;
+
+    const modal = new Modal({
+      content: (target) => new Menu({ target, props: { game } }),
+      allowClose: true,
+      animateClose: true,
+      afterClose() {
+        if ($event.name !== 'transitionstart') {
+          game.resume();
+        }
+      },
+    });
+
+    if ($event.name === 'transitionstart') {
+      if ($event.to === 'ongoing') {
+        await new Promise<void>((resolve, reject) => {
+          const unsubscribe = event.subscribe((e) => {
+            if (e.name === 'transitionend' && e.to === 'ongoing') {
+              resolve();
+            } else {
+              reject(e);
+            }
+
+            unsubscribe();
+          });
+        });
+
+        await game.pause();
+      }
+    } else {
+      await game.pause();
+    }
+
+    await modal.create(Component.body, true);
+
+    disabled = false;
+  };
 </script>
 
-<button on:click={onClick}><Icon class="your-game-icon" /> <span>Your game</span></button>
+<button {disabled} class:error={isError} on:click={handler}>
+  <Edit class="your-game-icon" />
+  <span>{display}</span>
+</button>
 
 <style>
   button {
@@ -22,9 +79,19 @@
     transition: all 0.1s ease-in;
   }
 
-  button:hover {
+  button:disabled {
+    cursor: default;
+  }
+
+  button:hover,
+  button:disabled:not(.error) {
     filter: drop-shadow(0 0 0.03em var(--color-heading));
     color: var(--color-heading);
+  }
+
+  button:disabled.error {
+    color: var(--color-danger);
+    filter: drop-shadow(0 0 0.03em var(--color-danger));
   }
 
   span {
