@@ -10,14 +10,14 @@ export interface MenuProps {
 
 export const openMenu = async ({ game, animate }: MenuProps) => {
   const modal = new Modal({
-    content: (target) => new Menu({ target }),
+    content: (target) => new Menu({ target, props: { game } }),
     allowClose: true,
     animateClose: animate,
     afterClose() {
-        game.resume()
+      game.resume()
     },
   })
 
-    await game.pause()
+  await game.pause()
   await modal.create(Component.body, animate)
 }
