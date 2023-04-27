@@ -107,6 +107,11 @@
     transition: border-color 0.1s ease-in, background-color 0.1s ease-in;
   }
 
+  label {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
   label ~ label span {
     padding-top: 0.2rem;
   }
