@@ -44,8 +44,9 @@ assertNonNull(footer)
 
 const NUM_COLORS = 5
 
+const gamemode = record?.gamemode || defaultGamemode
 const game = new Game({
-  gamemode: gamemodes[record?.gamemode || 'random'].create(),
+  gamemode: gamemodes[gamemode].create(),
   grid: new DOMGrid({
     numTotalSquares: 48,
     colors: Array.from({ length: NUM_COLORS }, (_, i) => `var(--color-square-${i + 1})`),

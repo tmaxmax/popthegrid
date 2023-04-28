@@ -18,3 +18,5 @@ export const gamemodes = {
     create: () => new SameSquare(),
   },
 } satisfies Record<GamemodeName, { create(): Gamemode; display: string }>
+
+export const defaultGamemode = 'random' satisfies GamemodeName
