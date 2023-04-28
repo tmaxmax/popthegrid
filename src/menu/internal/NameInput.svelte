@@ -1,6 +1,17 @@
 <script lang="ts">
-  const name = 'name';
-  const id = 'name';
+  import { setName } from '$share/name';
+  import { getContext } from '../context';
+
+  const inputName = 'name';
+  const inputID = 'name';
+
+  export let pretentious = false;
+
+  const { name } = getContext();
+
+  let value = $name;
+
+  $: empty = (value || '') === '';
 
   const onBlur = (ev: HTMLElementEventMap['blur']) => {
     const element = ev.target as HTMLInputElement;
@@ -8,15 +19,25 @@
     element.blur();
   };
 
-  export let value: string | undefined;
-  export let pretentious = false;
-
-  $: empty = (value || '') === '';
+  const onChange = () => {
+    $name = value;
+    setName($name);
+  };
 </script>
 
-<label for={name} data-value={value} title="Your name is used for sharing records.">
+<label for={inputName} data-value={value} title="Your name is used for sharing records.">
   <span class="message">{pretentious ? 'Well' : 'Howdy'},</span>
-  <input type="text" class:empty {name} {id} size="1" placeholder="…" bind:value aria-label="Your name" on:blur={onBlur} on:change />
+  <input
+    type="text"
+    class:empty
+    name={inputName}
+    id={inputID}
+    size="1"
+    placeholder="…"
+    bind:value
+    aria-label="Your name"
+    on:blur={onBlur}
+    on:change={onChange} />
 </label>
 
 <style>

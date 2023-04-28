@@ -9,23 +9,25 @@ import { assertNonNull } from '$util/assert'
 import { Modal } from '$components/Modal'
 import { Game } from '$game'
 import { DOMGrid } from '$game/grid/dom'
-import { insertAttempt } from '$db/attempt'
+import { insertAttempt, retrieveAttempts } from '$db/attempt'
 import { Redirect } from '$components/Redirect'
-import { gamemodes } from './gamemode'
+import { defaultGamemode, gamemodes } from './gamemode'
 import { clearSharedRecord, getSharedRecord } from '$share/record'
 import MenuAccess from './menu/MenuAccess.svelte'
-import { configureTitle } from './menu'
-import { getTheme, setTheme, defaultTheme, listenToThemeChanges } from './theme'
+import { getTheme, setTheme, defaultTheme, listenToThemeChanges, type ThemeName } from './theme'
+import { contextKey, createContext, configureTitle } from './menu/context'
+import { getName, listenToNameChanges } from '$share/name'
 
 const record = getSharedRecord()
+let theme: ThemeName
 
 try {
-  setTheme(record?.theme || getTheme(), { onlyCSS: true })
+  theme = record?.theme || getTheme()
+  setTheme(theme, { onlyCSS: true })
 } catch {
-  setTheme(defaultTheme)
+  theme = defaultTheme
+  setTheme(theme)
 }
-
-listenToThemeChanges((themeName) => setTheme(themeName, { onlyCSS: true }))
 
 const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
   assertNonNull(elem, `${name} doesn't exist in the HTML document!`)
@@ -34,7 +36,6 @@ const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Com
 
 const title = document.querySelector('#title')
 assertNonNull(title)
-configureTitle(title, !!record)
 
 const objective = componentFrom(document.querySelector<HTMLParagraphElement>('#objective'), 'Objective')
 const gridParent = componentFrom(document.querySelector<HTMLElement>('.grid__parent'), 'Grid parent')
@@ -55,13 +56,45 @@ const game = new Game({
   onError(err) {
     console.error(err)
   },
+  onGameInit({ gamemode, when }) {
+    if (when === 'after') {
+      context.gamemode.set(gamemode)
+    }
+  },
+  onGameReady({ gamemode, from, when }) {
+    if (when === 'before' && (from === 'win' || from === 'lose')) {
+      context.gamemode.set(gamemode)
+    }
+  },
   onGameEnd({ attempt, when }) {
     if (when === 'after') {
-    insertAttempt(db, attempt)
-    game.prepare()
+      insertAttempt(db, attempt).then(context.statistics.update)
+      game.prepare()
     }
   },
 })
+
+const context = createContext({
+  name: getName(),
+  game,
+  record,
+  gamemode,
+  theme,
+  attemptsLoader() {
+    return retrieveAttempts(db)
+  },
+})
+
+listenToThemeChanges((themeName) => {
+  setTheme(themeName, { onlyCSS: true })
+  context.theme.set(themeName)
+})
+
+listenToNameChanges(({ newValue }) => {
+  context.name.set(newValue)
+})
+
+configureTitle(context.name, title, !!record)
 
 const getVersionChangeModalContent = () => {
   const root = document.createElement('div')
@@ -99,7 +132,7 @@ const getRecordClearRedirect = () => {
 
 new MenuAccess({
   target: footer,
-  props: { props: { game, record } },
+  context: new Map([[contextKey, context]]),
 })
 
 let db: IDBDatabase

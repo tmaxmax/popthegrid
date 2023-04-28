@@ -4,20 +4,21 @@
   import { Modal } from '$components/Modal';
   import Menu from './Menu.svelte';
   import { Component } from '$components/internal/Component';
-  import { type ComponentProps } from 'svelte';
   import { createEventStore } from './internal/event';
   // @ts-expect-error Library has no type definitions.
   import { Confetti } from 'svelte-confetti';
   import { fade } from 'svelte/transition';
+  import { contextKey, getContext } from './context';
+  import { gamemodes } from '../gamemode';
 
-  export let props: ComponentProps<Menu>;
+  const context = getContext();
 
-  const { game } = props;
+  const { game, gamemode } = context;
   const event = game.events;
   const eventOutput = createEventStore(event, { short: true });
 
   $: isError = $event.name === 'error';
-  $: display = isError ? 'Something went wrong' : 'Your game';
+  $: display = isError ? 'Something went wrong' : gamemodes[$gamemode].display;
   $: isWin =
     (($event.name === 'transitionstart' || $event.name === 'transitionend') && $event.to === 'win') ||
     ($event.name === 'transitionstart' && $event.from === 'win');
@@ -32,7 +33,7 @@
     disabled = true;
 
     const modal = new Modal({
-      content: (target) => new Menu({ target, props }),
+      content: (target) => new Menu({ target, context: new Map([[contextKey, context]]) }),
       allowClose: true,
       animateClose: true,
       afterClose() {

@@ -1,24 +1,18 @@
 <script lang="ts">
   import NameInput from './internal/NameInput.svelte';
   import Gamemode from './internal/Gamemode.svelte';
-  import { name } from './internal/name';
   import { createEventStore } from './internal/event';
-  import { type Game } from '$game';
-  import { type GameRecord } from '$edge/share';
   import { fade } from 'svelte/transition';
   import Theme from './internal/Theme.svelte';
+  import { getContext } from './context';
 
-  export let game: Game;
-  export let record: GameRecord | undefined;
-
+  const { game, record } = getContext();
   const events = createEventStore(game.events);
-
-  $: value = $name;
 </script>
 
 <section>
   <div class="align-name-input">
-    <NameInput pretentious={!!record} bind:value on:change={() => ($name = value)} />
+    <NameInput pretentious={!!record} />
   </div>
   <p class="game-status" class:error={$events.isError}>
     {#key $events.message}
@@ -26,8 +20,8 @@
     {/key}
   </p>
   <h2>Settings</h2>
-  <Gamemode {game} {record} />
-  <Theme {record} />
+  <Gamemode />
+  <Theme />
   <h2>Statistics</h2>
 </section>
 

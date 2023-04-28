@@ -1,21 +1,16 @@
 <script context="module" lang="ts">
   import { type Option } from './Fieldset.svelte';
-  import { type GameRecord } from '$edge/share';
   import { entries } from '$util/objects';
-  import { type Game, type GamemodeSetWhen } from '$game';
+  import { type GamemodeSetWhen } from '$game';
   import { type GamemodeName } from '$game/gamemode';
   import { gamemodes } from '../../gamemode';
-  import { readable, writable } from 'svelte/store';
+  import { readable } from 'svelte/store';
 
-  const currentGamemode = writable<GamemodeName | undefined>(undefined);
-
-  const getGamemodeOptions = (record?: GameRecord): [GamemodeName, Option<GamemodeName>[]] => {
-    const options = entries(gamemodes).map(([value, { display }]) => ({
+  const getGamemodeOptions = (): Option<GamemodeName>[] => {
+    return entries(gamemodes).map(([value, { display }]) => ({
       display,
       value,
     }));
-
-    return [record ? record.gamemode : 'random', options];
   };
 
   const isWideMedia = window.matchMedia('(min-width: 600px)');
@@ -40,39 +35,31 @@
         return 'set for next game!';
     }
   };
+
+  const options = getGamemodeOptions();
 </script>
 
 <script lang="ts">
   import Fieldset from './Fieldset.svelte';
   import { wait } from '$util/index';
   import { fade } from 'svelte/transition';
+  import { getContext } from '../context';
 
-  // We assume that when this component is first created,
-  // the game has either the record's gamemode or the
-  // default, 'random'.
-
-  export let game: Game;
-  export let record: GameRecord | undefined;
-
-  let [selectedGamemode, options] = getGamemodeOptions(record);
-
-  if ($currentGamemode) {
-    selectedGamemode = $currentGamemode;
-  } else {
-    $currentGamemode = selectedGamemode;
-  }
+  const { game, gamemode, nextGamemode } = getContext();
 
   let waitPromise: Promise<void> | undefined;
   let when: GamemodeSetWhen | undefined;
 
   const onChange = () => {
-    when = game.setGamemode(gamemodes[selectedGamemode].create());
-    $currentGamemode = selectedGamemode;
+    when = game.setGamemode(gamemodes[$nextGamemode].create());
+    if (when === 'now') {
+      $gamemode = $nextGamemode;
+    }
     waitPromise = wait(2000);
   };
 </script>
 
-<Fieldset name="gamemode" {options} bind:selectedValue={selectedGamemode} let:value on:change={onChange}>
+<Fieldset name="gamemode" {options} bind:selectedValue={$nextGamemode} let:value on:change={onChange}>
   <span slot="legend">
     Gamemode{#if !$isWide && when}
       {#await waitPromise}
@@ -80,7 +67,7 @@
           >{' '}({getWhenDisplay(when, $isWide)})</span
         >{/await}{/if}:
   </span>
-  {#if $isWide && value === selectedGamemode && when}
+  {#if $isWide && value === $nextGamemode && when}
     {#await waitPromise}
       <p transition:fade={{ duration: 100 }} class="confirmation" class:next-game={when === 'next-game'}>{getWhenDisplay(when, $isWide)}</p>
     {/await}
