@@ -5,6 +5,7 @@ import { Component } from '../internal/Component'
 import interval from '$util/time/interval'
 import { LocalStorage } from './storage'
 import type { EasterEggStorage } from './storage'
+import { type ThemeName, themes, defaultTheme } from '$theme'
 
 interface Response {
   name: string
@@ -19,16 +20,18 @@ const fetchSillyName: () => Promise<string> = () =>
 
 const DISCOVER_COUNT = 5
 
-const colorScheme = interpolate(['#f4fd1f', '#0cce6b'])
-
 export class SillyName extends Component {
   private readonly controller = new AbortController()
   private counter = 0
+  private colorScheme: (index: number) => string
 
-  constructor(props?: { storage?: EasterEggStorage }) {
+  constructor(props?: { storage?: EasterEggStorage; theme?: ThemeName }) {
     super({ tag: 'p', classList: ['silly-name', 'undiscovered'] })
 
     const storage = props?.storage || new LocalStorage()
+    const { warning, assurance } = themes[props?.theme || defaultTheme].colors
+
+    this.colorScheme = interpolate([warning, assurance])
 
     if (storage.isDiscovered) {
       this.showURL()
@@ -83,6 +86,12 @@ export class SillyName extends Component {
     this.remove()
   }
 
+  setTheme(name: ThemeName) {
+    const { warning, assurance } = themes[name].colors
+    this.colorScheme = interpolate([warning, assurance])
+    this.setStyle('--color', `${this.colorScheme(this.counter / 5)}`)
+  }
+
   private showURL() {
     this.text = 'Made by '
     this.removeClass('undiscovered')
@@ -96,7 +105,7 @@ export class SillyName extends Component {
 
   private setCounter(value: number): number {
     this.counter = value
-    this.setStyle('--color', `${colorScheme(this.counter / 5)}`)
+    this.setStyle('--color', `${this.colorScheme(this.counter / 5)}`)
 
     return this.counter
   }

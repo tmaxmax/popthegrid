@@ -6,6 +6,7 @@
   text-decoration: underline;
   font-weight: bold;
   color: var(--color-body);
+  transition: color 0.1s ease-in;
 }
 
 .silly-name a:hover {
