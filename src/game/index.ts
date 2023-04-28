@@ -2,32 +2,47 @@ import { UnreachableError, isDefined } from '$util/index'
 import { writable, type Readable, type Writable } from 'svelte/store'
 import { startAttempt } from './attempt'
 import type { Attempt, OngoingAttempt } from './attempt'
-import { Gamemode } from './gamemode'
+import { Gamemode, type GamemodeName } from './gamemode'
 import type { Grid, Square } from './grid'
 
-export interface OnGameEndData {
+export interface OnGameData {
+  when: CallbackWhen
+  from?: StateName
+}
+
+export interface OnGameInitData extends OnGameData {
+  gamemode: GamemodeName
+}
+
+export type OnGameReadyData = OnGameInitData
+
+export interface OnGameEndData extends OnGameData {
   attempt: Attempt
 }
 
-export interface OnGameStartData {
+export interface OnGameStartData extends OnGameData {
   attempt: OngoingAttempt
 }
+
+export type OnGameOverData = OnGameData
 
 export interface GameProps {
   grid: Grid
   gamemode: Gamemode
   onError(err: Error): unknown
-  onGameInit?(): unknown
-  onGameReady?(): unknown
+  onGameInit?(data: OnGameInitData): unknown
+  onGameReady?(data: OnGameReadyData): unknown
   onGameStart?(data: OnGameStartData): unknown
   onGameEnd?(data: OnGameEndData): unknown
-  onGameOver?(): unknown
+  onGameOver?(data: OnGameOverData): unknown
 }
 
 type BaseProps = Pick<GameProps, 'grid' | 'gamemode'>
 type Callbacks = Omit<GameProps, 'grid' | 'gamemode' | 'onError'>
 
 export type GamemodeSetWhen = 'now' | 'next-game'
+
+export type CallbackWhen = 'before' | 'after'
 
 export type StateName = 'initial' | 'ready' | 'ongoing' | 'win' | 'lose' | 'over'
 
@@ -94,15 +109,17 @@ export class Game {
   }
 
   private async setState(state: State): Promise<void> {
-    const previousStateName = this.state?.name
+    const from = this.state?.name
 
     this.state = state
 
     this.dispatchedEvents.set({
       name: 'transitionstart',
-      from: previousStateName,
+      from: from,
       to: this.state.name,
     })
+
+    this.state.executeCallback(this.props, { when: 'before', from })
 
     await this.state.transition()
     const newGen = this.state.run()
@@ -111,11 +128,11 @@ export class Game {
 
     this.dispatchedEvents.set({
       name: 'transitionend',
-      from: previousStateName,
+      from: from,
       to: this.state.name,
     })
 
-    this.state.executeCallback(this.props)
+    this.state.executeCallback(this.props, { when: 'after', from })
   }
 
   private async sendEvent(ev: GameEvent) {
@@ -154,7 +171,7 @@ abstract class State {
   }
 
   abstract setGamemode(gamemode: Gamemode): GamemodeSetWhen
-  abstract executeCallback(cbs: Callbacks): void
+  abstract executeCallback(cbs: Callbacks, data: OnGameData): void
   abstract transition(): Promise<void>
   protected abstract processEvent(event: GameEvent): void | State | Error
 }
@@ -187,11 +204,11 @@ class Initial extends State {
 
   setGamemode(gamemode: Gamemode): GamemodeSetWhen {
     this.props.gamemode = gamemode
-    return 'next-game'
+    return 'now'
   }
 
-  executeCallback({ onGameInit }: Callbacks): void {
-    onGameInit?.()
+  executeCallback({ onGameInit }: Callbacks, data: OnGameData): void {
+    onGameInit?.({ gamemode: this.props.gamemode.name(), ...data })
   }
 
   async transition() {
@@ -257,8 +274,8 @@ class Ready extends State {
     return 'now'
   }
 
-  executeCallback({ onGameReady }: Callbacks) {
-    onGameReady?.()
+  executeCallback({ onGameReady }: Callbacks, data: OnGameData) {
+    onGameReady?.({ gamemode: this.props.gamemode.name(), ...data })
   }
 
   async transition() {
@@ -302,8 +319,8 @@ class Ongoing extends State {
     return 'next-game'
   }
 
-  executeCallback({ onGameStart }: Callbacks): void {
-    onGameStart?.({ attempt: this.attempt })
+  executeCallback({ onGameStart }: Callbacks, data: OnGameData): void {
+    onGameStart?.({ attempt: this.attempt, ...data })
   }
 
   private onRemoveSquare(square: Square): State | void {
@@ -360,8 +377,8 @@ class End extends State {
     return 'next-game'
   }
 
-  executeCallback({ onGameEnd }: Callbacks): void {
-    onGameEnd?.({ attempt: this.attempt })
+  executeCallback({ onGameEnd }: Callbacks, data: OnGameData): void {
+    onGameEnd?.({ attempt: this.attempt, ...data })
   }
 
   async transition() {
@@ -383,8 +400,8 @@ class Over extends State {
     throw new Error('Game over.')
   }
 
-  executeCallback({ onGameOver }: Callbacks): void {
-    onGameOver?.()
+  executeCallback({ onGameOver }: Callbacks, data: OnGameData): void {
+    onGameOver?.({ ...data })
   }
 
   async transition() {

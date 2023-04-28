@@ -54,9 +54,11 @@ const game = new Game({
   onError(err) {
     console.error(err)
   },
-  onGameEnd({ attempt }) {
+  onGameEnd({ attempt, when }) {
+    if (when === 'after') {
     insertAttempt(db, attempt)
     game.prepare()
+    }
   },
 })
 
