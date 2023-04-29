@@ -54,8 +54,11 @@ export class Grid extends Component<HTMLDivElement> {
 
   private async setSquaresPosition(start = 0, end = this.squares.length) {
     const size = this.squareData.sideLength
-    const cols = (this.width / size) | 0
+    const colsUnrounded = this.width / size
+    const cols = colsUnrounded | 0
+    const offset = (this.width - cols * size) / 2
 
+    this.setStyle('--offset', `${offset}px`)
     this.setStyle('--size', `${size}px`)
 
     await mapAsync(this.squares.slice(start, end), (s, i) => {
