@@ -52,8 +52,11 @@ export class DOMGrid implements Grid {
   }
 
   onSquare(callback: (square: Square, grid: Grid) => unknown): void {
-    this.grid.addSquareEventListener('mousedown', (_, square) => {
-      callback(square, this)
+    this.grid.addSquareEventListener('mousedown', (ev, square) => {
+      if ((ev.buttons || ev.which || ev.button) === 1) {
+        ev.preventDefault()
+        callback(square, this)
+      }
     })
   }
 
