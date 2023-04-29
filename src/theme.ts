@@ -70,6 +70,7 @@ export const setTheme = (name: ThemeName, opts?: { onlyCSS?: boolean }) => {
     }
   })
   props.forEach(([key, value]) => set(key, value))
+  document.querySelector('meta[name="theme-color"]')!.setAttribute('content', theme.colors.background)
   if (opts?.onlyCSS) {
     return
   }
