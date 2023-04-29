@@ -1,13 +1,16 @@
 import type { Attempt } from './attempt'
+import type { GamemodeName } from './gamemode'
 
-type Counts = {
+export interface Counts {
   numAttempts: number
   numWins: number
   numLosses: number
 }
 
-export type Statistics = Counts &
-  ({ gamemode?: never } | { gamemode: 'random' } | { gamemode: 'random-timer' | 'same-square'; fastestWinDuration?: number })
+export interface Statistics extends Counts {
+  gamemode: GamemodeName
+  fastestWinDuration?: number
+}
 
 const EMPTY_COUNTS: Counts = {
   numAttempts: 0,
@@ -15,15 +18,19 @@ const EMPTY_COUNTS: Counts = {
   numLosses: 0,
 } as const
 
-export const addAttemptToStatistics = (acc: Statistics[], curr: Attempt): Statistics[] => {
+export type Accumulator = [] | [Counts, ...Statistics[]]
+
+export const addAttemptToStatistics = (acc: Accumulator, curr: Attempt): Accumulator => {
   if (acc.length === 0) {
-    acc.push({ ...EMPTY_COUNTS })
+    acc = [{ ...EMPTY_COUNTS }]
   }
 
-  let accg = acc.find((s) => 'gamemode' in s && s.gamemode === curr.gamemode)
+  assertAccumulator(acc)
+
+  let accg = acc.find(isStatistics(curr.gamemode))
   if (!accg) {
-    acc.push({ gamemode: curr.gamemode, ...EMPTY_COUNTS })
-    accg = acc[acc.length - 1]
+    accg = { gamemode: curr.gamemode, ...EMPTY_COUNTS }
+    acc = [...acc, accg]
   }
 
   acc[0].numAttempts++
@@ -33,7 +40,7 @@ export const addAttemptToStatistics = (acc: Statistics[], curr: Attempt): Statis
     acc[0].numWins++
     accg.numWins++
 
-    if ('gamemode' in accg && (accg.gamemode === 'random-timer' || accg.gamemode === 'same-square')) {
+    if (accg.gamemode === 'random-timer' || accg.gamemode === 'same-square') {
       if (!accg.fastestWinDuration || accg.fastestWinDuration > curr.duration) {
         accg.fastestWinDuration = curr.duration
       }
@@ -44,4 +51,15 @@ export const addAttemptToStatistics = (acc: Statistics[], curr: Attempt): Statis
   }
 
   return acc
+}
+
+const isStatistics =
+  (gamemode: GamemodeName) =>
+  (s: Counts | Statistics): s is Statistics => {
+    return 'gamemode' in s && s.gamemode === gamemode
+  }
+
+function assertAccumulator(acc: Accumulator): asserts acc is Exclude<Accumulator, []> {
+  void acc
+  return
 }

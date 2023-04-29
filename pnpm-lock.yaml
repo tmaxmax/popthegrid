@@ -1,21 +1,25 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@svelte-put/clickoutside': ^2.0.0
   '@sveltejs/vite-plugin-svelte': ^2.1.0
   '@tsconfig/svelte': ^4.0.1
   '@types/debug': ^4.1.7
+  '@types/humanize-duration': ^3.27.1
   '@typescript-eslint/eslint-plugin': ^5.58.0
   '@typescript-eslint/parser': ^5.58.0
   color-interpolate: ^1.0.5
   cross-env: ^7.0.3
   debug: ^4.3.4
   eslint: ^8.38.0
+  humanize-duration: ^3.28.0
   jsdom: ^21.1.1
   npm-run-all: ^4.1.5
   prettier: ^2.8.7
   prettier-plugin-svelte: ^2.10.0
   resize-observer-polyfill: ^1.5.1
   svelte: ^3.58.0
+  svelte-autosize: ^1.1.0
   svelte-confetti: ^1.2.2
   svelte-material-icons: ^3.0.4
   typescript: ^5.0.4
@@ -24,9 +28,12 @@ specifiers:
   vitest-fetch-mock: ^0.2.2
 
 dependencies:
+  '@svelte-put/clickoutside': 2.0.0
   color-interpolate: 1.0.5
   debug: 4.3.4
+  humanize-duration: 3.28.0
   resize-observer-polyfill: 1.5.1
+  svelte-autosize: 1.1.0
   svelte-confetti: 1.2.2
   svelte-material-icons: 3.0.4_svelte@3.58.0
 
@@ -34,6 +41,7 @@ devDependencies:
   '@sveltejs/vite-plugin-svelte': 2.1.0_svelte@3.58.0+vite@4.2.1
   '@tsconfig/svelte': 4.0.1
   '@types/debug': 4.1.7
+  '@types/humanize-duration': 3.27.1
   '@typescript-eslint/eslint-plugin': 5.58.0_gjoxkwycl3ml7yxlw3iuo7gyna
   '@typescript-eslint/parser': 5.58.0_voubu7prgxjfsfbgx5d4sqnwiy
   cross-env: 7.0.3
@@ -330,6 +338,10 @@ packages:
       fastq: 1.15.0
     dev: true
 
+  /@svelte-put/clickoutside/2.0.0:
+    resolution: {integrity: sha512-04xYxOT5Ti+VlP70+uY/a5tGnVWl3XFgnRiO9bMSHbkwOlzHxSgXyM1NCS4NV09B3i41LRuShgeMrbgU0J5cPg==}
+    dev: false
+
   /@sveltejs/vite-plugin-svelte/2.1.0_svelte@3.58.0+vite@4.2.1:
     resolution: {integrity: sha512-Bc9A8mtTGlhTICdLL/aZ+jyHI3kwtkcXremOH5xwjbNNKOTOtY8nMyG8/oZ5KK8IuUfAn1WL58Bp2tofDJBW0w==}
     engines: {node: ^14.18.0 || >= 16}
@@ -372,6 +384,10 @@ packages:
     resolution: {integrity: sha512-9AonUzyTjXXhEOa0DnqpzZi6VHlqKMswga9EXjpXnnqxwLtdvPPtlO8evrI5D9S6asFRCQ6v+wpiUKbw+vKqyg==}
     dependencies:
       '@types/ms': 0.7.31
+    dev: true
+
+  /@types/humanize-duration/3.27.1:
+    resolution: {integrity: sha512-K3e+NZlpCKd6Bd/EIdqjFJRFHbrq5TzPPLwREk5Iv/YoIjQrs6ljdAUCo+Lb2xFlGNOjGSE0dqsVD19cZL137w==}
     dev: true
 
   /@types/json-schema/7.0.11:
@@ -658,6 +674,10 @@ packages:
   /asynckit/0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
     dev: true
+
+  /autosize/6.0.1:
+    resolution: {integrity: sha512-f86EjiUKE6Xvczc4ioP1JBlWG7FKrE13qe/DxBCpe8GCipCq2nFw73aO8QEBKHfSbYGDN5eB9jXWKen7tspDqQ==}
+    dev: false
 
   /available-typed-arrays/1.0.5:
     resolution: {integrity: sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==}
@@ -1444,6 +1464,10 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /humanize-duration/3.28.0:
+    resolution: {integrity: sha512-jMAxraOOmHuPbffLVDKkEKi/NeG8dMqP8lGRd6Tbf7JgAeG33jjgPWDbXXU7ypCI0o+oNKJFgbSB9FKVdWNI2A==}
+    dev: false
 
   /iconv-lite/0.6.3:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
@@ -2380,6 +2404,12 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
     dev: true
+
+  /svelte-autosize/1.1.0:
+    resolution: {integrity: sha512-CPHq/K0ssrwuHBxFCCOtpWtXZwk4edjEIZ2mJT4KKzjSBq+CO9nOmstjpOh5TpoOf/4MtDcwAwnWmktqANjU6A==}
+    dependencies:
+      autosize: 6.0.1
+    dev: false
 
   /svelte-confetti/1.2.2:
     resolution: {integrity: sha512-LkvWO732jRNmYykWi0IOK7xoBX241p+p+tC7Ef1EcO3TK9b9lpB/vYqKkcwVya+onG2SgQsX2g+JVbVKxq5ixQ==}

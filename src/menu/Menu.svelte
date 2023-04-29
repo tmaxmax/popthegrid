@@ -6,6 +6,7 @@
   import Theme from './internal/Theme.svelte';
   import { getContext } from './context';
   import SillyName from './internal/SillyName.svelte';
+  import Statistics from './internal/Statistics.svelte';
 
   const { game, record } = getContext();
   const events = createEventStore(game.events);
@@ -24,6 +25,7 @@
   <Gamemode />
   <Theme />
   <h2>Statistics</h2>
+  <Statistics />
   <SillyName />
 </section>
 

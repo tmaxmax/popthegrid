@@ -1,6 +1,6 @@
 import type { InsertedAttempt } from '$db/attempt'
 import type { GamemodeName } from '$game/gamemode'
-import { addAttemptToStatistics, type Statistics } from '$game/statistics'
+import { addAttemptToStatistics, type Accumulator } from '$game/statistics'
 import type { ThemeName } from '$theme'
 import { writable, type Readable, type Writable } from 'svelte/store'
 import { getContext as svelteGetContext } from 'svelte'
@@ -18,7 +18,7 @@ export interface Context {
   theme: Writable<ThemeName>
 }
 
-interface StatisticsStore extends Readable<Statistics[]> {
+interface StatisticsStore extends Readable<Accumulator> {
   update(attempt: InsertedAttempt): void
 }
 
@@ -64,14 +64,23 @@ export function configureTitle(name: Writable<string | undefined>, element: Elem
 }
 
 function createStatisticsStore(loader: () => Promise<InsertedAttempt[]>): StatisticsStore {
-  const { subscribe, update } = writable<Statistics[]>([], () => {
-    loader().then((attempts) => update((stats) => attempts.reduce(addAttemptToStatistics, stats)))
+  let hasSubscribed = false
+
+  const { subscribe, update } = writable<Accumulator>([], (set) => {
+    loader().then((attempts) => {
+      set(attempts.reduce(addAttemptToStatistics, []))
+      hasSubscribed = true
+    })
+
+    return () => void 0
   })
 
   return {
     subscribe,
     update(attempt) {
-      update((stats) => addAttemptToStatistics(stats, attempt))
+      if (hasSubscribed) {
+        update((stats) => addAttemptToStatistics(stats, attempt))
+      }
     },
   }
 }
