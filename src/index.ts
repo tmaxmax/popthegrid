@@ -98,8 +98,14 @@ configureTitle(context.name, title, !!record)
 
 const getVersionChangeModalContent = () => {
   const root = document.createElement('div')
+  root.style.height = '100%'
+  root.style.display = 'flex'
+  root.style.alignItems = 'center'
+  root.style.justifyContent = 'center'
+  root.style.flexDirection = 'column'
   const title = document.createElement('h2')
   title.append('Game update!')
+  title.style.marginBottom = '0.2em'
   root.append(title)
   const content = document.createElement('p')
   content.append('The game was updated! Please refresh the page.')

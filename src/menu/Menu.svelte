@@ -31,8 +31,13 @@
   section {
     width: 100%;
     max-width: 920px;
-    height: 100%;
+    min-height: 100%;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    overflow: auto;
   }
 
   h2 {
@@ -50,7 +55,7 @@
 
   @media (min-width: 560px) {
     section {
-      padding: 0 0.6rem;
+      padding: 3rem 0.6rem;
     }
   }
 </style>
