@@ -14,7 +14,13 @@
   $: empty = (value || '') === '';
 
   const onBlur = (ev: HTMLElementEventMap['blur']) => {
+    // This function helps iOS safari to correctly handle input blurring.
+
     const element = ev.target as HTMLInputElement;
+    if (document.activeElement !== element) {
+      return;
+    }
+
     element.setSelectionRange(0, 0, 'forward');
     element.blur();
   };
