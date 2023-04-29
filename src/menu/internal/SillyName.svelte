@@ -22,7 +22,7 @@
 
 <style>
   div {
-    margin-top: 0.8em;
+    margin-top: auto;
     display: flex;
     justify-content: center;
   }
