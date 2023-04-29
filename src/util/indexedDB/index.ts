@@ -81,7 +81,7 @@ function configureVersionChange(db: IDBDatabase, cb: (ev: IDBVersionChangeEvent)
   }
 }
 
-export function fromRequest<T>(req: IDBRequest): Promise<T> {
+export function fromRequest<T>(req: IDBRequest<T>): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     req.onerror = () => {
       reject(req.error)

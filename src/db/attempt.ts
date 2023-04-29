@@ -12,9 +12,10 @@ export function insertAttempt(db: IDBDatabase, attempt: Attempt): Promise<Insert
   return transact(db, {
     stores: ATTEMPTS_STORE,
     mode: 'readwrite',
-    operation(tx) {
+    async operation(tx) {
       const req = tx.objectStore(ATTEMPTS_STORE).add(attempt)
-      return fromRequest<InsertedAttempt>(req)
+      const id = (await fromRequest(req)) as number
+      return { ...attempt, id }
     },
   })
 }
