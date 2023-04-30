@@ -1,13 +1,18 @@
 import type { Context } from 'https://edge.netlify.com'
 import { createOrChange, getContentType, parseHTML, makePossessive, toResponseBody, formatDuration } from '../edge/utils.ts'
-import { Code, GameRecord, GamemodeName, getCodeFromPath, storageKey } from '../edge/share.ts'
+import { GameRecord, GamemodeName, getCodeFromPath, storageKey } from '../edge/share.ts'
 
 export default async (request: Request, context: Context) => {
   const url = new URL(request.url)
   const baseURL = `${url.protocol}//${url.host}`
 
   const code = getCodeFromPath(url.pathname)
-  if (!code || !(code in mockCodes)) {
+  if (!code) {
+    return
+  }
+
+  const res = await fetch(`${baseURL}/.netlify/functions/share?code=${code}`)
+  if (res.status !== 200) {
     return
   }
 
@@ -23,7 +28,7 @@ export default async (request: Request, context: Context) => {
     return new Response(text, response)
   }
 
-  const record = mockCodes[code]
+  const record: GameRecord = await res.json()
   const description = getDescription(record)
 
   createOrChange(
@@ -45,37 +50,17 @@ export default async (request: Request, context: Context) => {
   return new Response(toResponseBody(html), response)
 }
 
-const mockCodes: Record<Code, GameRecord> = {
-  ['r4nd0m' as Code]: {
-    gamemode: 'random',
-    numWins: 5,
-    theme: 'candy',
-  },
-  ['t1m3rM' as Code]: {
-    gamemode: 'random-timer',
-    name: 'Michael',
-    fastestWinDuration: 5450,
-    theme: 'blood',
-  },
-  ['s4m3sQ' as Code]: {
-    gamemode: 'same-square',
-    name: 'Hans',
-    fastestWinDuration: 6000,
-    theme: 'blood',
-  },
-}
-
 const getDescription = (r: GameRecord) => {
   const name = r.name || 'your friend'
   const root = `You're in ${makePossessive(name)} world:`
 
   switch (r.gamemode) {
     case 'random':
-      return `${root} be luckier! They won ${r.numWins} times.`
+      return `${root} be luckier! They won ${r.data.numWins} times.`
     case 'random-timer':
-      return `${root} be quicker! They won in ${formatDuration(r.fastestWinDuration)}.`
+      return `${root} be quicker! They won in ${formatDuration(r.data.fastestWinDuration)}.`
     case 'same-square':
-      return `${root} zerstöre schneller die gleiche Karos! They did it in ${formatDuration(r.fastestWinDuration)}.`
+      return `${root} zerstöre schneller die gleiche Karos! They did it in ${formatDuration(r.data.fastestWinDuration)}.`
     default:
       throw new Error(`Unknown gamemode ${(r as GameRecord).gamemode}`)
   }

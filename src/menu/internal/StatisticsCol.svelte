@@ -1,4 +1,6 @@
 <script lang="ts" context="module">
+  import { entries } from '$util/objects';
+  import type { ThemeName } from '$edge/share';
   import type { Statistics, Counts } from '$game/statistics';
   import type { GamemodeName } from '$game/gamemode';
 
@@ -36,24 +38,72 @@
     return s + 's';
   }
 
-  async function getShareContent(s: Counts | Statistics, key: keyof Statistics, { protocol, host }: Location): Promise<ShareData> {
-    if ('gamemode' in s) {
+  interface ShareContentParams {
+    /** Keep in sync with Go's share.Record */
+    record: {
+      gamemode?: GamemodeName;
+      theme: ThemeName;
+      name?: string;
+      data: Record<string, unknown>;
+      when: Date;
+    };
+    location: Location;
+  }
+
+  interface Response {
+    code: string;
+  }
+
+  interface ResponseErrorData {
+    title: string;
+    status: number;
+    type?: string;
+    detail?: string;
+    instance?: string;
+    reason: string;
+  }
+
+  class ResponseError extends Error {
+    constructor({ status, title, detail, reason }: ResponseErrorData) {
+      super(`${status} ${title}${detail ? ': ' + detail : ''}`, { cause: new Error(reason) });
+    }
+  }
+
+  /** Mimics share.Record from Go code. Keep in sync. */
+  async function getShareContent({ record, location: { protocol, host } }: ShareContentParams): Promise<ShareData> {
+    if (!record.gamemode) {
+      const [[key, value]] = entries(record.data);
+
       return {
-        title: 'Mock.',
-        text: 'This is a mock share.',
+        title: 'Pop the grid!',
+        text: `I have ${value} ${makePlural(display[key as keyof typeof display], value as number)} by now, can you beat me?`,
         url: `${protocol}//${host}`,
       };
     }
 
+    console.log(record);
+
+    const res = await fetch(`${import.meta.env.VITE_FUNCTIONS_ROOT}/share`, {
+      method: 'POST',
+      body: JSON.stringify(record),
+    });
+
+    if (res.status !== 200) {
+      const data: ResponseErrorData = await res.json();
+      throw new ResponseError(data);
+    }
+
+    const { code }: Response = await res.json();
+
     return {
-      title: 'Pop the grid!',
-      text: `I have ${s[key as keyof Counts]} ${makePlural(display[key], s[key as keyof Counts] as number)} by now, can you beat me?`,
-      url: `${protocol}//${host}`,
+      url: `${protocol}//${host}/${code}`,
     };
   }
 </script>
 
 <script lang="ts">
+  import { getContext } from '../context';
+
   import type { KeyOfUnion } from '$util/index';
   import Share from './Share.svelte';
 
@@ -64,11 +114,29 @@
   export let key: Exclude<K, 'gamemode' | 'when'>;
   export let processor: ((key: T[K]) => string) | undefined = undefined;
 
+  const { theme, name } = getContext();
+  let data: ShareContentParams;
+
   $: processed = processor ? processor(statistics[key]) : statistics[key];
+
+  $: if (statistics[key]) {
+    data = {
+      record: {
+        gamemode: 'gamemode' in statistics ? statistics.gamemode : undefined,
+        theme: $theme,
+        name: $name,
+        data: {
+          [key]: statistics[key],
+        },
+        when: statistics.when,
+      },
+      location: window.location,
+    };
+  }
 </script>
 
 {#if isShareable(statistics, key) && statistics[key]}
-  <Share data={() => getShareContent(statistics, key, window.location)}>{processed}</Share>
+  <Share data={() => getShareContent(data)}>{processed}</Share>
 {:else}
   {processed}
 {/if}
