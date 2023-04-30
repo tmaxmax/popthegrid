@@ -3,6 +3,8 @@ package memory
 import (
 	"context"
 	"errors"
+	"math/rand"
+	"time"
 
 	"github.com/tmaxmax/popthegrid/internal/handler"
 	"github.com/tmaxmax/popthegrid/internal/share"
@@ -24,5 +26,21 @@ func (r *Repository) Get(ctx context.Context, code share.Code) (share.Record, er
 }
 
 func (r *Repository) Save(ctx context.Context, record share.Record) (share.Code, error) {
-	return "", errors.New("unimplemented")
+	src := rand.NewSource(time.Now().UnixNano())
+	for i := 0; i < 10; i++ {
+		code := share.NewCode(src)
+		if _, ok := r.Data[code]; ok {
+			continue
+		}
+
+		r.Data[code] = record
+
+		return code, nil
+	}
+
+	return "", handler.RepositoryError{
+		Kind:  handler.ErrorInternal,
+		Cause: errors.New("couldn't generate unique code"),
+	}
+
 }
