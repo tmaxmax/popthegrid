@@ -1,13 +1,13 @@
 export type Code = string & { __brand: 'code' }
 
-export type GamemodeName = 'random' | 'random-timer' | 'same-square' // keep in sync with FE
+export type GamemodeName = 'random' | 'random-timer' | 'same-square' | 'passthrough' // keep in sync with FE
 
-export type ThemeName = 'candy' | 'blood' // keep in sync with FE
+export type ThemeName = 'candy' | 'blood' | 'noir' | 'cozy' // keep in sync with FE
 
 // keep in sync with Go's share.Record
 export type GameRecord = { name?: string; theme: ThemeName; when: Date } & (
   | { gamemode: 'random'; data: { numWins: number } }
-  | { gamemode: 'random-timer' | 'same-square'; data: { fastestWinDuration: number } }
+  | { gamemode: 'random-timer' | 'same-square' | 'passthrough'; data: { fastestWinDuration: number } }
 )
 
 export const getCodeFromPath = (path: string): Code | undefined => {

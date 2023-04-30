@@ -166,6 +166,8 @@ const main = async () => {
     context: new Map([[contextKey, context]]),
   })
 
+  document.body.style.transition = 'background-color 0.4s ease-out'
+
   await game.prepare()
 }
 

@@ -42,7 +42,7 @@ export const addAttemptToStatistics = (acc: Accumulator, curr: Attempt): Accumul
     acc[0].numWins++
     accg.numWins++
 
-    if (accg.gamemode === 'random-timer' || accg.gamemode === 'same-square') {
+    if (accg.gamemode === 'random-timer' || accg.gamemode === 'same-square' || accg.gamemode === 'passthrough') {
       if (!accg.fastestWinDuration || accg.fastestWinDuration > curr.duration) {
         accg.fastestWinDuration = curr.duration
         accg.when = curr.startedAt

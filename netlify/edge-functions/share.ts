@@ -61,6 +61,8 @@ const getDescription = (r: GameRecord) => {
       return `${root} be quicker! They won in ${formatDuration(r.data.fastestWinDuration)}.`
     case 'same-square':
       return `${root} zerstöre schneller die gleiche Karos! They did it in ${formatDuration(r.data.fastestWinDuration)}.`
+    case 'passthrough':
+      return `${root} do you have the FFITW? Beat ${formatDuration(r.data.fastestWinDuration)} to win!`
     default:
       throw new Error(`Unknown gamemode ${(r as GameRecord).gamemode}`)
   }
@@ -70,4 +72,5 @@ const metaAlts: Record<GamemodeName, string> = {
   random: 'be more lucky than me.',
   'random-timer': 'beat me on time.',
   'same-square': 'destroy faster the same squares.',
+  passthrough: 'be faster than me.',
 }

@@ -6,7 +6,7 @@
     maxDecimalPoints: 2,
   });
 
-  const durationProcessor = (n?: number | GamemodeName) => {
+  const durationProcessor = (n?: number | GamemodeName | Date) => {
     // I don't have enough patience to fix the types.
     if (!n) return '-';
     if (typeof n !== 'number') throw new Error('Something went wrong.');

@@ -19,6 +19,7 @@
     'random-timer': ['fastestWinDuration'],
     'same-square': ['fastestWinDuration'],
     total: ['numWins', 'numAttempts'],
+    passthrough: ['fastestWinDuration'],
   };
 
   function isShareable(s: Counts | Statistics, key: keyof Statistics) {
@@ -111,6 +112,9 @@
         break;
       case 'same-square':
         text = 'Destroy the same squares! Can you do it quicker?';
+        break;
+      case 'passthrough':
+        text = 'Do you have the fastest fingers in the world? Or at least faster than mine?';
         break;
       default:
         throw new UnreachableError(record.gamemode, 'unimplemented gamemode');

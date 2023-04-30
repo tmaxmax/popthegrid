@@ -92,7 +92,7 @@
   }
 
   .next-game {
-    color: #f4fd1f;
+    color: var(--color-warning);
     opacity: 90%;
   }
 </style>

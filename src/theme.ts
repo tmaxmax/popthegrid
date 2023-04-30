@@ -49,6 +49,32 @@ export const themes = {
       squares: ['#7d1128', '#f7a493', '#3c0919', '#bc1300', '#ffa061'],
     },
   },
+  noir: {
+    display: 'Noir',
+    description: 'Inspired by the foggiest and haziest of the mornings. Try to play Gleich!',
+    colors: {
+      background: '#D5D5D8',
+      heading: '#070A0B',
+      body: '#3D3D3D',
+      assurance: '#2D8B81',
+      warning: '#FDE849',
+      danger: '#EF233C',
+      squares: ['#BABBBF', '#B2B3B7', '#ADB0B3', '#A8A9AD', '#A4A5A8'],
+    },
+  },
+  cozy: {
+    display: 'Cozy',
+    description: 'Calm and content – take it easy! With a vintage touch.',
+    colors: {
+      background: '#A5DBF5',
+      heading: '#06070E',
+      body: '#2F3734',
+      assurance: '#0C7C59',
+      warning: '#FFB917',
+      danger: '#E0002D',
+      squares: ['#C4CEA1', '#D9E0A3', '#FDF2B0', '#F3D17C', '#CF9963'],
+    },
+  },
 } satisfies Record<string, Theme>
 
 export const defaultTheme = 'candy' satisfies ThemeName

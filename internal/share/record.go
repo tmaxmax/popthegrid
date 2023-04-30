@@ -10,7 +10,7 @@ type Gamemode string
 
 func (g Gamemode) Validate() error {
 	switch g {
-	case GamemodeRandom, GamemodeRandomTimer, GamemodeSameSquare:
+	case GamemodeRandom, GamemodeRandomTimer, GamemodeSameSquare, GamemodePassthrough:
 		return nil
 	default:
 		return fmt.Errorf("invalid gamemode %q", g)
@@ -25,13 +25,14 @@ const (
 	GamemodeRandom      Gamemode = "random"
 	GamemodeRandomTimer Gamemode = "random-timer"
 	GamemodeSameSquare  Gamemode = "same-square"
+	GamemodePassthrough Gamemode = "passthrough"
 )
 
 type Theme string
 
 func (t Theme) Validate() error {
 	switch t {
-	case ThemeBlood, ThemeCandy:
+	case ThemeBlood, ThemeCandy, ThemeNoir, ThemeCozy:
 		return nil
 	default:
 		return fmt.Errorf("invalid theme %q", t)
@@ -45,6 +46,8 @@ func (t *Theme) UnmarshalJSON(data []byte) error {
 const (
 	ThemeCandy Theme = "candy"
 	ThemeBlood Theme = "blood"
+	ThemeNoir  Theme = "noir"
+	ThemeCozy  Theme = "cozy"
 )
 
 type Record struct {
