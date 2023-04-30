@@ -5,7 +5,7 @@ export interface OpenOptions {
   onVersionChange: (ev: IDBVersionChangeEvent) => void
 }
 
-type ErrorCode = 'blocked' | 'version-change' | 'config-error' | 'request-error' | 'transaction-error' | 'result-error'
+type ErrorCode = 'blocked' | 'version-change' | 'config-error' | 'request-error' | 'transaction-error' | 'result-error' | 'abort'
 
 const errorMessages: Readonly<Record<ErrorCode, string>> = {
   blocked: 'The user blocked the creation of an IndexedDB',
@@ -14,6 +14,7 @@ const errorMessages: Readonly<Record<ErrorCode, string>> = {
   'transaction-error': 'The transaction failed',
   'result-error': 'Failed to get result',
   'version-change': 'The database version was changed',
+  abort: 'The transaction was aborted',
 }
 
 export class OperationError extends Error {
