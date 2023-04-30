@@ -39,7 +39,7 @@ export const themes = {
     colors: {
       background: '#080c0c',
       heading: '#f4f9e9',
-      body: '#C1C9AF',
+      body: '#c8ceb9',
       assurance: '#20bf55',
       warning: '#ffbe0b',
       danger: '#bc1300',
