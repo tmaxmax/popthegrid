@@ -11,6 +11,8 @@
 </script>
 
 <script lang="ts">
+  import { fade } from 'svelte/transition';
+
   type T = $$Generic<string>;
 
   export let options: Option<T>[];
@@ -44,7 +46,11 @@
   </div>
 </fieldset>
 {#if selectedOrHovered?.description}
-  <p>{selectedOrHovered.description}</p>
+  <p>
+    {#key selectedOrHovered.value}
+      <span transition:fade={{ duration: 100 }}>{selectedOrHovered.description}</span>
+    {/key}
+  </p>
 {/if}
 
 <style>
@@ -169,5 +175,10 @@
 
   p {
     margin-top: 0.2em;
+    display: grid;
+  }
+
+  p span {
+    grid-area: 1 / 1 / 2 / 2;
   }
 </style>
