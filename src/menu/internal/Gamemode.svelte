@@ -13,14 +13,6 @@
     }));
   };
 
-  const isWideMedia = window.matchMedia('(min-width: 600px)');
-
-  const isWide = readable(isWideMedia.matches, (set) => {
-    const callback = () => set(isWideMedia.matches);
-    isWideMedia.addEventListener('change', callback);
-    return () => isWideMedia.removeEventListener('change', callback);
-  });
-
   const getWhenDisplay = (when: GamemodeSetWhen, isWide: boolean) => {
     switch (when) {
       case 'now':
@@ -37,6 +29,7 @@
   };
 
   const options = getGamemodeOptions();
+  const isWide = createMediaMatcher('(min-width: 600px)');
 </script>
 
 <script lang="ts">
