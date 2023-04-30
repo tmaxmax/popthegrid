@@ -84,6 +84,7 @@ export class SillyName extends Component {
 
   destroy(): void {
     this.remove()
+    this.controller.abort()
   }
 
   setTheme(name: ThemeName) {
