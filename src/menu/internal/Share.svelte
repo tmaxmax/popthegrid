@@ -19,12 +19,13 @@
   export let data: () => Promise<ShareData>;
 
   let clicked = false;
-  let toShare: ShareData | undefined;
+  let toShare: ShareData | Error | undefined;
   let resolvePopUp: (() => void) | undefined;
   let popUpPosition: { x: number; y: number } | undefined;
   let absolute: HTMLElement | undefined;
 
   $: absolute && document.body.appendChild(absolute);
+  $: textAreaContent = toShare ? (toShare instanceof Error ? toShare.message : toShare.text + '\n' + toShare.url) : undefined;
 
   const popUpWidth = 20 * 16;
   const modalMargin = 2 * 16;
@@ -35,7 +36,17 @@
     }
 
     clicked = true;
-    toShare = await data();
+
+    try {
+      toShare = await data();
+    } catch (err) {
+      console.error({ err });
+      if (err instanceof Error) {
+        toShare = err;
+      } else {
+        throw err;
+      }
+    }
 
     await new Promise<void>((resolve) => {
       $modal?.close();
@@ -47,7 +58,6 @@
         x = window.innerWidth - modalMargin - popUpWidth;
       }
       popUpPosition = { x, y: e.clientY };
-      console.log({ popUpPosition });
       resolvePopUp = resolve;
     });
 
@@ -56,6 +66,10 @@
   };
 
   const onTextAreaClick = (e: Event) => {
+    if (toShare instanceof Error) {
+      return;
+    }
+
     (e.target as HTMLTextAreaElement).select();
   };
 </script>
@@ -70,14 +84,23 @@
     bind:this={absolute}>
     <div class="popup" transition:fade={{ duration: 400, easing: cubicOut }} use:clickoutside on:clickoutside={resolvePopUp}>
       <label for="share-text">
-        {#if toShare.url && !(toShare.text || toShare.title)}
+        {#if toShare instanceof Error}
+          An error occurred :( try again later!
+        {:else if toShare.url && !(toShare.text || toShare.title)}
           Share this link with your friends!
         {:else}
           Share the following with your friends!
         {/if}
       </label>
-      <textarea on:click={onTextAreaClick} use:autosize name="share-text" autocomplete="off" autocorrect="off" cols="29" readonly
-        >{toShare.text}{'\n'}{toShare.url}</textarea>
+      <textarea
+        class:error={toShare instanceof Error}
+        on:click={onTextAreaClick}
+        use:autosize
+        name="share-text"
+        autocomplete="off"
+        autocorrect="off"
+        cols="29"
+        readonly>{textAreaContent}</textarea>
     </div>
   </div>
 {/if}
@@ -155,5 +178,10 @@
     border-radius: var(--padding);
     padding: var(--padding);
     border: 0.2em solid var(--color-body);
+  }
+
+  textarea.error,
+  textarea.error:hover {
+    color: var(--color-danger);
   }
 </style>
