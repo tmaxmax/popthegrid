@@ -10,6 +10,7 @@
 
 <script lang="ts">
   import Share from 'svelte-material-icons/Share.svelte';
+  import Loading from 'svelte-material-icons/Loading.svelte';
   import { fade } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
   import { clickoutside } from '@svelte-put/clickoutside';
@@ -23,6 +24,7 @@
   let resolvePopUp: (() => void) | undefined;
   let popUpPosition: { x: number; y: number } | undefined;
   let absolute: HTMLElement | undefined;
+  let loading = false;
 
   $: absolute && document.body.appendChild(absolute);
   $: textAreaContent = toShare ? (toShare instanceof Error ? toShare.message : toShare.text + '\n' + toShare.url) : undefined;
@@ -38,9 +40,11 @@
     clicked = true;
 
     try {
+      loading = true;
       toShare = await data();
+      loading = false;
     } catch (err) {
-      console.error({ err });
+      loading = false;
       if (err instanceof Error) {
         toShare = err;
       } else {
@@ -75,7 +79,14 @@
 </script>
 
 <div class="button">
-  <button on:click|stopPropagation={onClick}><slot /><Share class="share-icon" /></button>
+  <button on:click|stopPropagation={onClick}>
+    <slot />
+    {#if loading}
+      <Loading class="share-icon share-icon--loading" />
+    {:else}
+      <Share class="share-icon" />
+    {/if}
+  </button>
 </div>
 {#if resolvePopUp && toShare && popUpPosition}
   <div
@@ -183,5 +194,15 @@
   textarea.error,
   textarea.error:hover {
     color: var(--color-danger);
+  }
+
+  @keyframes spin {
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  :global(.share-icon--loading) {
+    animation: spin 2s linear infinite;
   }
 </style>
