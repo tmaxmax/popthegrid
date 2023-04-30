@@ -5,6 +5,7 @@ export interface Counts {
   numAttempts: number
   numWins: number
   numLosses: number
+  when: Date
 }
 
 export interface Statistics extends Counts {
@@ -16,6 +17,7 @@ const EMPTY_COUNTS: Counts = {
   numAttempts: 0,
   numWins: 0,
   numLosses: 0,
+  when: new Date(),
 } as const
 
 export type Accumulator = [] | [Counts, ...Statistics[]]
@@ -43,11 +45,16 @@ export const addAttemptToStatistics = (acc: Accumulator, curr: Attempt): Accumul
     if (accg.gamemode === 'random-timer' || accg.gamemode === 'same-square') {
       if (!accg.fastestWinDuration || accg.fastestWinDuration > curr.duration) {
         accg.fastestWinDuration = curr.duration
+        accg.when = curr.startedAt
       }
     }
   } else {
     acc[0].numLosses++
     accg.numLosses++
+  }
+
+  if (acc[0].when.getTime() < curr.startedAt.getDate()) {
+    acc[0].when = curr.startedAt
   }
 
   return acc

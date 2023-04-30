@@ -2,7 +2,7 @@
   import type { Statistics, Counts } from '$game/statistics';
   import type { GamemodeName } from '$game/gamemode';
 
-  const display: Record<keyof Statistics, string> = {
+  const display: Record<Exclude<keyof Statistics, 'when'>, string> = {
     fastestWinDuration: 'fastest win',
     gamemode: 'gamemode',
     numAttempts: 'attempt',
@@ -61,7 +61,7 @@
   type K = KeyOfUnion<T>;
 
   export let statistics: T;
-  export let key: K;
+  export let key: Exclude<K, 'gamemode' | 'when'>;
   export let processor: ((key: T[K]) => string) | undefined = undefined;
 
   $: processed = processor ? processor(statistics[key]) : statistics[key];
