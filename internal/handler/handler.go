@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/tmaxmax/popthegrid/internal/share"
@@ -31,6 +32,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		default:
 			err = fmt.Errorf("%v", v)
 		}
+
+		log.Println(err)
 
 		p := problem.Of(http.StatusInternalServerError).Append(problem.Wrap(err), problem.Detail("something went terribly wrong"))
 		p.WriteHeaderTo(w)
