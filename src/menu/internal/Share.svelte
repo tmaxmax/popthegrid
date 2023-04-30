@@ -22,6 +22,9 @@
   let toShare: ShareData | undefined;
   let resolvePopUp: (() => void) | undefined;
   let popUpPosition: { x: number; y: number } | undefined;
+  let absolute: HTMLElement | undefined;
+
+  $: absolute && document.body.appendChild(absolute);
 
   const popUpWidth = 20 * 16;
   const modalMargin = 2 * 16;
@@ -61,7 +64,10 @@
   <button on:click|stopPropagation={onClick}><slot /><Share class="share-icon" /></button>
 </div>
 {#if resolvePopUp && toShare && popUpPosition}
-  <div class="absolute" style="--width: {popUpWidth}px; --position-x: {popUpPosition.x}px; --position-y: {popUpPosition.y}px">
+  <div
+    class="absolute"
+    style="--width: {popUpWidth}px; --position-x: {popUpPosition.x}px; --position-y: {popUpPosition.y}px"
+    bind:this={absolute}>
     <div class="popup" transition:fade={{ duration: 400, easing: cubicOut }} use:clickoutside on:clickoutside={resolvePopUp}>
       <label for="share-text">
         {#if toShare.url && !(toShare.text || toShare.title)}
@@ -104,6 +110,12 @@
   :global(.share-icon) {
     margin-bottom: 0.2em;
     margin-left: 0.4em;
+  }
+
+  label {
+    color: var(--color-body);
+    font-weight: bold;
+    font-family: var(--font-body);
   }
 
   textarea {

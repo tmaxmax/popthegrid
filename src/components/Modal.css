@@ -6,7 +6,6 @@
   left: 0;
   display: flex;
   justify-content: center;
-  z-index: 100;
   visibility: visible;
   background-color: var(--color-background-opaque);
   -webkit-backdrop-filter: blur(10px);
