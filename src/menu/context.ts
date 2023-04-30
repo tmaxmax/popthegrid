@@ -16,6 +16,7 @@ export interface Context {
   gamemode: Writable<GamemodeName>
   nextGamemode: Writable<GamemodeName>
   theme: Writable<ThemeName>
+  database: IDBDatabase
 }
 
 interface StatisticsStore extends Readable<Accumulator> {
@@ -29,9 +30,10 @@ export interface ContextInput {
   game: Game
   gamemode: GamemodeName
   theme: ThemeName
+  database: IDBDatabase
 }
 
-export function createContext({ name, attemptsLoader, gamemode, game, theme }: ContextInput): Context {
+export function createContext({ name, attemptsLoader, gamemode, game, theme, database }: ContextInput): Context {
   return {
     name: writable<string | undefined>(name),
     game,
@@ -39,6 +41,7 @@ export function createContext({ name, attemptsLoader, gamemode, game, theme }: C
     gamemode: writable<GamemodeName>(gamemode),
     nextGamemode: writable<GamemodeName>(gamemode),
     theme: writable<ThemeName>(theme),
+    database,
   }
 }
 

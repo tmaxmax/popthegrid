@@ -1,6 +1,8 @@
 <script lang="ts" context="module">
+  import { findCachedLink, type CodeInfo, cacheLink } from '$db/link';
+
   import { entries } from '$util/objects';
-  import type { ThemeName } from '$edge/share';
+  import type { Code, ThemeName } from '$edge/share';
   import type { Statistics, Counts } from '$game/statistics';
   import type { GamemodeName } from '$game/gamemode';
 
@@ -51,7 +53,7 @@
   }
 
   interface Response {
-    code: string;
+    code: Code;
   }
 
   interface ResponseErrorData {
@@ -70,8 +72,8 @@
   }
 
   /** Mimics share.Record from Go code. Keep in sync. */
-  async function getShareContent({ record, location: { protocol, host } }: ShareContentParams): Promise<ShareData> {
-    if (!record.gamemode) {
+  async function getShareContent(db: IDBDatabase, { record, location: { protocol, host } }: ShareContentParams): Promise<ShareData> {
+    if (!recordCanBeCodeInfo(record)) {
       const [[key, value]] = entries(record.data);
 
       return {
@@ -81,19 +83,23 @@
       };
     }
 
-    console.log(record);
+    let code = await findCachedLink(db, record);
 
-    const res = await fetch(`${import.meta.env.VITE_FUNCTIONS_ROOT}/share`, {
-      method: 'POST',
-      body: JSON.stringify(record),
-    });
+    if (!code) {
+      const res = await fetch(`${import.meta.env.VITE_FUNCTIONS_ROOT}/share`, {
+        method: 'POST',
+        body: JSON.stringify(record),
+      });
 
-    if (res.status !== 200) {
-      const data: ResponseErrorData = await res.json();
-      throw new ResponseError(data);
+      if (res.status !== 200) {
+        const data: ResponseErrorData = await res.json();
+        throw new ResponseError(data);
+      }
+
+      const { code: newCode }: Response = await res.json();
+      code = newCode;
+      await cacheLink(db, { ...record, code });
     }
-
-    const { code }: Response = await res.json();
 
     let text: string;
     switch (record.gamemode!) {
@@ -116,6 +122,10 @@
       text,
     };
   }
+
+  function recordCanBeCodeInfo(r: Omit<ShareContentParams['record'], 'data'>): r is CodeInfo {
+    return 'gamemode' in r && !!r.gamemode;
+  }
 </script>
 
 <script lang="ts">
@@ -131,7 +141,7 @@
   export let key: Exclude<K, 'gamemode' | 'when'>;
   export let processor: ((key: T[K]) => string) | undefined = undefined;
 
-  const { theme, name } = getContext();
+  const { theme, name, database } = getContext();
   let data: ShareContentParams;
 
   $: processed = processor ? processor(statistics[key]) : statistics[key];
@@ -153,7 +163,7 @@
 </script>
 
 {#if isShareable(statistics, key) && statistics[key]}
-  <Share data={() => getShareContent(data)}>{processed}</Share>
+  <Share data={() => getShareContent(database, data)}>{processed}</Share>
 {:else}
   {processed}
 {/if}

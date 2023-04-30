@@ -1,6 +1,7 @@
 import { createConfigurator } from '$util/indexedDB/schema'
 import type { Schema, Migration } from '$util/indexedDB/schema'
 import { ATTEMPTS_STORE } from './attempt'
+import { LINKS_INDEX, LINKS_STORE } from './link'
 
 const migrations: Migration[] = [
   (db) => {
@@ -21,6 +22,13 @@ const migrations: Migration[] = [
     store.deleteIndex('isWin')
     store.deleteIndex('startedAt')
     store.deleteIndex('duration')
+  },
+  (db) => {
+    const store = db.createObjectStore(LINKS_STORE, {
+      keyPath: 'code',
+    })
+
+    store.createIndex(LINKS_INDEX, ['name', 'gamemode', 'when', 'theme'], { unique: true })
   },
 ]
 

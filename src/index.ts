@@ -15,7 +15,7 @@ import { defaultGamemode, gamemodes } from './gamemode'
 import { clearSharedRecord, getSharedRecord } from '$share/record'
 import MenuAccess from './menu/MenuAccess.svelte'
 import { getTheme, setTheme, defaultTheme, listenToThemeChanges, type ThemeName } from './theme'
-import { contextKey, createContext, configureTitle } from './menu/context'
+import { contextKey, createContext, configureTitle, type Context } from './menu/context'
 import { getName, listenToNameChanges } from '$share/name'
 
 const record = getSharedRecord()
@@ -58,7 +58,7 @@ const game = new Game({
   },
   onGameInit({ gamemode, when }) {
     if (when === 'after') {
-      context.gamemode.set(gamemode)
+      context?.gamemode.set(gamemode)
     }
   },
   onGameReady({ gamemode, from, when }) {
@@ -76,28 +76,6 @@ const game = new Game({
     }
   },
 })
-
-const context = createContext({
-  name: getName(),
-  game,
-  record,
-  gamemode,
-  theme,
-  attemptsLoader() {
-    return retrieveAttempts(db)
-  },
-})
-
-listenToThemeChanges((themeName) => {
-  setTheme(themeName, { onlyCSS: true })
-  context.theme.set(themeName)
-})
-
-listenToNameChanges(({ newValue }) => {
-  context.name.set(newValue)
-})
-
-configureTitle(context.name, title, !!record)
 
 const attemptsChan = new BroadcastChannel('attempts')
 attemptsChan.addEventListener('message', (ev: MessageEvent<InsertedAttempt>) => {
@@ -144,12 +122,8 @@ const getRecordClearRedirect = () => {
   })
 }
 
-new MenuAccess({
-  target: footer,
-  context: new Map([[contextKey, context]]),
-})
-
 let db: IDBDatabase
+let context: Context
 
 const main = async () => {
   db = await openIndexedDB(window.indexedDB, {
@@ -163,6 +137,34 @@ const main = async () => {
   if (record) {
     await getRecordClearRedirect().create(objective, false)
   }
+
+  context = createContext({
+    name: getName(),
+    game,
+    record,
+    gamemode,
+    theme,
+    database: db,
+    attemptsLoader() {
+      return retrieveAttempts(db)
+    },
+  })
+
+  listenToThemeChanges((themeName) => {
+    setTheme(themeName, { onlyCSS: true })
+    context.theme.set(themeName)
+  })
+
+  listenToNameChanges(({ newValue }) => {
+    context.name.set(newValue)
+  })
+
+  configureTitle(context.name, title, !!record)
+
+  new MenuAccess({
+    target: footer,
+    context: new Map([[contextKey, context]]),
+  })
 
   await game.prepare()
 }
