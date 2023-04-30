@@ -21,7 +21,6 @@ const migrations: Migration[] = [
     store.deleteIndex('isWin')
     store.deleteIndex('startedAt')
     store.deleteIndex('duration')
-    store.clear()
   },
 ]
 
