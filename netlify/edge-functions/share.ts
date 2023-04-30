@@ -56,7 +56,7 @@ const getDescription = (r: GameRecord) => {
 
   switch (r.gamemode) {
     case 'random':
-      return `${root} be luckier! They won ${r.data.numWins} times.`
+      return `${root} can you win more? They won ${r.data.numWins} times.`
     case 'random-timer':
       return `${root} be quicker! They won in ${formatDuration(r.data.fastestWinDuration)}.`
     case 'same-square':
