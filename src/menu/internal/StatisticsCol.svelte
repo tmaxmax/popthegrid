@@ -167,6 +167,3 @@
 {:else}
   {processed}
 {/if}
-
-<style>
-</style>
