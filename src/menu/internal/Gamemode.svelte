@@ -1,16 +1,21 @@
 <script context="module" lang="ts">
   import { type Option } from './Fieldset.svelte';
-  import { entries } from '$util/objects';
+  import { entries, keys } from '$util/objects';
   import { type GamemodeSetWhen } from '$game';
   import { type GamemodeName } from '$game/gamemode';
   import { gamemodes } from '../../gamemode';
-  import { readable } from 'svelte/store';
+  import { createMediaMatcher } from './media';
 
-  const getGamemodeOptions = (): Option<GamemodeName>[] => {
-    return entries(gamemodes).map(([value, { display }]) => ({
+  const getGamemodeOptions = (): Option<GamemodeName | 'random-pick'>[] => {
+    const options: Option<GamemodeName | 'random-pick'>[] = entries(gamemodes).map(([value, { display }]) => ({
       display,
       value,
     }));
+    options.push({
+      value: 'random-pick',
+      display: 'Random',
+    });
+    return options;
   };
 
   const getWhenDisplay = (when: GamemodeSetWhen, isWide: boolean) => {
@@ -34,7 +39,7 @@
 
 <script lang="ts">
   import Fieldset from './Fieldset.svelte';
-  import { wait } from '$util/index';
+  import { randInt, wait } from '$util/index';
   import { fade } from 'svelte/transition';
   import { getContext } from '../context';
 
@@ -42,8 +47,16 @@
 
   let waitPromise: Promise<void> | undefined;
   let when: GamemodeSetWhen | undefined;
+  let selectedValue: GamemodeName | 'random-pick' = $nextGamemode;
 
   const onChange = () => {
+    if (selectedValue === 'random-pick') {
+      const choices = keys(gamemodes).filter((v) => v !== $nextGamemode);
+      $nextGamemode = selectedValue = choices[randInt(choices.length)];
+    } else {
+      $nextGamemode = selectedValue;
+    }
+
     when = game.setGamemode(gamemodes[$nextGamemode].create());
     if (when === 'now') {
       $gamemode = $nextGamemode;
@@ -52,7 +65,7 @@
   };
 </script>
 
-<Fieldset name="gamemode" {options} bind:selectedValue={$nextGamemode} let:value on:change={onChange}>
+<Fieldset name="gamemode" {options} bind:selectedValue let:value on:change={onChange}>
   <span slot="legend">
     Gamemode{#if !$isWide && when}
       {#await waitPromise}
