@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -15,30 +14,23 @@ import (
 )
 
 func main() {
-	isDev := os.Getenv("DEV") == "true"
 	opts := cors.Options{
 		AllowedOrigins: []string{
 			os.Getenv("URL"),
+			os.Getenv("NETLIFY_URL"),
+			os.Getenv("NETLIFY_DEPLOY_URL"),
+			os.Getenv("NETLIFY_DEPLOY_PRIME_URL"),
 		},
 		AllowedMethods: []string{
 			http.MethodGet,
 			http.MethodPost,
 		},
-		Debug: isDev,
+		Debug: os.Getenv("DEV") == "true",
 	}
 
-	url := fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
-		os.Getenv("POSTGRES_USER"),
-		os.Getenv("POSTGRES_PASSWORD"),
-		os.Getenv("POSTGRES_HOSTNAME"),
-		os.Getenv("POSTGRES_PORT"),
-		os.Getenv("POSTGRES_DB"),
-		getSSLMode(isDev),
-	)
-	log.Println(url)
+	log.Println(opts)
 
-	config, err := pgx.ParseConfig(url)
+	config, err := pgx.ParseConfig(os.Getenv("DATABASE_URL"))
 	if err != nil {
 		panic(err)
 	}
@@ -50,11 +42,4 @@ func main() {
 	})
 
 	lambda.Start(httpadapter.New(cors).ProxyWithContext)
-}
-
-func getSSLMode(isDev bool) string {
-	if isDev {
-		return "disable"
-	}
-	return "required"
 }

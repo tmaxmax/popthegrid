@@ -18,6 +18,3 @@ path = "/*"
 from = "/"
 status = 200
 to = "/index.html"
-
-[context.dev.environment]
-DEV = true
