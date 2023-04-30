@@ -3,7 +3,6 @@ package pg
 import (
 	"context"
 	"errors"
-	"log"
 	"math/rand"
 	"time"
 
@@ -78,8 +77,7 @@ func (r *Repository) trySaveWithCode(ctx context.Context, tx pgx.Tx, record shar
 	}
 	defer rollbackWithTimeout(ptx)
 
-	tag, err := ptx.Exec(ctx, query, code, record.Name, record.Gamemode, record.Theme, record.When, record.Data)
-	log.Println(tag)
+	_, err = ptx.Exec(ctx, query, code, record.Name, record.Gamemode, record.Theme, record.When, record.Data)
 	if err == nil {
 		if err := commitWithTimeout(ptx); err != nil {
 			return false, createError(handler.ErrorInternal, err)
