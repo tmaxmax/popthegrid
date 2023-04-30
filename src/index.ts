@@ -9,7 +9,7 @@ import { assertNonNull } from '$util/assert'
 import { Modal } from '$components/Modal'
 import { Game } from '$game'
 import { DOMGrid } from '$game/grid/dom'
-import { insertAttempt, retrieveAttempts } from '$db/attempt'
+import { insertAttempt, retrieveAttempts, type InsertedAttempt } from '$db/attempt'
 import { Redirect } from '$components/Redirect'
 import { defaultGamemode, gamemodes } from './gamemode'
 import { clearSharedRecord, getSharedRecord } from '$share/record'
@@ -68,7 +68,10 @@ const game = new Game({
   },
   onGameEnd({ attempt, when }) {
     if (when === 'after') {
-      insertAttempt(db, attempt).then(context.statistics.update)
+      insertAttempt(db, attempt).then((attempt) => {
+        context.statistics.update(attempt)
+        attemptsChan.postMessage(attempt)
+      })
       game.prepare()
     }
   },
@@ -95,6 +98,11 @@ listenToNameChanges(({ newValue }) => {
 })
 
 configureTitle(context.name, title, !!record)
+
+const attemptsChan = new BroadcastChannel('attempts')
+attemptsChan.addEventListener('message', (ev: MessageEvent<InsertedAttempt>) => {
+  context.statistics.update(ev.data)
+})
 
 const getVersionChangeModalContent = () => {
   const root = document.createElement('div')
