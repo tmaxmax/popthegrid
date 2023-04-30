@@ -95,8 +95,25 @@
 
     const { code }: Response = await res.json();
 
+    let text: string;
+    switch (record.gamemode!) {
+      case 'random':
+        text = 'Can you win more than me at Pop the grid?';
+        break;
+      case 'random-timer':
+        text = 'Can you Pop the grid quicker than me?';
+        break;
+      case 'same-square':
+        text = 'Destroy the same squares! Can you do it quicker?';
+        break;
+      default:
+        throw new UnreachableError(record.gamemode, 'unimplemented gamemode');
+    }
+
     return {
+      title: 'Pop the grid!',
       url: `${protocol}//${host}/${code}`,
+      text,
     };
   }
 </script>
@@ -104,7 +121,7 @@
 <script lang="ts">
   import { getContext } from '../context';
 
-  import type { KeyOfUnion } from '$util/index';
+  import { UnreachableError, type KeyOfUnion } from '$util/index';
   import Share from './Share.svelte';
 
   type T = $$Generic<Counts | Statistics>;
