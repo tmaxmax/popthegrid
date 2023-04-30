@@ -1,19 +1,21 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/awslabs/aws-lambda-go-api-proxy/httpadapter"
+	"github.com/jackc/pgx/v5"
 	"github.com/rs/cors"
 	"github.com/tmaxmax/popthegrid/internal/handler"
-	"github.com/tmaxmax/popthegrid/internal/repo/memory"
-	"github.com/tmaxmax/popthegrid/internal/share"
+	"github.com/tmaxmax/popthegrid/internal/repo/pg"
 )
 
 func main() {
+	isDev := os.Getenv("DEV") == "true"
 	opts := cors.Options{
 		AllowedOrigins: []string{
 			os.Getenv("URL"),
@@ -22,40 +24,37 @@ func main() {
 			http.MethodGet,
 			http.MethodPost,
 		},
+		Debug: isDev,
+	}
 
-		Debug: os.Getenv("DEV") == "true",
+	url := fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		os.Getenv("POSTGRES_USER"),
+		os.Getenv("POSTGRES_PASSWORD"),
+		os.Getenv("POSTGRES_HOSTNAME"),
+		os.Getenv("POSTGRES_PORT"),
+		os.Getenv("POSTGRES_DB"),
+		getSSLMode(isDev),
+	)
+	log.Println(url)
+
+	config, err := pgx.ParseConfig(url)
+	if err != nil {
+		panic(err)
 	}
 
 	cors := cors.New(opts).Handler(&handler.Handler{
-		Records: &memory.Repository{Data: map[share.Code]share.Record{
-			"r4nd0m": {
-				Gamemode: "random",
-				Data: map[string]any{
-					"numWins": 5,
-				},
-				Theme: "candy",
-				When:  time.Now(),
-			},
-			"t1m3rM": {
-				Gamemode: "random-timer",
-				Name:     "Michael",
-				Data: map[string]any{
-					"fastestWinDuration": 5450,
-				},
-				Theme: "blood",
-				When:  time.Now(),
-			},
-			"s4m3sQ": {
-				Gamemode: "same-square",
-				Name:     "Hans",
-				Data: map[string]any{
-					"fastestWinDuration": 6000,
-				},
-				Theme: "blood",
-				When:  time.Now(),
-			},
-		}},
+		Records: &pg.Repository{
+			Config: config,
+		},
 	})
 
 	lambda.Start(httpadapter.New(cors).ProxyWithContext)
+}
+
+func getSSLMode(isDev bool) string {
+	if isDev {
+		return "disable"
+	}
+	return "required"
 }

@@ -9,7 +9,10 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:create": "docker create --name postgres-popthegrid --env-file ./.env.local -p 5432:5432 postgres:15.2-alpine",
+    "db:start": "docker start postgres-popthegrid",
+    "db:stop": "docker stop postgres-popthegrid"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.1.0",
