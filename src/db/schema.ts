@@ -14,6 +14,15 @@ const migrations: Migration[] = [
     store.createIndex('startedAt', 'startedAt', { unique: false })
     store.createIndex('duration', 'duration', { unique: false })
   },
+  (_, tx) => {
+    const store = tx.objectStore(ATTEMPTS_STORE)
+
+    store.deleteIndex('gamemode')
+    store.deleteIndex('isWin')
+    store.deleteIndex('startedAt')
+    store.deleteIndex('duration')
+    store.clear()
+  },
 ]
 
 const schema: Schema = {
