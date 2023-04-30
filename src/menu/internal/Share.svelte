@@ -116,11 +116,12 @@
     font-family: 'Cutive Mono', 'Courier New', monospace;
     letter-spacing: -0.1em;
     font-size: 1.1em;
-    padding-top: 0.2em;
+    padding-top: 0.6em;
     padding-left: 0.6em;
     padding-right: 0.6em;
     transition: color 0.1s ease-in;
     background: none;
+    line-height: 1.2;
   }
 
   textarea:hover {
@@ -128,7 +129,6 @@
   }
 
   .absolute {
-    --height: 12em;
     position: absolute;
     top: calc(var(--position-y) - 4em);
     left: var(--position-x);
