@@ -6,17 +6,20 @@ import { SameSquare } from '$game/gamemode/sameSquare'
 
 export const gamemodes = {
   random: {
-    display: 'Luck',
+    display: 'Mistery',
+    description: 'You will win... somehow. Can you do it?',
     create: () => new RandomCount(),
   },
   'random-timer': {
-    display: 'Time (4–9 seconds)',
+    display: 'Lucky Timer',
+    description: "You're on time! Win before the timer ends – but who knows how long you have...",
     create: () => new RandomTimer({ minSeconds: 4, maxSeconds: 9 }),
   },
   'same-square': {
     display: 'Gleich',
+    description: 'Be careful, for two squares destroyed one after another alike shall be!',
     create: () => new SameSquare(),
   },
-} satisfies Record<GamemodeName, { create(): Gamemode; display: string }>
+} satisfies Record<GamemodeName, { create(): Gamemode; description: string; display: string }>
 
 export const defaultGamemode = 'random' satisfies GamemodeName

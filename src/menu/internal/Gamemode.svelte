@@ -7,13 +7,15 @@
   import { createMediaMatcher } from './media';
 
   const getGamemodeOptions = (): Option<GamemodeName | 'random-pick'>[] => {
-    const options: Option<GamemodeName | 'random-pick'>[] = entries(gamemodes).map(([value, { display }]) => ({
+    const options: Option<GamemodeName | 'random-pick'>[] = entries(gamemodes).map(([value, { display, description }]) => ({
       display,
+      description,
       value,
     }));
     options.push({
       value: 'random-pick',
       display: 'Random',
+      description: "Can't decide? Let us do it!",
     });
     return options;
   };

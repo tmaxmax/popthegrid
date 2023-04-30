@@ -4,8 +4,9 @@
   import { type Option } from './Fieldset.svelte';
 
   const getThemeOptions = (): Option<ThemeName>[] => {
-    return entries(themes).map(([value, { display }]) => ({
+    return entries(themes).map(([value, { display, description }]) => ({
       display,
+      description,
       value,
     }));
   };

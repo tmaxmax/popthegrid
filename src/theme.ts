@@ -8,6 +8,7 @@ function entries<T extends Record<string, unknown>>(o: T): Entries<T> {
 
 export interface Theme {
   display: string
+  description: string
   colors: {
     background: string
     heading: string
@@ -24,6 +25,7 @@ export type ThemeName = keyof typeof themes
 export const themes = {
   candy: {
     display: 'Candy',
+    description: 'Each square is a tasty candy! The original Pop the grid theme.',
     colors: {
       background: '#000f1e',
       heading: '#f6f4f3',
@@ -36,6 +38,7 @@ export const themes = {
   },
   blood: {
     display: 'Blood',
+    description: 'A literal blood bath.',
     colors: {
       background: '#080c0c',
       heading: '#f4f9e9',

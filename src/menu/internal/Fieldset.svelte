@@ -1,8 +1,13 @@
 <script context="module" lang="ts">
+  import { createMediaMatcher } from './media';
+
   export type Option<T extends string> = {
     display: string;
+    description?: string;
     value: T;
   };
+
+  const canHover = createMediaMatcher('(hover: hover)');
 </script>
 
 <script lang="ts">
@@ -13,6 +18,10 @@
   export let disabled = false;
   export let selectedValue: T;
   export let margin = false;
+
+  let hovering = '';
+
+  $: selectedOrHovered = options.find((v) => v.value === (($canHover ? hovering : '') || selectedValue));
 </script>
 
 <fieldset class:disabled class:margin on:change>
@@ -23,7 +32,7 @@
   {/if}
   <div class="layout">
     {#each options as { value, display }, i (value)}
-      <label for="{value}-{i}">
+      <label for="{value}-{i}" on:mouseenter={() => (hovering = value)} on:mouseleave={() => (hovering = '')}>
         <input type="radio" bind:group={selectedValue} {name} id="{value}-{i}" {value} {disabled} />
         <span class="display">
           <span class="radio" />
@@ -34,6 +43,9 @@
     {/each}
   </div>
 </fieldset>
+{#if selectedOrHovered?.description}
+  <p>{selectedOrHovered.description}</p>
+{/if}
 
 <style>
   fieldset {
@@ -153,5 +165,9 @@
   input:checked:disabled + .display > .radio {
     background-color: var(--color-heading);
     border-color: var(--color-heading);
+  }
+
+  p {
+    margin-top: 0.2em;
   }
 </style>
