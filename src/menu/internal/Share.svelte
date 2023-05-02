@@ -11,6 +11,7 @@
 <script lang="ts">
   import Share from 'svelte-material-icons/Share.svelte';
   import Loading from 'svelte-material-icons/Loading.svelte';
+  import CopyButton from './CopyButton.svelte';
   import { fade } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
   import { clickoutside } from '@svelte-put/clickoutside';
@@ -100,15 +101,15 @@
         <textarea class="error" use:autosize name="share-text" autocomplete="off" autocorrect="off" cols="29" readonly
           >{textAreaContent}</textarea>
       {:else if toShare.url && !(toShare.text || toShare.title)}
-        <label class="popup-title" for="share-text">Share this link with your friends!</label>
+        <label class="popup-title" for="share-text">Share this link with your friends! <CopyButton text={toShare.url} /></label>
         <textarea on:click={onTextAreaClick} use:autosize name="share-text" autocomplete="off" autocorrect="off" rows="1" cols="29" readonly
           >{toShare.url}</textarea>
       {:else}
         <div class="popup-title">Share the following with your friends!</div>
-        <label for="share-url" class="popup-subtitle">Link only:</label>
+        <label for="share-url" class="popup-subtitle">Link only: <CopyButton text={toShare.url || ''} /></label>
         <textarea on:click={onTextAreaClick} use:autosize name="share-url" autocomplete="off" autocorrect="off" rows="1" cols="29" readonly
           >{toShare.url}</textarea>
-        <label for="share-text" class="popup-subtitle">With text:</label>
+        <label for="share-text" class="popup-subtitle">With text: <CopyButton text={textAreaContent || ''} /></label>
         <textarea
           class:error={toShare instanceof Error}
           on:click={onTextAreaClick}
@@ -159,6 +160,12 @@
   :global(.share-icon) {
     margin-bottom: 0.2em;
     margin-left: 0.4em;
+  }
+
+  label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .popup-title {

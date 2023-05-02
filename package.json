@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@svelte-put/clickoutside": "^2.0.0",
+    "@svelte-put/copy": "^2.0.0",
     "color-interpolate": "^1.0.5",
     "debug": "^4.3.4",
     "human-date": "^1.4.0",
