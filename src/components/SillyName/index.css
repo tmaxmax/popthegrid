@@ -1,5 +1,8 @@
 .silly-name {
   font-style: normal;
+  text-align: center;
+  width: 100%;
+  max-width: 20em;
 }
 
 .silly-name a {
@@ -17,10 +20,32 @@
   transition: color 0.1s ease-out;
   user-select: none;
   -webkit-user-select: none;
+  animation: underline 4s linear infinite;
 }
 
 .silly-name.undiscovered:hover {
   color: var(--color-heading);
+}
+
+@keyframes underline {
+  0% {
+    text-decoration: none;
+  }
+  79% {
+    text-decoration: none;
+  }
+  80% {
+    text-decoration: underline;
+  }
+  85% {
+    text-decoration: none;
+  }
+  90% {
+    text-decoration: underline;
+  }
+  95% {
+    text-decoration: none;
+  }
 }
 
 @keyframes colour-progress {

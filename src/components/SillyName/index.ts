@@ -11,10 +11,8 @@ interface Response {
   name: string
 }
 
-const FUNCTIONS_ROOT = import.meta.env.VITE_FUNCTIONS_ROOT
-
 const fetchSillyName: () => Promise<string> = () =>
-  fetch(`${FUNCTIONS_ROOT}/name`)
+  fetch(`/name`)
     .then((res) => res.json())
     .then((res: Response) => res.name)
 

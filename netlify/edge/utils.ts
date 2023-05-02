@@ -102,3 +102,5 @@ export const makePossessive = (s: string) => {
   }
   return s + "'s"
 }
+
+export const pickRandom = <T>(c: T[]): T => c[Math.floor(Math.random() * c.length)]
