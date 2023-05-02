@@ -81,7 +81,7 @@ export const defaultTheme = 'candy' satisfies ThemeName
 
 const key = 'theme'
 
-export const setTheme = (name: ThemeName, opts?: { onlyCSS?: boolean }) => {
+export const setTheme = (name: ThemeName, opts?: { global?: boolean }) => {
   const theme = themes[name]
   const set = (name: string, value: string) => document.documentElement.style.setProperty(`--color-${name}`, value)
   const props = entries(theme.colors).flatMap(([key, value]) => {
@@ -100,10 +100,9 @@ export const setTheme = (name: ThemeName, opts?: { onlyCSS?: boolean }) => {
   })
   props.forEach(([key, value]) => set(key, value))
   document.querySelector('meta[name="theme-color"]')!.setAttribute('content', theme.colors.background)
-  if (opts?.onlyCSS) {
-    return
+  if (opts?.global) {
+    localStorage.setItem(key, name)
   }
-  localStorage.setItem(key, name)
 }
 
 export const isTheme = (name: string): name is ThemeName => name in themes

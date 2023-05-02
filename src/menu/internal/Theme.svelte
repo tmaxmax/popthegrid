@@ -21,7 +21,7 @@
   const { theme } = getContext();
 
   const onChange = () => {
-    setTheme($theme);
+    setTheme($theme, { global: true });
   };
 </script>
 

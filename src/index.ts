@@ -14,7 +14,7 @@ import { Redirect } from '$components/Redirect'
 import { defaultGamemode, gamemodes } from './gamemode'
 import { clearSharedRecord, getSharedRecord } from '$share/record'
 import MenuAccess from './menu/MenuAccess.svelte'
-import { getTheme, setTheme, defaultTheme, listenToThemeChanges, type ThemeName } from './theme'
+import { getTheme, setTheme, defaultTheme, type ThemeName } from './theme'
 import { contextKey, createContext, configureTitle, type Context } from './menu/context'
 import { getName, listenToNameChanges } from '$share/name'
 
@@ -23,7 +23,7 @@ let theme: ThemeName
 
 try {
   theme = record?.theme || getTheme()
-  setTheme(theme, { onlyCSS: true })
+  setTheme(theme)
 } catch {
   theme = defaultTheme
   setTheme(theme)
@@ -148,11 +148,6 @@ const main = async () => {
     attemptsLoader() {
       return retrieveAttempts(db)
     },
-  })
-
-  listenToThemeChanges((themeName) => {
-    setTheme(themeName, { onlyCSS: true })
-    context.theme.set(themeName)
   })
 
   listenToNameChanges(({ newValue }) => {
