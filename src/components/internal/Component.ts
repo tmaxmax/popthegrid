@@ -196,8 +196,13 @@ export class Component<T extends KnownHTMLElement = HTMLElement> {
     return Promise.race(this.events(events, options))
   }
 
-  protected async waitForAnimation(signal?: AbortSignal): Promise<void> {
-    await this.eventsRace(['animationend', 'animationcancel'], { stopPropagation: 'immediate', signal })
+  protected async waitForAnimation(signal?: AbortSignal, options?: { endOnly?: boolean }): Promise<void> {
+    const events: (keyof HTMLElementEventMap)[] = ['animationend', 'animationcancel']
+    if (options?.endOnly) {
+      events.splice(1)
+    }
+
+    await this.eventsRace(events, { stopPropagation: 'immediate', signal })
   }
 
   protected get text(): string {
