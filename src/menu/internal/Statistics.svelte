@@ -8,6 +8,16 @@
     if (typeof n !== 'number') throw new Error('Something went wrong.');
     return duration(n);
   };
+
+  const getFriendlyDate = (date: Date) => {
+    const relative = humanDate.relativeTime(date, {
+      presentText: 'just now',
+    });
+    if (relative.includes('weeks')) {
+      return `on ${humanDate.prettyPrint(date)}`;
+    }
+    return relative;
+  };
 </script>
 
 <script lang="ts">
@@ -15,17 +25,54 @@
   import { getContext } from '../context';
   import StatisticsCol from './StatisticsCol.svelte';
   import type { GamemodeName } from '$game/gamemode';
+  import { getShareContent, isShareable, type ShareContentParams } from './share';
+  import Share from './Share.svelte';
 
-  const { statistics } = getContext();
+  const { attempts, database, theme, name } = getContext();
 
   let layout: HTMLElement | undefined;
   $: overflows = layout ? layout.scrollWidth > layout.clientWidth : false;
 
-  $: [total, ...rest] = $statistics;
+  $: last = $attempts.last;
+  $: [total, ...rest] = $attempts.statistics;
+  $: statForAttempt = last ? $attempts.statistics.find((v) => 'gamemode' in v && v.gamemode === last!.gamemode) : undefined;
+  $: isShareableStat = last && statForAttempt ? isShareable(statForAttempt, 'fastestWinDuration') : false;
+
+  const getShareData = () => {
+    const shareData: ShareContentParams = {
+      record: {
+        gamemode: last!.gamemode,
+        theme: $theme,
+        name: $name,
+        data: {
+          fastestWinDuration: last!.duration,
+        },
+        when: last!.startedAt,
+      },
+      location: window.location,
+    };
+
+    return getShareContent(database, shareData);
+  };
 </script>
 
-{#if total}
-  <p class="caption">Here's how you've been holding up:</p>
+{#if total && last}
+  <p class="caption last-attempt">Here's your last attempt:</p>
+  <ul>
+    <li>Gamemode: {gamemodes[last.gamemode].display}</li>
+    <li>
+      {#if isShareableStat}
+        <Share small data={getShareData}>Duration: {duration(last.duration)}</Share>
+      {:else}
+        Duration: {duration(last.duration)}
+      {/if}
+    </li>
+    <li>Played {getFriendlyDate(last.startedAt)}</li>
+    {#if last.gamemode !== 'passthrough'}
+      <li>{last.isWin ? 'You won' : 'You lost'}.</li>
+    {/if}
+  </ul>
+  <p class="caption">Here's how you've been holding up overall:</p>
   <div bind:this={layout}>
     <table>
       <thead>
@@ -83,7 +130,7 @@
   }
 
   .caption {
-    margin-bottom: 0.4em;
+    margin-bottom: 0.2em;
   }
 
   thead {
@@ -127,5 +174,21 @@
 
   .bottom {
     margin-bottom: 2.4em;
+  }
+
+  p.last-attempt {
+    margin-bottom: 0;
+  }
+
+  ul {
+    margin-bottom: 1em;
+    color: var(--color-body);
+    font-family: var(--font-body);
+    list-style: disc;
+  }
+
+  li {
+    margin-top: 0.2em;
+    margin-left: 1em;
   }
 </style>

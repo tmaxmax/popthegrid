@@ -10,7 +10,7 @@ import { getName } from '$share/name'
 
 export interface Context {
   name: Writable<string | undefined>
-  statistics: StatisticsStore
+  attempts: AttemptsStore
   game: Game
   record?: GameRecord
   gamemode: Writable<GamemodeName>
@@ -19,7 +19,12 @@ export interface Context {
   database: IDBDatabase
 }
 
-interface StatisticsStore extends Readable<Accumulator> {
+export interface Attempts {
+  statistics: Accumulator
+  last?: InsertedAttempt
+}
+
+interface AttemptsStore extends Readable<Attempts> {
   update(attempt: InsertedAttempt): void
 }
 
@@ -33,15 +38,16 @@ export interface ContextInput {
   database: IDBDatabase
 }
 
-export function createContext({ name, attemptsLoader, gamemode, game, theme, database }: ContextInput): Context {
+export function createContext({ name, attemptsLoader, gamemode, game, theme, database, record }: ContextInput): Context {
   return {
     name: writable<string | undefined>(name),
     game,
-    statistics: createStatisticsStore(attemptsLoader),
+    attempts: createAttemptsStore(attemptsLoader),
     gamemode: writable<GamemodeName>(gamemode),
     nextGamemode: writable<GamemodeName>(gamemode),
     theme: writable<ThemeName>(theme),
     database,
+    record,
   }
 }
 
@@ -66,12 +72,15 @@ export function configureTitle(name: Writable<string | undefined>, element: Elem
   return name.subscribe(set)
 }
 
-function createStatisticsStore(loader: () => Promise<InsertedAttempt[]>): StatisticsStore {
+function createAttemptsStore(loader: () => Promise<InsertedAttempt[]>): AttemptsStore {
   let hasSubscribed = false
 
-  const { subscribe, update } = writable<Accumulator>([], (set) => {
+  const { subscribe, update } = writable<Attempts>({ statistics: [] }, (set) => {
     loader().then((attempts) => {
-      set(attempts.reduce(addAttemptToStatistics, []))
+      set({
+        statistics: attempts.reduce(addAttemptToStatistics, []),
+        last: attempts.at(-1),
+      })
       hasSubscribed = true
     })
 
@@ -82,7 +91,12 @@ function createStatisticsStore(loader: () => Promise<InsertedAttempt[]>): Statis
     subscribe,
     update(attempt) {
       if (hasSubscribed) {
-        update((stats) => addAttemptToStatistics(stats, attempt))
+        update(({ statistics }) => ({
+          statistics: addAttemptToStatistics(statistics, attempt),
+          last: attempt,
+        }))
+      } else {
+        update((v) => ({ statistics: v.statistics, last: attempt }))
       }
     },
   }

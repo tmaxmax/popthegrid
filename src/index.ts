@@ -69,7 +69,7 @@ const game = new Game({
   onGameEnd({ attempt, when }) {
     if (when === 'before') {
       insertAttempt(db, attempt).then((attempt) => {
-        context.statistics.update(attempt)
+        context.attempts.update(attempt)
         attemptsChan.postMessage(attempt)
       })
     } else if (when === 'after') {
@@ -80,7 +80,7 @@ const game = new Game({
 
 const attemptsChan = new BroadcastChannel('attempts')
 attemptsChan.addEventListener('message', (ev: MessageEvent<InsertedAttempt>) => {
-  context.statistics.update(ev.data)
+  context.attempts.update(ev.data)
 })
 
 const getVersionChangeModalContent = () => {
