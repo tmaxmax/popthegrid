@@ -56,10 +56,10 @@
     await new Promise<void>((resolve) => {
       $modal?.close();
       $modal = { close: resolve };
-      let x = e.clientX - popUpWidth / 2;
+      let x = e.clientX - popUpWidth / 4;
       if (x - modalMargin < 0) {
         x = modalMargin;
-      } else if (e.clientX + popUpWidth / 2 > window.innerWidth - modalMargin) {
+      } else if (e.clientX + (3 * popUpWidth) / 4 > window.innerWidth - modalMargin) {
         x = window.innerWidth - modalMargin - popUpWidth;
       }
       popUpPosition = { x, y: e.clientY };
@@ -95,24 +95,30 @@
     style="--width: {popUpWidth}px; --position-x: {popUpPosition.x}px; --position-y: {popUpPosition.y}px"
     bind:this={absolute}>
     <div class="popup" transition:fade={{ duration: 400, easing: cubicOut }} use:clickoutside on:clickoutside={resolvePopUp}>
-      <label for="share-text">
-        {#if toShare instanceof Error}
-          An error occurred :( try again later!
-        {:else if toShare.url && !(toShare.text || toShare.title)}
-          Share this link with your friends!
-        {:else}
-          Share the following with your friends!
-        {/if}
-      </label>
-      <textarea
-        class:error={toShare instanceof Error}
-        on:click={onTextAreaClick}
-        use:autosize
-        name="share-text"
-        autocomplete="off"
-        autocorrect="off"
-        cols="29"
-        readonly>{textAreaContent}</textarea>
+      {#if toShare instanceof Error}
+        <label class="popup-title" for="share-text">An error occurred :( try again later!</label>
+        <textarea class="error" use:autosize name="share-text" autocomplete="off" autocorrect="off" cols="29" readonly
+          >{textAreaContent}</textarea>
+      {:else if toShare.url && !(toShare.text || toShare.title)}
+        <label class="popup-title" for="share-text">Share this link with your friends!</label>
+        <textarea on:click={onTextAreaClick} use:autosize name="share-text" autocomplete="off" autocorrect="off" rows="1" cols="29" readonly
+          >{toShare.url}</textarea>
+      {:else}
+        <div class="popup-title">Share the following with your friends!</div>
+        <label for="share-url" class="popup-subtitle">Link only:</label>
+        <textarea on:click={onTextAreaClick} use:autosize name="share-url" autocomplete="off" autocorrect="off" rows="1" cols="29" readonly
+          >{toShare.url}</textarea>
+        <label for="share-text" class="popup-subtitle">With text:</label>
+        <textarea
+          class:error={toShare instanceof Error}
+          on:click={onTextAreaClick}
+          use:autosize
+          name="share-text"
+          autocomplete="off"
+          autocorrect="off"
+          cols="29"
+          readonly>{textAreaContent}</textarea>
+      {/if}
     </div>
   </div>
 {/if}
@@ -155,10 +161,16 @@
     margin-left: 0.4em;
   }
 
-  label {
+  .popup-title {
     color: var(--color-body);
     font-weight: bold;
     font-family: var(--font-body);
+    margin-bottom: 0.6em;
+  }
+
+  .popup-subtitle {
+    font-family: var(--font-body);
+    color: var(--color-body);
   }
 
   textarea {
@@ -171,12 +183,12 @@
     font-family: 'Cutive Mono', 'Courier New', monospace;
     letter-spacing: -0.1em;
     font-size: 1.1em;
-    padding-top: 0.6em;
-    padding-left: 0.6em;
-    padding-right: 0.6em;
+    padding: 0 0.6em;
     transition: color 0.1s ease-in;
     background: none;
     line-height: 1.2;
+    margin-top: 0.2em;
+    margin-bottom: 0.4em;
   }
 
   textarea:hover {
@@ -185,7 +197,7 @@
 
   .absolute {
     position: absolute;
-    top: calc(var(--position-y) - 4em);
+    top: calc(var(--position-y) - 5.8em);
     left: var(--position-x);
     width: var(--width);
     height: calc(100% - var(--position) + 3em);
