@@ -61,7 +61,7 @@
   <ul>
     <li>Gamemode: {gamemodes[last.gamemode].display}</li>
     <li>
-      {#if isShareableStat}
+      {#if isShareableStat && last.isWin}
         <Share small data={getShareData}>Duration: {duration(last.duration)}</Share>
       {:else}
         Duration: {duration(last.duration)}
