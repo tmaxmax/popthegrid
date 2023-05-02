@@ -67,11 +67,12 @@ const game = new Game({
     }
   },
   onGameEnd({ attempt, when }) {
-    if (when === 'after') {
+    if (when === 'before') {
       insertAttempt(db, attempt).then((attempt) => {
         context.statistics.update(attempt)
         attemptsChan.postMessage(attempt)
       })
+    } else if (when === 'after') {
       game.prepare()
     }
   },
