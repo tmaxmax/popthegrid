@@ -1,17 +1,6 @@
 <script lang="ts" context="module">
-  import humanizeDuration from 'humanize-duration';
-
-  const duration = humanizeDuration.humanizer({
-    units: ['s'],
-    maxDecimalPoints: 2,
-    language: 'short',
-    spacer: '',
-    languages: {
-      short: {
-        s: () => 's',
-      },
-    },
-  });
+  import { duration } from './duration';
+  import humanDate from 'human-date';
 
   const durationProcessor = (n?: number | GamemodeName | Date) => {
     // I don't have enough patience to fix the types.
