@@ -13,6 +13,7 @@ GO_IMPORT_PATH = "github.com/tmaxmax/popthegrid"
 [[edge_functions]]
 function = "share"
 path = "/*"
+cache = "manual"
 
 [[redirects]]
 from = "/"

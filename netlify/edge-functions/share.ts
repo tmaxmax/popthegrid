@@ -47,7 +47,10 @@ export default async (request: Request, context: Context) => {
     ].map((attrs) => ({ tag: 'meta', attrs }))
   )
 
-  return new Response(toResponseBody(html), response)
+  const headers = new Headers(response.headers)
+  headers.set('Cache-Control', 'public, s-maxage=2592000') // 30 days
+
+  return new Response(toResponseBody(html), { headers, status: 200 })
 }
 
 const getDescription = (r: GameRecord) => {
