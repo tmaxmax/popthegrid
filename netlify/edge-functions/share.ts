@@ -4,6 +4,8 @@ import { GameRecord, GamemodeName, getCodeFromPath, storageKey } from '../edge/s
 import { logRequest } from '../edge/log.ts'
 
 export default async (request: Request, context: Context) => {
+  console.info({ requestID: context.requestId, url: request.url })
+
   const url = new URL(request.url)
   const baseURL = `${url.protocol}//${url.host}`
 
