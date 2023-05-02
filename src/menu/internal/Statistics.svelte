@@ -4,6 +4,13 @@
   const duration = humanizeDuration.humanizer({
     units: ['s'],
     maxDecimalPoints: 2,
+    language: 'short',
+    spacer: '',
+    languages: {
+      short: {
+        s: () => 's',
+      },
+    },
   });
 
   const durationProcessor = (n?: number | GamemodeName | Date) => {
@@ -116,13 +123,13 @@
   td {
     flex-grow: 2;
     flex-basis: 0;
-    min-width: 10em;
+    min-width: 8em;
   }
 
   .count {
     flex-grow: 1;
     flex-shrink: 1;
-    min-width: 6em;
+    min-width: 5.8em;
   }
 
   .share {
