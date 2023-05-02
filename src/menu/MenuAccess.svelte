@@ -1,3 +1,62 @@
+<script context="module" lang="ts">
+  import type { Statistics } from '$game/statistics';
+  import type { GameRecord } from '$edge/share';
+  import { isDefined } from '$util/index';
+  import type { Event } from '$game';
+
+  const getRecordDelta = ({ statistics, last }: Attempts, record: GameRecord): [number, boolean] | undefined => {
+    const stat = statistics.find((v) => 'gamemode' in v && record.gamemode === v.gamemode) as Statistics | undefined;
+    if (!stat) {
+      return undefined;
+    }
+
+    if ('numWins' in record.data) {
+      return [record.data.numWins - stat.numWins, false];
+    }
+
+    if ('fastestWinDuration' in record.data) {
+      console.log(record.data.fastestWinDuration, last?.duration);
+
+      return [last!.duration - record.data.fastestWinDuration, true];
+    }
+
+    // TODO: Add here new records when necessary. This could surely be cleaner.
+
+    return undefined;
+  };
+
+  const isTransitionEvent = (e: Event): e is Extract<Event, { name: `transition${string}` }> => {
+    return e.name.startsWith('transition');
+  };
+
+  const getRecordPrompt = (attempts: Attempts, record: GameRecord | undefined): string | undefined => {
+    if (!record) {
+      return undefined;
+    }
+
+    const result = getRecordDelta(attempts, record);
+    if (!isDefined(result)) {
+      return 'Not yet there...';
+    }
+
+    const [delta, isTime] = result;
+
+    if (delta > 0) {
+      if (isTime) {
+        return `${duration(delta)} behind!`;
+      }
+
+      return `${delta} attempts behind!`;
+    }
+
+    if (delta < 0) {
+      return `You've beaten ${record.name || 'them'}!`;
+    }
+
+    return `You're now equal.`;
+  };
+</script>
+
 <script lang="ts">
   import Edit from 'svelte-material-icons/PuzzleEdit.svelte';
   import Win from 'svelte-material-icons/Trophy.svelte';
@@ -8,20 +67,21 @@
   // @ts-expect-error Library has no type definitions.
   import { Confetti } from 'svelte-confetti';
   import { fade } from 'svelte/transition';
-  import { contextKey, getContext } from './context';
+  import { contextKey, getContext, type Attempts } from './context';
   import { gamemodes } from '../gamemode';
+  import { duration } from './internal/duration';
 
   const context = getContext();
 
-  const { game, gamemode } = context;
+  const { game, gamemode, record, attempts } = context;
   const event = game.events;
   const eventOutput = createEventStore(event, { short: true });
 
   $: isError = $event.name === 'error';
-  $: display = isError ? 'Something went wrong' : gamemodes[$gamemode].display;
-  $: isWin =
-    (($event.name === 'transitionstart' || $event.name === 'transitionend') && $event.to === 'win') ||
-    ($event.name === 'transitionstart' && $event.from === 'win');
+  $: recordPrompt = getRecordPrompt($attempts, record);
+  $: display = isError ? 'Something went wrong' : recordPrompt && isEnd ? recordPrompt : gamemodes[$gamemode].display;
+  $: isEnd = (isTransitionEvent($event) && $event.to === 'win') || ($event.name === 'transitionstart' && $event.from === 'win');
+  $: isWin = isEnd && (record ? recordPrompt?.includes('beaten') : true);
 
   let disabled = false;
 
@@ -73,13 +133,19 @@
   {#if isWin}
     <div transition:fade={{ duration: 100 }}>
       <Win class="your-game-icon" />
-      <span>You won!</span>
-      <span class="confetti"><Confetti /></span>
+      <span>{recordPrompt ? recordPrompt : 'You won!'}</span>
+      <span class="confetti">
+        {#if record}
+          <Confetti duration={4000} noGravity cone amount={150} />
+        {:else}
+          <Confetti />
+        {/if}
+      </span>
     </div>
   {:else}
     <div transition:fade={{ duration: 100 }}>
       <Edit class="your-game-icon" />
-      <span>{display} • {$eventOutput.message}</span>
+      <span>{display}{recordPrompt && isEnd ? '' : ` • ${$eventOutput.message}`}</span>
     </div>
   {/if}
 </button>
