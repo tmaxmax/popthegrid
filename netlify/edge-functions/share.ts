@@ -19,7 +19,7 @@ export default async (request: Request, context: Context) => {
   const res = await fetch(`${baseURL}/.netlify/functions/share?code=${code}`)
   if (res.status !== 200) {
     console.warn(`Request ${context.requestId}: fetch code ${code}: ${res.status} ${res.statusText}`)
-    console.warn(`Request ${context.requestId}: ${await res.json()}`)
+    console.warn(`Request ${context.requestId}: ${await res.text()}`)
     return
   }
 
