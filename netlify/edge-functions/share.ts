@@ -4,10 +4,10 @@ import { GameRecord, GamemodeName, getCodeFromPath, storageKey } from '../edge/s
 import { logRequest } from '../edge/log.ts'
 
 export default async (request: Request, context: Context) => {
-  console.info({ requestID: context.requestId, url: request.url })
-
   const url = new URL(request.url)
   const baseURL = `${url.protocol}//${url.host}`
+
+  console.info(`Request ${context.requestId}: ${url.pathname}`)
 
   const code = getCodeFromPath(url.pathname)
   if (!code) {
@@ -18,12 +18,15 @@ export default async (request: Request, context: Context) => {
 
   const res = await fetch(`${baseURL}/.netlify/functions/share?code=${code}`)
   if (res.status !== 200) {
+    console.warn(`Request ${context.requestId}: fetch code ${code}: ${res.status} ${res.statusText}`)
+    console.warn(`Request ${context.requestId}: ${await res.json()}`)
     return
   }
 
   const response = await context.next(new Request(baseURL))
   const contentType = getContentType(response.headers)
   if (contentType.type !== 'text/html') {
+    console.warn(`Request ${context.requestId}: unexpected content type ${contentType.type}`)
     return response
   }
 
@@ -51,6 +54,8 @@ export default async (request: Request, context: Context) => {
       { name: 'robots', content: 'noindex' },
     ].map((attrs) => ({ tag: 'meta', attrs }))
   )
+
+  console.info(`Request ${context.requestId}: found code ${code}`)
 
   const headers = new Headers(response.headers)
   headers.set('Cache-Control', 'public, s-maxage=2592000') // 30 days

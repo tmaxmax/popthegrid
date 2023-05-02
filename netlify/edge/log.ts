@@ -5,7 +5,7 @@ export function logRequest(request: Request, context: Context) {
   const { cache, isReloadNavigation, url } = request
   const { ip, requestId, geo } = context
 
-  console.info(requestId, headers)
-  console.info(requestId, geo)
-  console.info(requestId, { cache, isReloadNavigation, url, ip })
+  console.info(requestId, JSON.stringify(headers))
+  console.info(requestId, JSON.stringify(geo))
+  console.info(requestId, JSON.stringify({ cache, isReloadNavigation, url, ip }))
 }
