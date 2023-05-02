@@ -1,6 +1,7 @@
 import type { Context } from 'https://edge.netlify.com'
 import { createOrChange, getContentType, parseHTML, makePossessive, toResponseBody, formatDuration } from '../edge/utils.ts'
 import { GameRecord, GamemodeName, getCodeFromPath, storageKey } from '../edge/share.ts'
+import { logRequest } from '../edge/log.ts'
 
 export default async (request: Request, context: Context) => {
   const url = new URL(request.url)
@@ -10,6 +11,8 @@ export default async (request: Request, context: Context) => {
   if (!code) {
     return
   }
+
+  logRequest(request, context)
 
   const res = await fetch(`${baseURL}/.netlify/functions/share?code=${code}`)
   if (res.status !== 200) {

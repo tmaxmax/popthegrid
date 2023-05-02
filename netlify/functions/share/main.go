@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/awslabs/aws-lambda-go-api-proxy/httpadapter"
+	"github.com/go-chi/httplog"
 	"github.com/jackc/pgx/v5"
 	"github.com/rs/cors"
 	"github.com/tmaxmax/popthegrid/internal/handler"
@@ -14,6 +15,7 @@ import (
 )
 
 func main() {
+	isDev := os.Getenv("DEV") == "true"
 	opts := cors.Options{
 		AllowedOrigins: []string{
 			os.Getenv("URL"),
@@ -25,7 +27,7 @@ func main() {
 			http.MethodGet,
 			http.MethodPost,
 		},
-		Debug: os.Getenv("DEV") == "true",
+		Debug: isDev,
 	}
 
 	log.Println(opts)
@@ -35,11 +37,16 @@ func main() {
 		panic(err)
 	}
 
-	cors := cors.New(opts).Handler(&handler.Handler{
+	logger := httplog.Handler(httplog.NewLogger("share", httplog.Options{
+		JSON:    !isDev,
+		Concise: isDev,
+	}))
+
+	cors := cors.New(opts).Handler(logger(&handler.Handler{
 		Records: &pg.Repository{
 			Config: config,
 		},
-	})
+	}))
 
 	lambda.Start(httpadapter.New(cors).ProxyWithContext)
 }
