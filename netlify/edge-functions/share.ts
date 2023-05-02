@@ -57,10 +57,7 @@ export default async (request: Request, context: Context) => {
 
   console.info(`Request ${context.requestId}: found code ${code}`)
 
-  const headers = new Headers(response.headers)
-  headers.set('Cache-Control', 'public, s-maxage=2592000') // 30 days
-
-  return new Response(toResponseBody(html), { headers, status: 200 })
+  return new Response(toResponseBody(html), response)
 }
 
 const getDescription = (r: GameRecord) => {
