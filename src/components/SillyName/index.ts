@@ -6,15 +6,11 @@ import interval from '$util/time/interval'
 import { LocalStorage } from './storage'
 import type { EasterEggStorage } from './storage'
 import { type ThemeName, themes, defaultTheme } from '$theme'
+import { adjective, noun } from './data'
 
-interface Response {
-  name: string
-}
+const toUpper = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
-const fetchSillyName: () => Promise<string> = () =>
-  fetch(`/name`)
-    .then((res) => res.json())
-    .then((res: Response) => res.name)
+const fetchSillyName = () => toUpper(noun()) + adjective()
 
 const DISCOVER_COUNT = 5
 
@@ -37,7 +33,7 @@ export class SillyName extends Component {
       this.setCounter(0)
 
       interval({
-        callback: async () => (this.text = `Made by ${await fetchSillyName()}`),
+        callback: () => (this.text = `Made by ${fetchSillyName()}`),
         interval: 2000,
         leading: true,
         signal: this.controller.signal,

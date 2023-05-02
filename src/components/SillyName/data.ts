@@ -1,16 +1,9 @@
-import { toUpper, pickRandom } from '../edge/utils.ts'
+import { randInt } from '$util'
 
-export default () => {
-  return new Response(JSON.stringify({ name: toUpper(noun()) + adjective() }), {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-}
+export const noun = () => pickRandom(data.nouns)
+export const adjective = () => pickRandom(data.adjectives)
 
-const noun = () => pickRandom(data.nouns)
-const adjective = () => pickRandom(data.adjectives)
+const pickRandom = <T>(c: T[]): T => c[randInt(c.length)]
 
 const data = {
   adjectives: [
