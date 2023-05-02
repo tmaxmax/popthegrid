@@ -20,7 +20,7 @@
   transition: color 0.1s ease-out;
   user-select: none;
   -webkit-user-select: none;
-  animation: underline 4s linear infinite;
+  animation: underline 4s linear -3s infinite;
 }
 
 .silly-name.undiscovered:hover {
@@ -61,7 +61,5 @@
 }
 
 .silly-name.undiscovered.clicked {
-  animation-name: colour-progress;
-  animation-duration: 0.4s;
-  animation-timing-function: ease-out;
+  animation: colour-progress 1s ease-out;
 }

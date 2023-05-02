@@ -57,7 +57,7 @@ export class SillyName extends Component {
         inClick = true
 
         this.addClass('clicked')
-        await this.waitForAnimation()
+        await this.waitForAnimation(undefined, { endOnly: true })
         this.removeClass('clicked')
 
         if (this.setCounter(this.counter + 1) !== DISCOVER_COUNT) {
