@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/go-chi/httplog"
 	"github.com/tmaxmax/popthegrid/internal/share"
 	"schneider.vip/problem"
 )
@@ -48,12 +49,18 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		l := httplog.LogEntry(r.Context())
+		l.Info().Str("requestID", r.Header.Get("x-nf-request-id")).Str("code", string(code)).Msg("Get code")
+
 		err = h.get(w, r, code)
 	case http.MethodPost:
 		record, ok := h.unmarshalPost(w, r)
 		if !ok {
 			return
 		}
+
+		l := httplog.LogEntry(r.Context())
+		l.Info().Str("requestID", r.Header.Get("x-nf-request-id")).Interface("record", record).Msg("New record")
 
 		err = h.post(w, r, record)
 	default:
