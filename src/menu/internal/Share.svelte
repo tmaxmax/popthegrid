@@ -18,6 +18,7 @@
   import autosize from 'svelte-autosize';
 
   export let data: () => Promise<ShareData>;
+  export let small = false;
 
   let clicked = false;
   let toShare: ShareData | Error | undefined;
@@ -78,7 +79,7 @@
   };
 </script>
 
-<div class="button">
+<div class="button" class:small>
   <button on:click|stopPropagation={onClick}>
     <slot />
     {#if loading}
@@ -120,6 +121,14 @@
   .button {
     width: calc(100% - 1em);
     height: 100%;
+  }
+
+  .button.small {
+    width: max-content;
+  }
+
+  .button.small > button {
+    padding-right: 0.4em;
   }
 
   button {
