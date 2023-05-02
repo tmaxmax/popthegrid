@@ -29,11 +29,7 @@
     return e.name.startsWith('transition');
   };
 
-  const getRecordPrompt = (attempts: Attempts, record: GameRecord | undefined): string | undefined => {
-    if (!record) {
-      return undefined;
-    }
-
+  const getRecordPrompt = (attempts: Attempts, record: GameRecord): string | undefined => {
     const result = getRecordDelta(attempts, record);
     if (!isDefined(result)) {
       return 'Not yet there...';
@@ -78,10 +74,10 @@
   const eventOutput = createEventStore(event, { short: true });
 
   $: isError = $event.name === 'error';
-  $: recordPrompt = getRecordPrompt($attempts, record);
+  $: recordPrompt = record && $attempts.last?.gamemode === record.gamemode ? getRecordPrompt($attempts, record) : undefined;
   $: display = isError ? 'Something went wrong' : recordPrompt && isEnd ? recordPrompt : gamemodes[$gamemode].display;
   $: isEnd = (isTransitionEvent($event) && $event.to === 'win') || ($event.name === 'transitionstart' && $event.from === 'win');
-  $: isWin = isEnd && (record ? recordPrompt?.includes('beaten') : true);
+  $: isWin = isEnd && (recordPrompt ? recordPrompt?.includes('beaten') : true);
 
   let disabled = false;
 
@@ -135,8 +131,8 @@
       <Win class="your-game-icon" />
       <span>{recordPrompt ? recordPrompt : 'You won!'}</span>
       <span class="confetti">
-        {#if record}
-          <Confetti duration={4000} noGravity cone amount={150} />
+        {#if recordPrompt}
+          <Confetti delay={[200, 4000]} cone amount={600} />
         {:else}
           <Confetti />
         {/if}
