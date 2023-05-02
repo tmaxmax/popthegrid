@@ -189,6 +189,6 @@
 
   li {
     margin-top: 0.2em;
-    margin-left: 1em;
+    margin-left: 1.3em;
   }
 </style>
