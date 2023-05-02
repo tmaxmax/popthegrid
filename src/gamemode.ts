@@ -7,7 +7,7 @@ import { SameSquare } from '$game/gamemode/sameSquare'
 
 export const gamemodes = {
   random: {
-    display: 'Mistery',
+    display: 'Mystery',
     description: 'You will win... somehow. Can you do it?',
     create: () => new RandomCount(),
   },
