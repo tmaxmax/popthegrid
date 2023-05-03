@@ -7,6 +7,7 @@ import { getContext as svelteGetContext } from 'svelte'
 import type { Game } from '$game'
 import type { GameRecord } from '$edge/share'
 import { getName } from '$share/name'
+import type { OngoingAttempt } from '$game/attempt'
 
 export interface Context {
   name: Writable<string | undefined>
@@ -22,10 +23,12 @@ export interface Context {
 export interface Attempts {
   statistics: Accumulator
   last?: InsertedAttempt
+  ongoing?: OngoingAttempt
 }
 
 interface AttemptsStore extends Readable<Attempts> {
   update(attempt: InsertedAttempt): void
+  updateOngoing(attempt?: OngoingAttempt): void
 }
 
 export interface ContextInput {
@@ -98,6 +101,9 @@ function createAttemptsStore(loader: () => Promise<InsertedAttempt[]>): Attempts
       } else {
         update((v) => ({ statistics: v.statistics, last: attempt }))
       }
+    },
+    updateOngoing(attempt) {
+      update((v) => ({ ...v, ongoing: attempt }))
     },
   }
 }
