@@ -68,10 +68,16 @@ const game = new Game({
       context.gamemode.set(gamemode)
     }
   },
+  onGameStart({ attempt, when }) {
+    if (when === 'before') {
+      context.attempts.updateOngoing(attempt)
+    }
+  },
   onGameEnd({ attempt, when }) {
     if (when === 'before') {
       insertAttempt(db, attempt).then((attempt) => {
         context.attempts.update(attempt)
+        context.attempts.updateOngoing(undefined)
         attemptsChan.postMessage(attempt)
       })
     } else if (when === 'after') {
