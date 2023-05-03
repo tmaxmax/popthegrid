@@ -20,7 +20,7 @@ export default async (request: Request, context: Context) => {
   if (res.status !== 200) {
     console.warn(`Request ${context.requestId}: fetch code ${code}: ${res.status} ${res.statusText}`)
     console.warn(`Request ${context.requestId}: ${await res.text()}`)
-    return
+    return Response.redirect(`${baseURL}?${res.status === 404 ? 'notFound' : 'error'}`, 307)
   }
 
   const response = await context.next(new Request(baseURL))

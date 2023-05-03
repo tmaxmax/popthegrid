@@ -17,6 +17,8 @@ import MenuAccess from './menu/MenuAccess.svelte'
 import { getTheme, setTheme, defaultTheme, type ThemeName } from './theme'
 import { contextKey, createContext, configureTitle, type Context } from './menu/context'
 import { getName, listenToNameChanges } from '$share/name'
+import { wait } from '$util'
+import type { Writable } from 'svelte/store'
 
 const record = getSharedRecord()
 let theme: ThemeName
@@ -126,6 +128,31 @@ const getRecordClearRedirect = () => {
 let db: IDBDatabase
 let context: Context
 
+const handleURLAndTitle = async (name: Writable<string | undefined>) => {
+  const params = new URLSearchParams(location.search)
+
+  let text: string
+  if (params.has('error')) {
+    text = "The link couldn't be opened, try again later."
+  } else if (params.has('notFound')) {
+    text = 'The link was not found: is it correct?'
+  } else {
+    configureTitle(name, title, !!record)
+    return
+  }
+
+  history.replaceState({}, '', '/')
+
+  const originalText = title.textContent
+  title.textContent = text
+  title.classList.add('error')
+  await wait(4500)
+  title.classList.remove('error')
+  title.textContent = originalText
+
+  configureTitle(name, title, !!record)
+}
+
 const main = async () => {
   db = await openIndexedDB(window.indexedDB, {
     schema,
@@ -155,7 +182,7 @@ const main = async () => {
     context.name.set(newValue)
   })
 
-  configureTitle(context.name, title, !!record)
+  const titleDone = handleURLAndTitle(context.name)
 
   new MenuAccess({
     target: footer,
@@ -164,7 +191,7 @@ const main = async () => {
 
   document.body.style.transition = 'background-color 0.4s ease-out'
 
-  await game.prepare()
+  await Promise.all([game.prepare(), titleDone])
 }
 
 main()
