@@ -10,10 +10,6 @@ framework = "vite"
 [build.environment]
 GO_IMPORT_PATH = "github.com/tmaxmax/popthegrid"
 
-[[edge_functions]]
-function = "share"
-path = "/*"
-
 [[redirects]]
 from = "/"
 status = 200

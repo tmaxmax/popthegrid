@@ -1,4 +1,4 @@
-import type { Context } from 'https://edge.netlify.com'
+import type { Context, Config } from 'https://edge.netlify.com'
 import { createOrChange, getContentType, parseHTML, makePossessive, toResponseBody, formatDuration } from '../edge/utils.ts'
 import { GameRecord, GamemodeName, getCodeFromPath, storageKey } from '../edge/share.ts'
 import { logRequest } from '../edge/log.ts'
@@ -16,7 +16,7 @@ export default async (request: Request, context: Context) => {
 
   logRequest(request, context)
 
-  const res = await fetch(`${baseURL}/.netlify/functions/share?code=${code}`)
+  const res = await context.next(new Request(`${baseURL}/.netlify/functions/share?code=${code}`), { sendConditionalRequest: false })
   if (res.status !== 200) {
     console.warn(`Request ${context.requestId}: fetch code ${code}: ${res.status} ${res.statusText}`)
     console.warn(`Request ${context.requestId}: ${await res.text()}`)
@@ -57,7 +57,16 @@ export default async (request: Request, context: Context) => {
 
   console.info(`Request ${context.requestId}: found code ${code}`)
 
-  return new Response(toResponseBody(html), response)
+  const headers = new Headers(response.headers)
+  headers.set('Cache-Control', 'public, s-maxage=2592000, maxage=2592000')
+
+  return new Response(toResponseBody(html), { status: 200, headers })
+}
+
+export const config: Config = {
+  cache: 'manual',
+  excludedPath: ['/.netlify/functions/*', '/assets/*', '/icons/*', '/og/*', '/browserconfig.xml', '/manifest.json', '/favicon.ico'],
+  path: '/*',
 }
 
 const getDescription = (r: GameRecord) => {
