@@ -65,7 +65,7 @@ export default async (request: Request, context: Context) => {
 
 export const config: Config = {
   cache: 'manual',
-  excludedPath: ['/.netlify/functions/*', '/assets/*', '/icons/*', '/og/*', '/browserconfig.xml', '/manifest.json', '/favicon.ico'],
+  excludedPath: ['/.netlify/functions/*', '/assets/*', '/icons/*', '/og/*', '/browserconfig.xml', '/manifest.json', '/favicon.ico', '/'],
   path: '/*',
 }
 
