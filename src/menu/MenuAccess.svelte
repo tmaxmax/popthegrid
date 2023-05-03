@@ -4,9 +4,9 @@
   import { isDefined } from '$util/index';
   import type { Event } from '$game';
 
-  const getRecordDelta = ({ statistics, last }: Attempts, record: GameRecord): [number, boolean] | undefined => {
+  const getRecordDelta = ({ statistics, last, ongoing }: Attempts, record: GameRecord): [number, boolean] | undefined => {
     const stat = statistics.find((v) => 'gamemode' in v && record.gamemode === v.gamemode) as Statistics | undefined;
-    if (!stat) {
+    if (!stat || !last?.isWin || ongoing) {
       return undefined;
     }
 
@@ -30,6 +30,9 @@
   const getRecordPrompt = (attempts: Attempts, record: GameRecord): string | undefined => {
     const result = getRecordDelta(attempts, record);
     if (!isDefined(result)) {
+      if (attempts.ongoing) {
+        return 'Hang tight...';
+      }
       return 'Not yet there...';
     }
 
@@ -75,7 +78,7 @@
   $: recordPrompt = record && $attempts.last?.gamemode === record.gamemode ? getRecordPrompt($attempts, record) : undefined;
   $: display = isError ? 'Something went wrong' : recordPrompt && isEnd ? recordPrompt : gamemodes[$gamemode].display;
   $: isEnd = (isTransitionEvent($event) && $event.to === 'win') || ($event.name === 'transitionstart' && $event.from === 'win');
-  $: isWin = isEnd && (recordPrompt ? recordPrompt?.includes('beaten') : true);
+  $: isWin = isEnd && (recordPrompt ? recordPrompt?.includes('beaten') : !record);
 
   let disabled = false;
 
