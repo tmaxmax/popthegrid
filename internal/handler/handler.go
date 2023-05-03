@@ -3,9 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
-	"log"
 	"net/http"
 
 	"github.com/go-chi/httplog"
@@ -18,28 +16,7 @@ type Handler struct {
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	defer func() {
-		r := recover()
-		if r == nil {
-			return
-		}
-
-		var err error
-		switch v := r.(type) {
-		case error:
-			err = v
-		case string:
-			err = errors.New(v)
-		default:
-			err = fmt.Errorf("%v", v)
-		}
-
-		log.Println(err)
-
-		p := problem.Of(http.StatusInternalServerError).Append(problem.Wrap(err), problem.Detail("something went terribly wrong"))
-		p.WriteHeaderTo(w)
-		p.WriteTo(w)
-	}()
+	l := httplog.LogEntry(r.Context())
 
 	var err error
 	switch r.Method {
@@ -49,8 +26,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		l := httplog.LogEntry(r.Context())
-		l.Info().Str("requestID", r.Header.Get("x-nf-request-id")).Str("code", string(code)).Msg("Get code")
+		l.Info().Str("code", string(code)).Msg("Get code")
 
 		err = h.get(w, r, code)
 	case http.MethodPost:
@@ -60,7 +36,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		l := httplog.LogEntry(r.Context())
-		l.Info().Str("requestID", r.Header.Get("x-nf-request-id")).Interface("record", record).Msg("New record")
+		l.Info().Interface("record", record).Msg("New record")
 
 		err = h.post(w, r, record)
 	default:
@@ -70,6 +46,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		return
 	}
+
+	l.Err(err).Send()
 
 	var p *problem.Problem
 	var rerr RepositoryError
