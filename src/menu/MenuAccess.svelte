@@ -15,8 +15,6 @@
     }
 
     if ('fastestWinDuration' in record.data) {
-      console.log(record.data.fastestWinDuration, last?.duration);
-
       return [last!.duration - record.data.fastestWinDuration, true];
     }
 
