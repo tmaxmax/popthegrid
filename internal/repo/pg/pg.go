@@ -55,7 +55,7 @@ func (r *Repository) Save(ctx context.Context, record share.Record) (share.Code,
 
 		ok, err := r.trySaveWithCode(ctx, tx, record, code)
 		if ok {
-			if err := commitWithTimeout(tx); err != nil {
+			if err := tx.Commit(ctx); err != nil {
 				return "", createError(handler.ErrorInternal, err)
 			}
 
@@ -79,7 +79,7 @@ func (r *Repository) trySaveWithCode(ctx context.Context, tx pgx.Tx, record shar
 
 	_, err = ptx.Exec(ctx, query, code, record.Name, record.Gamemode, record.Theme, record.When, record.Data)
 	if err == nil {
-		if err := commitWithTimeout(ptx); err != nil {
+		if err := ptx.Commit(ctx); err != nil {
 			return false, createError(handler.ErrorInternal, err)
 		}
 
@@ -137,11 +137,4 @@ func rollbackWithTimeout(tx pgx.Tx) {
 	if err := tx.Rollback(ctx); err != nil && err != pgx.ErrTxClosed {
 		panic(err)
 	}
-}
-
-func commitWithTimeout(tx pgx.Tx) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	return tx.Commit(ctx)
 }
