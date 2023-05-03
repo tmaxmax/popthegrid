@@ -37,14 +37,18 @@ func main() {
 
 	logger := httplog.NewLogger("share", httplog.Options{
 		JSON:     !isDev,
-		Concise:  true,
+		Concise:  false,
 		LogLevel: "trace",
 		SkipHeaders: []string{
 			"cdn-loop",
+			"connection",
+			"dnt",
 			"x-nf-site-id",
 			"x-nf-client-connection-ip",
 			"x-nf-account-id",
+			"x-forwarded-for",
 			"x-forwarded-proto",
+			"x-nf-site-info",
 		},
 	})
 
