@@ -17,6 +17,8 @@ import MenuAccess from './menu/MenuAccess.svelte'
 import { getTheme, setTheme, defaultTheme, type ThemeName } from './theme'
 import { contextKey, createContext, configureTitle, type Context } from './menu/context'
 import { getName, listenToNameChanges } from '$share/name'
+import { wait } from '$util'
+import type { Writable } from 'svelte/store'
 
 const record = getSharedRecord()
 let theme: ThemeName
