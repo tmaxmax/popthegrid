@@ -25,7 +25,7 @@ func (r *Repository) Get(ctx context.Context, code share.Code) (share.Record, er
 
 	var rec share.Record
 
-	row := conn.QueryRow(ctx, "select name, gamemode, theme, record_when, data from links where code = $1", code)
+	row := conn.QueryRow(ctx, "select name, gamemode, theme, record_when, data from links where code = $1", string(code))
 	err = row.Scan(&rec.Name, &rec.Gamemode, &rec.Theme, &rec.When, &rec.Data)
 	if err == pgx.ErrNoRows {
 		return share.Record{}, createError(handler.ErrorNotFound, err)
@@ -104,6 +104,12 @@ func (r *Repository) connect(ctx context.Context) (*pgx.Conn, error) {
 			Cause: err,
 		}
 	}
+
+	m := conn.TypeMap()
+	m.RegisterDefaultPgType(map[string]any{}, "jsonb")
+	m.RegisterDefaultPgType(share.Code(""), "char")
+	m.RegisterDefaultPgType(share.Gamemode(""), "text")
+	m.RegisterDefaultPgType(share.Theme(""), "text")
 
 	return conn, nil
 }

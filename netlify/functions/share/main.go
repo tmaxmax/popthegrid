@@ -37,6 +37,8 @@ func main() {
 		panic(err)
 	}
 
+	config.DefaultQueryExecMode = pgx.QueryExecModeExec
+
 	logger := httplog.Handler(httplog.NewLogger("share", httplog.Options{
 		JSON:    !isDev,
 		Concise: isDev,
