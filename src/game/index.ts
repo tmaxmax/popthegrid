@@ -29,7 +29,7 @@ export type OnGameOverData = OnGameData
 export interface GameProps {
   grid: Grid
   gamemode: Gamemode
-  onError(err: Error): unknown
+  onError(err: unknown): unknown
   onGameInit?(data: OnGameInitData): unknown
   onGameReady?(data: OnGameReadyData): unknown
   onGameStart?(data: OnGameStartData): unknown
@@ -73,31 +73,35 @@ export class Game {
     const { grid } = this.props
 
     grid.onSquare((square) => {
-      this.sendEvent({ type: 'removeSquare', square }).catch((err) => this.props.onError(err))
+      try {
+        this.sendEvent({ type: 'removeSquare', square })
+      } catch (err) {
+        this.props.onError(err)
+      }
     })
 
     this.dispatchedEvents = writable<Event>(undefined)
 
-    // NOTE: This is basically sync, as Initial has no transition
+    // NOTE: This is sync, as Initial has no transition
     // when the grid was never created. This call initializes the game's
     // gen and state fields, do not remove.
     this.setState(new Initial({ ...this.props }))
   }
 
-  async prepare() {
-    await this.sendEvent({ type: 'prepare' })
+  prepare() {
+    return this.sendEvent({ type: 'prepare' })
   }
 
-  async forceEnd(canRestart?: boolean) {
-    await this.sendEvent({ type: 'forceEnd', canRestart })
+  forceEnd(canRestart?: boolean) {
+    return this.sendEvent({ type: 'forceEnd', canRestart })
   }
 
-  async pause() {
-    await this.sendEvent({ type: 'pause' })
+  pause() {
+    return this.sendEvent({ type: 'pause' })
   }
 
-  async resume() {
-    await this.sendEvent({ type: 'resume' })
+  resume() {
+    return this.sendEvent({ type: 'resume' })
   }
 
   setGamemode(gamemode: Gamemode): GamemodeSetWhen {
@@ -108,7 +112,7 @@ export class Game {
     return { subscribe: this.dispatchedEvents.subscribe }
   }
 
-  private async setState(state: State): Promise<void> {
+  private setState(state: State): void | Promise<void> {
     const from = this.state?.name
 
     this.state = state
@@ -121,21 +125,29 @@ export class Game {
 
     this.state.executeCallback(this.props, { when: 'before', from })
 
-    await this.state.transition()
-    const newGen = this.state.run()
-    newGen.next()
-    this.gen = newGen
+    const done = this.state.transition()
+    const setNewState = () => {
+      const newGen = this.state.run()
+      newGen.next()
+      this.gen = newGen
 
-    this.dispatchedEvents.set({
-      name: 'transitionend',
-      from: from,
-      to: this.state.name,
-    })
+      this.dispatchedEvents.set({
+        name: 'transitionend',
+        from: from,
+        to: this.state.name,
+      })
 
-    this.state.executeCallback(this.props, { when: 'after', from })
+      this.state.executeCallback(this.props, { when: 'after', from })
+    }
+
+    if (done) {
+      return done.then(setNewState)
+    }
+
+    setNewState()
   }
 
-  private async sendEvent(ev: GameEvent) {
+  private sendEvent(ev: GameEvent): void | Promise<void> {
     const { value, done } = this.gen.next(ev)
     if (!done) {
       return
@@ -172,7 +184,7 @@ abstract class State {
 
   abstract setGamemode(gamemode: Gamemode): GamemodeSetWhen
   abstract executeCallback(cbs: Callbacks, data: OnGameData): void
-  abstract transition(): Promise<void>
+  abstract transition(): void | Promise<void>
   protected abstract processEvent(event: GameEvent): void | State | Error
 }
 
@@ -211,8 +223,12 @@ class Initial extends State {
     onGameInit?.({ gamemode: this.props.gamemode.name(), ...data })
   }
 
-  async transition() {
-    await Promise.all([this.props.grid.destroy(), this.props.gamemode.reset()])
+  transition(): void | Promise<void> {
+    const resetDone = this.props.gamemode.reset()
+    if (this.props.grid.activeSquares.length > 0) {
+      return Promise.all([resetDone, this.props.grid.destroy()]).then(() => void 0)
+    }
+    return resetDone
   }
 }
 
@@ -278,8 +294,8 @@ class Ready extends State {
     onGameReady?.({ gamemode: this.props.gamemode.name(), ...data })
   }
 
-  async transition() {
-    await this.props.grid.create()
+  transition() {
+    return this.props.grid.create()
   }
 }
 
@@ -336,7 +352,7 @@ class Ongoing extends State {
     return
   }
 
-  async transition() {
+  transition() {
     return
   }
 }

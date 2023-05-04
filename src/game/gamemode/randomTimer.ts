@@ -48,18 +48,18 @@ export class RandomTimer extends Gamemode {
     this.interval?.resume()
   }
 
-  async reset() {
+  reset() {
     if (!this.interval || !this.controller) {
       return
     }
 
     this.controller.abort()
-    await this.interval.done
-
-    this.done = false
-    this.interval = undefined
-    this.controller = undefined
-    this.hasPoppedFirstSquare = false
+    return this.interval.done.then(() => {
+      this.done = false
+      this.interval = undefined
+      this.controller = undefined
+      this.hasPoppedFirstSquare = false
+    })
   }
 
   private markAsDone(iteration: number) {
