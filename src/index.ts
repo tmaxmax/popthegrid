@@ -199,6 +199,23 @@ const main = async () => {
   document.body.style.transition = 'background-color 0.4s ease-out'
 
   await Promise.all([game.prepare(), titleDone])
+
+  let token: string | undefined
+
+  document.addEventListener('visibilitychange', () => {
+    try {
+      if (document.hidden) {
+        if (!token) {
+          token = game.pause()
+        }
+      } else if (token) {
+        game.resume(token)
+        token = undefined
+      }
+    } catch (err) {
+      void err
+    }
+  })
 }
 
 main()
