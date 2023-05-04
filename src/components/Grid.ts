@@ -105,7 +105,7 @@ export class Grid extends Component<HTMLDivElement> {
     options?: AddEventListenerOptions
   ) {
     const cb = (e: Event) => {
-      if (!isHTMLDivElement(e.target) || !e.target.classList.contains('grid__square')) {
+      if (!isHTMLDivElement(e.target) || !e.target.classList.contains('grid__square') || !e.isTrusted) {
         return
       }
 
