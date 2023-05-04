@@ -37,7 +37,7 @@ export interface GameProps {
   onGameOver?(data: OnGameOverData): unknown
 }
 
-type BaseProps = Pick<GameProps, 'grid' | 'gamemode'>
+type BaseProps = Pick<GameProps, 'grid' | 'gamemode'> & { nextGamemode?: Gamemode }
 type Callbacks = Omit<GameProps, 'grid' | 'gamemode' | 'onError'>
 
 export type GamemodeSetWhen = 'now' | 'next-game'
@@ -188,11 +188,25 @@ abstract class State {
   protected abstract processEvent(event: GameEvent): void | State | Error
 }
 
+interface EndProps {
+  attempt: OngoingAttempt
+  kind: 'win' | 'lose'
+  lastOp?: Promise<void>
+}
+
 class Initial extends State {
-  constructor(props: BaseProps, nextGamemode?: Gamemode) {
-    super('initial', props)
-    if (nextGamemode) {
-      this.props.gamemode = nextGamemode
+  private readonly attempt?: Attempt
+  private readonly lastOp?: Promise<void>
+
+  constructor(props: BaseProps, end?: EndProps) {
+    super(end?.kind || 'initial', props)
+    if (end) {
+      this.attempt = end.attempt.end(end.kind === 'win')
+      this.lastOp = end.lastOp
+    }
+    if (this.props.nextGamemode) {
+      this.props.gamemode = this.props.nextGamemode
+      this.props.nextGamemode = undefined
     }
   }
 
@@ -208,7 +222,7 @@ class Initial extends State {
       case 'removeSquare':
       case 'pause':
       case 'resume':
-        return new Error('Game not initialized, no attempt started.')
+        return new Error(`Game is ${this.nameForError}, no attempt started.`)
       default:
         throw new UnreachableError(event, `Unimplemented event type received in Initial state.`)
     }
@@ -219,26 +233,49 @@ class Initial extends State {
     return 'now'
   }
 
-  executeCallback({ onGameInit }: Callbacks, data: OnGameData): void {
+  executeCallback({ onGameInit, onGameEnd }: Callbacks, data: OnGameData): void {
+    if (this.name === 'initial') {
     onGameInit?.({ gamemode: this.props.gamemode.name(), ...data })
+    } else {
+      onGameEnd?.({ attempt: this.attempt!, ...data })
+    }
   }
 
   transition(): void | Promise<void> {
+    if (this.lastOp) {
+      return this.transitionLastOp()
+    }
+
     const resetDone = this.props.gamemode.reset()
     if (this.props.grid.activeSquares.length > 0) {
       return Promise.all([resetDone, this.props.grid.destroy()]).then(() => void 0)
     }
+
     return resetDone
+  }
+
+  private async transitionLastOp() {
+    await this.lastOp
+    await Promise.all([this.props.grid.destroy(), this.props.gamemode.reset()])
+  }
+
+  private get nameForError(): string {
+    switch (this.name) {
+      case 'win':
+        return 'won'
+      case 'lose':
+        return 'lost'
+      default:
+        return 'not initialized'
+    }
   }
 }
 
 class Ready extends State {
   private squareWasRemoved = false
-  private nextGamemode: Gamemode
 
   constructor(props: BaseProps) {
     super('ready', props)
-    this.nextGamemode = this.props.gamemode
   }
 
   protected processEvent(event: GameEvent): void | State | Error {
@@ -270,22 +307,21 @@ class Ready extends State {
 
     const done = grid.removeSquare(square)
     if (gamemode.shouldDestroy(grid, square)) {
-      return new End(this.props, this.nextGamemode, attempt, 'lose')
+      return new Initial(this.props, { attempt, kind: 'lose' })
     } else if (grid.activeSquares.length === 0) {
-      return new End(this.props, this.nextGamemode, attempt, 'win', done)
+      return new Initial(this.props, { attempt, kind: 'win', lastOp: done })
     }
 
-    return new Ongoing(this.props, this.nextGamemode, attempt)
+    return new Ongoing(this.props, attempt)
   }
 
   setGamemode(gamemode: Gamemode): GamemodeSetWhen {
     if (this.squareWasRemoved) {
-      this.nextGamemode = gamemode
+      this.props.nextGamemode = gamemode
       return 'next-game'
     }
 
     this.props.gamemode = gamemode
-    this.nextGamemode = gamemode
 
     return 'now'
   }
@@ -300,7 +336,7 @@ class Ready extends State {
 }
 
 class Ongoing extends State {
-  constructor(props: BaseProps, private nextGamemode: Gamemode, private readonly attempt: OngoingAttempt) {
+  constructor(props: BaseProps, private readonly attempt: OngoingAttempt) {
     super('ongoing', props)
   }
 
@@ -310,7 +346,7 @@ class Ongoing extends State {
         return new Error('Game is ongoing, already prepared.')
       case 'forceEnd':
         if (event.canRestart) {
-          return new Initial(this.props, this.nextGamemode)
+          return new Initial(this.props)
         }
         return new Over(this.props)
       case 'removeSquare':
@@ -331,7 +367,7 @@ class Ongoing extends State {
   }
 
   setGamemode(gamemode: Gamemode): GamemodeSetWhen {
-    this.nextGamemode = gamemode
+    this.props.nextGamemode = gamemode
     return 'next-game'
   }
 
@@ -344,9 +380,9 @@ class Ongoing extends State {
 
     const done = grid.removeSquare(square)
     if (gamemode.shouldDestroy(grid, square)) {
-      return new End(this.props, this.nextGamemode, this.attempt, 'lose')
+      return new Initial(this.props, { attempt: this.attempt, kind: 'lose' })
     } else if (grid.activeSquares.length === 0) {
-      return new End(this.props, this.nextGamemode, this.attempt, 'win', done)
+      return new Initial(this.props, { attempt: this.attempt, kind: 'win', lastOp: done })
     }
 
     return
@@ -354,52 +390,6 @@ class Ongoing extends State {
 
   transition() {
     return
-  }
-}
-
-class End extends State {
-  private readonly attempt: Attempt
-
-  constructor(
-    props: BaseProps,
-    nextGamemode: Gamemode,
-    ongoingAttempt: OngoingAttempt,
-    private readonly kind: 'win' | 'lose',
-    private readonly lastOp?: Promise<void>
-  ) {
-    super(kind, props)
-    this.attempt = ongoingAttempt.end(kind === 'win')
-    this.props.gamemode = nextGamemode
-  }
-
-  protected processEvent(event: GameEvent): void | State | Error {
-    switch (event.type) {
-      case 'prepare':
-        return new Ready(this.props)
-      case 'forceEnd':
-        if (event.canRestart) {
-          return
-        }
-        return new Over(this.props)
-      case 'removeSquare':
-      case 'pause':
-      case 'resume':
-        return new Error(`Game is ${this.kind === 'win' ? 'won' : 'lost'}.`)
-    }
-  }
-
-  setGamemode(gamemode: Gamemode): GamemodeSetWhen {
-    this.props.gamemode = gamemode
-    return 'next-game'
-  }
-
-  executeCallback({ onGameEnd }: Callbacks, data: OnGameData): void {
-    onGameEnd?.({ attempt: this.attempt, ...data })
-  }
-
-  async transition() {
-    await this.lastOp
-    await Promise.all([this.props.gamemode.reset(), this.props.grid.destroy()])
   }
 }
 
