@@ -47,6 +47,8 @@ assertNonNull(footer)
 
 const NUM_COLORS = 5
 
+let context: Context | undefined
+
 const gamemode = record?.gamemode || defaultGamemode
 const game = new Game({
   gamemode: gamemodes[gamemode].create(),
@@ -65,19 +67,19 @@ const game = new Game({
   },
   onGameReady({ gamemode, from, when }) {
     if (when === 'before' && (from === 'win' || from === 'lose')) {
-      context.gamemode.set(gamemode)
+      context!.gamemode.set(gamemode)
     }
   },
   onGameStart({ attempt, when }) {
     if (when === 'before') {
-      context.attempts.updateOngoing(attempt)
+      context!.attempts.updateOngoing(attempt)
     }
   },
   onGameEnd({ attempt, when }) {
     if (when === 'before') {
       insertAttempt(db, attempt).then((attempt) => {
-        context.attempts.update(attempt)
-        context.attempts.updateOngoing(undefined)
+        context!.attempts.update(attempt)
+        context!.attempts.updateOngoing(undefined)
         attemptsChan.postMessage(attempt)
       })
     } else if (when === 'after') {
@@ -88,7 +90,7 @@ const game = new Game({
 
 const attemptsChan = new BroadcastChannel('attempts')
 attemptsChan.addEventListener('message', (ev: MessageEvent<InsertedAttempt>) => {
-  context.attempts.update(ev.data)
+  context?.attempts.update(ev.data)
 })
 
 const getVersionChangeModalContent = () => {
@@ -132,7 +134,6 @@ const getRecordClearRedirect = () => {
 }
 
 let db: IDBDatabase
-let context: Context
 
 const handleURLAndTitle = async (name: Writable<string | undefined>) => {
   const params = new URLSearchParams(location.search)
@@ -185,7 +186,7 @@ const main = async () => {
   })
 
   listenToNameChanges(({ newValue }) => {
-    context.name.set(newValue)
+    context!.name.set(newValue)
   })
 
   const titleDone = handleURLAndTitle(context.name)
