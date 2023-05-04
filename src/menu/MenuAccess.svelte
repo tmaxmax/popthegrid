@@ -135,7 +135,7 @@
       <span>{recordPrompt ? recordPrompt : 'You won!'}</span>
       <span class="confetti">
         {#if recordPrompt}
-          <Confetti delay={[200, 4000]} cone amount={600} />
+          <Confetti delay={[200, 3000]} cone amount={500} />
         {:else}
           <Confetti />
         {/if}
