@@ -80,6 +80,7 @@ p {
   height: 50%;
   max-height: 20em;
   position: relative;
+  touch-action: none;
 }
 
 footer {

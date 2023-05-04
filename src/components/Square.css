@@ -6,7 +6,7 @@
   position: absolute;
   background: var(--color);
   transition: all 0.5s ease-out;
-  touch-action: manipulation;
+  touch-action: none;
 }
 
 @keyframes delete-grid__square {
