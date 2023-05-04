@@ -21,7 +21,7 @@ export const createEventStore = (events: Readable<GameEvent>, opts?: StoreOption
   })
 }
 
-const getTransitionStartText = ({ from, to }: Transition, opts?: StoreOptions): string => {
+const getTransitionStartText = ({ from, to, name }: Transition, opts?: StoreOptions): string => {
   const short = !!opts?.short
 
   switch (to) {
@@ -39,6 +39,9 @@ const getTransitionStartText = ({ from, to }: Transition, opts?: StoreOptions): 
     case 'ongoing':
       return short ? 'Starting...' : 'Starting attempt...'
     case 'pause':
+      if (from !== 'ongoing') {
+        return getTransitionStartText({ name, from, to: from! }, opts)
+      }
       return short ? 'Paused' : 'Game is paused.'
     case 'win':
       return short ? 'Won' : 'You won!'
@@ -49,7 +52,7 @@ const getTransitionStartText = ({ from, to }: Transition, opts?: StoreOptions): 
   }
 }
 
-const getTransitionEndText = ({ to }: Transition, opts?: StoreOptions): string => {
+const getTransitionEndText = ({ from, to, name }: Transition, opts?: StoreOptions): string => {
   const short = !!opts?.short
 
   switch (to) {
@@ -58,6 +61,9 @@ const getTransitionEndText = ({ to }: Transition, opts?: StoreOptions): string =
     case 'ready':
       return short ? 'Ready' : 'You can start a new game.'
     case 'pause':
+      if (from !== 'ongoing') {
+        return getTransitionEndText({ name, from, to: from! }, opts)
+      }
       return short ? 'Paused' : 'Your current game is now paused. It will be resumed automatically when you close this menu.'
     case 'ongoing':
       return short ? 'Ongoing' : 'You are in a game!'
