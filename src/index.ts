@@ -201,6 +201,8 @@ const main = async () => {
   })
 
   document.body.style.transition = 'background-color 0.4s ease-out'
+  // prevents double-tap zoom
+  document.querySelector('.grid__parent')!.addEventListener('touchend', (e) => e.preventDefault())
 
   await Promise.all([game.prepare(), titleDone])
 
