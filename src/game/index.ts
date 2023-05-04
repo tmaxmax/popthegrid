@@ -170,7 +170,7 @@ export class Game {
 type GameGenerator = Generator<void, State | Error, GameEvent>
 
 abstract class State {
-  constructor(public readonly name: StateName) {}
+  constructor(public readonly name: StateName, protected props: BaseProps) {}
 
   *run(): GameGenerator {
     let nextYield = this.processEvent(yield)
@@ -189,8 +189,8 @@ abstract class State {
 }
 
 class Initial extends State {
-  constructor(private props: BaseProps, nextGamemode?: Gamemode) {
-    super('initial')
+  constructor(props: BaseProps, nextGamemode?: Gamemode) {
+    super('initial', props)
     if (nextGamemode) {
       this.props.gamemode = nextGamemode
     }
@@ -236,8 +236,8 @@ class Ready extends State {
   private squareWasRemoved = false
   private nextGamemode: Gamemode
 
-  constructor(private props: BaseProps) {
-    super('ready')
+  constructor(props: BaseProps) {
+    super('ready', props)
     this.nextGamemode = this.props.gamemode
   }
 
@@ -300,8 +300,8 @@ class Ready extends State {
 }
 
 class Ongoing extends State {
-  constructor(private readonly props: BaseProps, private nextGamemode: Gamemode, private readonly attempt: OngoingAttempt) {
-    super('ongoing')
+  constructor(props: BaseProps, private nextGamemode: Gamemode, private readonly attempt: OngoingAttempt) {
+    super('ongoing', props)
   }
 
   protected processEvent(event: GameEvent): void | State | Error {
@@ -361,13 +361,13 @@ class End extends State {
   private readonly attempt: Attempt
 
   constructor(
-    private props: BaseProps,
+    props: BaseProps,
     nextGamemode: Gamemode,
     ongoingAttempt: OngoingAttempt,
     private readonly kind: 'win' | 'lose',
     private readonly lastOp?: Promise<void>
   ) {
-    super(kind)
+    super(kind, props)
     this.attempt = ongoingAttempt.end(kind === 'win')
     this.props.gamemode = nextGamemode
   }
@@ -404,8 +404,8 @@ class End extends State {
 }
 
 class Over extends State {
-  constructor(private readonly props: BaseProps) {
-    super('over')
+  constructor(props: BaseProps) {
+    super('over', props)
   }
 
   protected processEvent(): void | State | Error {
