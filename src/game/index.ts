@@ -1,4 +1,4 @@
-import { UnreachableError, isDefined } from '$util/index'
+import { UnreachableError, isDefined, randString } from '$util'
 import { writable, type Readable, type Writable } from 'svelte/store'
 import { startAttempt } from './attempt'
 import type { Attempt, OngoingAttempt } from './attempt'
@@ -35,6 +35,7 @@ export interface GameProps {
   onGameStart?(data: OnGameStartData): unknown
   onGameEnd?(data: OnGameEndData): unknown
   onGameOver?(data: OnGameOverData): unknown
+  onGamePause?(data: OnGameData): unknown
 }
 
 type BaseProps = Pick<GameProps, 'grid' | 'gamemode'> & { nextGamemode?: Gamemode }
@@ -44,7 +45,7 @@ export type GamemodeSetWhen = 'now' | 'next-game'
 
 export type CallbackWhen = 'before' | 'after'
 
-export type StateName = 'initial' | 'ready' | 'ongoing' | 'win' | 'lose' | 'over'
+export type StateName = 'initial' | 'ready' | 'ongoing' | 'win' | 'lose' | 'over' | 'pause'
 
 export type Event =
   | {
@@ -61,8 +62,8 @@ type GameEvent =
   | { type: 'prepare' }
   | { type: 'removeSquare'; square: Square }
   | { type: 'forceEnd'; canRestart?: boolean }
-  | { type: 'pause' }
-  | { type: 'resume' }
+  | { type: 'pause'; token: string }
+  | { type: 'resume'; token: string }
 
 export class Game {
   private gen!: GameGenerator
@@ -97,11 +98,14 @@ export class Game {
   }
 
   pause() {
-    return this.sendEvent({ type: 'pause' })
+    const token = randString(8)
+    this.sendEvent({ type: 'pause', token })
+
+    return token
   }
 
-  resume() {
-    return this.sendEvent({ type: 'resume' })
+  resume(token: string) {
+    return this.sendEvent({ type: 'resume', token })
   }
 
   setGamemode(gamemode: Gamemode): GamemodeSetWhen {
@@ -182,6 +186,10 @@ abstract class State {
     return nextYield
   }
 
+  properties(): BaseProps {
+    return { ...this.props }
+  }
+
   abstract setGamemode(gamemode: Gamemode): GamemodeSetWhen
   abstract executeCallback(cbs: Callbacks, data: OnGameData): void
   abstract transition(): void | Promise<void>
@@ -220,9 +228,11 @@ class Initial extends State {
         }
         return new Over(this.props)
       case 'removeSquare':
+        return new Error('Game is not started, cannot remove square.')
       case 'pause':
+        return new Pause(this, event.token)
       case 'resume':
-        return new Error(`Game is ${this.nameForError}, no attempt started.`)
+        return
       default:
         throw new UnreachableError(event, `Unimplemented event type received in Initial state.`)
     }
@@ -235,7 +245,7 @@ class Initial extends State {
 
   executeCallback({ onGameInit, onGameEnd }: Callbacks, data: OnGameData): void {
     if (this.name === 'initial') {
-    onGameInit?.({ gamemode: this.props.gamemode.name(), ...data })
+      onGameInit?.({ gamemode: this.props.gamemode.name(), ...data })
     } else {
       onGameEnd?.({ attempt: this.attempt!, ...data })
     }
@@ -258,17 +268,6 @@ class Initial extends State {
     await this.lastOp
     await Promise.all([this.props.grid.destroy(), this.props.gamemode.reset()])
   }
-
-  private get nameForError(): string {
-    switch (this.name) {
-      case 'win':
-        return 'won'
-      case 'lose':
-        return 'lost'
-      default:
-        return 'not initialized'
-    }
-  }
 }
 
 class Ready extends State {
@@ -288,10 +287,8 @@ class Ready extends State {
         }
         return new Over(this.props)
       case 'pause':
-        this.props.grid.toggleInteraction(false)
-        return
+        return new Pause(this, event.token)
       case 'resume':
-        this.props.grid.toggleInteraction(true)
         return
       case 'removeSquare':
         return this.onRemoveSquare(event.square)
@@ -352,14 +349,8 @@ class Ongoing extends State {
       case 'removeSquare':
         return this.onRemoveSquare(event.square)
       case 'pause':
-        this.attempt.pause()
-        this.props.gamemode.pause()
-        this.props.grid.toggleInteraction(false)
-        return
+        return new Pause(this, event.token)
       case 'resume':
-        this.attempt.resume()
-        this.props.gamemode.resume()
-        this.props.grid.toggleInteraction(true)
         return
       default:
         throw new UnreachableError(event, `Unimplemented event type received in Ongoing state.`)
@@ -413,4 +404,73 @@ class Over extends State {
   async transition() {
     await this.props.grid.destroy()
   }
+}
+
+class Pause extends State {
+  constructor(private previousState: State, private readonly token: string) {
+    super('pause', previousState.properties())
+  }
+
+  protected processEvent(event: GameEvent): void | State | Error {
+    switch (event.type) {
+      case 'prepare':
+        return new Error('Game is paused, already prepared.')
+      case 'removeSquare':
+        return new Error("Game is paused, can't remove square.")
+      case 'forceEnd':
+        if (event.canRestart) {
+          return new Initial(this.props)
+        }
+        return new Over(this.props)
+      case 'pause':
+        return
+      case 'resume':
+        if (event.token !== this.token) {
+          return
+        }
+        return changeStateTransitionForResume(this.previousState)
+      default:
+        throw new UnreachableError(event, `Unimplemented event type received in Pause state.`)
+    }
+  }
+
+  setGamemode(gamemode: Gamemode): GamemodeSetWhen {
+    return this.previousState.setGamemode(gamemode)
+  }
+
+  executeCallback({ onGamePause }: Callbacks, data: OnGameData): void {
+    onGamePause?.(data)
+  }
+
+  transition(): void | Promise<void> {
+    this.props.grid.toggleInteraction(false)
+    this.props.gamemode.pause()
+  }
+}
+
+function changeStateTransitionForResume(state: State): State {
+  interface Wrapped extends State {
+    unwrap(): State
+  }
+
+  if ('unwrap' in state) {
+    return state as Wrapped
+  }
+
+  return new Proxy<Wrapped>(state as Wrapped, {
+    get(target, p, receiver) {
+      switch (p) {
+        case 'transition':
+          return () => {
+            const props = state.properties()
+            props.gamemode.resume()
+            props.grid.toggleInteraction(true)
+          }
+        case 'unwrap':
+          return () => state
+        default:
+          return Reflect.get(target, p, receiver)
+      }
+    },
+  })
 }

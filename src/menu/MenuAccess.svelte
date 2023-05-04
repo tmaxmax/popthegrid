@@ -89,13 +89,15 @@
 
     disabled = true;
 
+    let token: string | undefined;
+
     const modal = new Modal({
       content: (target) => new Menu({ target, context: new Map([[contextKey, context]]) }),
       allowClose: true,
       animateClose: true,
       afterClose() {
-        if ($event.name !== 'transitionstart') {
-          game.resume();
+        if ($event.name !== 'transitionstart' && token) {
+          game.resume(token);
         }
       },
     });
@@ -114,10 +116,10 @@
           });
         });
 
-        await game.pause();
+        token = game.pause();
       }
     } else {
-      await game.pause();
+      token = game.pause();
     }
 
     await modal.create(Component.body, true);
