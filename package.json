@@ -40,7 +40,7 @@
     "color-interpolate": "^1.0.5",
     "debug": "^4.3.4",
     "human-date": "^1.4.0",
-    "humanize-duration": "^3.28.0",
+    "pretty-ms": "^8.0.0",
     "resize-observer-polyfill": "^1.5.1",
     "svelte-autosize": "^1.1.0",
     "svelte-confetti": "^1.2.2",

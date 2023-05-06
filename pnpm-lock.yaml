@@ -15,11 +15,11 @@ specifiers:
   debug: ^4.3.4
   eslint: ^8.38.0
   human-date: ^1.4.0
-  humanize-duration: ^3.28.0
   jsdom: ^21.1.1
   npm-run-all: ^4.1.5
   prettier: ^2.8.7
   prettier-plugin-svelte: ^2.10.0
+  pretty-ms: ^8.0.0
   resize-observer-polyfill: ^1.5.1
   svelte: ^3.58.0
   svelte-autosize: ^1.1.0
@@ -36,7 +36,7 @@ dependencies:
   color-interpolate: 1.0.5
   debug: 4.3.4
   human-date: 1.4.0
-  humanize-duration: 3.28.0
+  pretty-ms: 8.0.0
   resize-observer-polyfill: 1.5.1
   svelte-autosize: 1.1.0
   svelte-confetti: 1.2.2
@@ -1483,10 +1483,6 @@ packages:
     resolution: {integrity: sha512-jhEvaL0yj8LZnphQqOylapYTLB91ZIaNuDnrHqDR/3/P1Mhil1kh1qgm75xQ/qi7iZSPKIjqrEx6kw9gTcdeuA==}
     dev: false
 
-  /humanize-duration/3.28.0:
-    resolution: {integrity: sha512-jMAxraOOmHuPbffLVDKkEKi/NeG8dMqP8lGRd6Tbf7JgAeG33jjgPWDbXXU7ypCI0o+oNKJFgbSB9FKVdWNI2A==}
-    dev: false
-
   /iconv-lite/0.6.3:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
     engines: {node: '>=0.10.0'}
@@ -2017,6 +2013,11 @@ packages:
       json-parse-better-errors: 1.0.2
     dev: true
 
+  /parse-ms/3.0.0:
+    resolution: {integrity: sha512-Tpb8Z7r7XbbtBTrM9UhpkzzaMrqA2VXMT3YChzYltwV3P3pM6t8wl7TvpMnSTosz1aQAdVib7kdoys7vYOPerw==}
+    engines: {node: '>=12'}
+    dev: false
+
   /parse5/7.1.2:
     resolution: {integrity: sha512-Czj1WaSVpaoj0wbhMzLmWD69anp2WH7FXMB9n1Sy8/ZFF9jolSQVMu1Ij5WIyGmcBmhk7EOndpO4mIpihVqAXw==}
     dependencies:
@@ -2138,6 +2139,13 @@ packages:
       ansi-styles: 5.2.0
       react-is: 17.0.2
     dev: true
+
+  /pretty-ms/8.0.0:
+    resolution: {integrity: sha512-ASJqOugUF1bbzI35STMBUpZqdfYKlJugy6JBziGi2EE+AL5JPJGSzvpeVXojxrr0ViUYoToUjb5kjSEGf7Y83Q==}
+    engines: {node: '>=14.16'}
+    dependencies:
+      parse-ms: 3.0.0
+    dev: false
 
   /psl/1.9.0:
     resolution: {integrity: sha512-E/ZsdU4HLs/68gYzgGTkMicWTLPdAftJLfJFlLUAAKZGkStNU72sZjT66SnMDVOfOWY/YAoiD7Jxa9iHvngcag==}

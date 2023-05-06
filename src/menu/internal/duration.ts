@@ -1,13 +1,3 @@
-import humanizeDuration from 'humanize-duration'
+import prettyMs, { type Options } from 'pretty-ms'
 
-export const duration = humanizeDuration.humanizer({
-  units: ['s'],
-  maxDecimalPoints: 2,
-  language: 'short',
-  spacer: '',
-  languages: {
-    short: {
-      s: () => 's',
-    },
-  },
-})
+export const duration = (ms: number, opts?: Options) => prettyMs(ms, { secondsDecimalDigits: 2, ...opts })
