@@ -68,6 +68,7 @@
   import { gamemodes } from '../gamemode';
   import { duration } from './internal/duration';
   import { pause, resume } from '$game/pause';
+  import Interval from './internal/Interval.svelte';
 
   const context = getContext();
 
@@ -80,8 +81,18 @@
   $: display = isError ? 'Something went wrong' : recordPrompt && isEnd ? recordPrompt : gamemodes[$gamemode].display;
   $: isEnd = (isTransitionEvent($event) && $event.to === 'win') || ($event.name === 'transitionstart' && $event.from === 'win');
   $: isWin = isEnd && (recordPrompt ? recordPrompt?.includes('beaten') : !record);
+  $: showInterval = isTransitionEvent($event) && $event.to === 'ongoing';
 
   let disabled = false;
+
+  let intervalPause: (() => void) | undefined;
+  let intervalResume: (() => void) | undefined;
+  let currentTime = 0;
+
+  $: if (!(isTransitionEvent($event) && ($event.to === 'ongoing' || ($event.to === 'pause' && $event.from === 'ongoing')))) {
+    console.log('Reset:', $event);
+    currentTime = 0;
+  }
 
   const handler = async () => {
     if (disabled || isError) {
@@ -91,12 +102,15 @@
     disabled = true;
 
     const token = pause(game);
+    intervalPause?.();
+
     const modal = new Modal({
       content: (target) => new Menu({ target, context: new Map([[contextKey, context]]) }),
       allowClose: true,
       animateClose: true,
       afterClose() {
         resume(game, token);
+        intervalResume?.();
       },
     });
 
@@ -122,7 +136,11 @@
   {:else}
     <div transition:fade={{ duration: 100 }}>
       <Edit class="your-game-icon" />
-      <span>{display}{recordPrompt && isEnd ? '' : ` • ${$eventOutput.message}`}</span>
+      <span
+        >{display}{recordPrompt && isEnd ? '' : ` • `}{#if showInterval}<Interval
+            bind:pause={intervalPause}
+            bind:resume={intervalResume}
+            bind:currentTime />{:else}{$eventOutput.message}{/if}</span>
     </div>
   {/if}
 </button>
