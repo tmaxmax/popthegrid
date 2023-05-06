@@ -162,9 +162,9 @@ const handleURLAndTitle = async (name: Writable<string | undefined>) => {
 }
 
 const main = async () => {
-  try {
+  if (navigator.storage && navigator.storage.persist) {
     await navigator.storage.persist()
-  } catch {}
+  }
 
   db = await openIndexedDB(window.indexedDB, {
     schema,
