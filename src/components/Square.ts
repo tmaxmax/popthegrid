@@ -13,9 +13,13 @@ export interface SquareProperties {
 }
 
 export class Square extends Component<HTMLDivElement> {
+  private currentColor!: string
+  private rowNum = -1
+  private colNum = -1
+
   constructor(properties: SquareProperties) {
     super({ tag: 'div', classList: ['grid__square'] })
-    ;({ color: this.color } = properties)
+    this.color = properties.color
     this.addEventListener('mouseenter', () => {
       this.setStyle('z-index', `${2}`)
     })
@@ -26,27 +30,38 @@ export class Square extends Component<HTMLDivElement> {
   }
 
   get color(): string {
-    return this.getStyle('--color')
+    return this.currentColor
   }
 
   set color(color: string) {
+    this.currentColor = color
     this.setStyle('--color', color)
   }
 
   set row(row: number) {
-    this.setStyle('--row', `${row}`)
+    if (row !== -1) {
+      this.rowNum = row
+      this.setStyle('--row', `${row}`)
+    } else {
+      this.setStyle('--row', null)
+    }
   }
 
   get row(): number {
-    return parseInt(this.getStyle('--row'), 10)
+    return this.rowNum
   }
 
   set col(col: number) {
-    this.setStyle('--col', `${col}`)
+    if (col !== -1) {
+      this.colNum = col
+      this.setStyle('--col', `${col}`)
+    } else {
+      this.setStyle('--col', null)
+    }
   }
 
   get col(): number {
-    return parseInt(this.getStyle('--col'), 10)
+    return this.colNum
   }
 
   animate(which: string, animate = true): Promise<void> {
