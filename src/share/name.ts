@@ -1,4 +1,4 @@
-import { isDefined } from '$util/index'
+import { isDefined, isNonNull } from '$util/index'
 
 const key = 'name'
 
@@ -14,10 +14,10 @@ export const listenToNameChanges = (cb: (params: NameListenerParams) => void) =>
     }
 
     const params: NameListenerParams = {}
-    if (ev.newValue) {
+    if (isNonNull(ev.newValue)) {
       params.newValue = ev.newValue
     }
-    if (ev.oldValue) {
+    if (isNonNull(ev.oldValue)) {
       params.oldValue = ev.oldValue
     }
 
