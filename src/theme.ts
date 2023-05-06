@@ -31,7 +31,7 @@ export const themes = {
       heading: '#f6f4f3',
       body: '#cecaca',
       assurance: '#0cce6b',
-      warning: '#000f1e',
+      warning: '#f4fd1f',
       danger: '#ef2d56',
       squares: ['#fdc5f5', '#f7aef8', '#b388eb', '#8093f1', '#72ddf7'],
     },
