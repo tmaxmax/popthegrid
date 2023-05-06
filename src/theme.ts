@@ -6,17 +6,19 @@ function entries<T extends Record<string, unknown>>(o: T): Entries<T> {
   return Object.entries(o) as Entries<T>
 }
 
+export type Hex = `#${string}`
+
 export interface Theme {
   display: string
   description: string
   colors: {
-    background: string
-    heading: string
-    body: string
-    assurance: string
-    warning: string
-    danger: string
-    squares: [string, string, string, string, string]
+    background: Hex
+    heading: Hex
+    body: Hex
+    assurance: Hex
+    warning: Hex
+    danger: Hex
+    squares: [Hex, Hex, Hex, Hex, Hex]
   }
 }
 

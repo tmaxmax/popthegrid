@@ -5,7 +5,6 @@ import { Square } from './Square'
 import baseLog from '$util/log'
 import { isDefined, randInt, wait } from '$util'
 import { map as mapAsync } from '$util/async'
-import ResizeObserver from 'resize-observer-polyfill'
 
 export interface GridProperties {
   colors?: string[]

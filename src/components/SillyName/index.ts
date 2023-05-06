@@ -1,16 +1,41 @@
 import './index.css'
-import interpolate from 'color-interpolate'
 
 import { Component } from '../internal/Component'
 import interval from '$util/time/interval'
 import { LocalStorage } from './storage'
 import type { EasterEggStorage } from './storage'
-import { type ThemeName, themes, defaultTheme } from '$theme'
-import { adjective, noun } from './data'
+import { type ThemeName, themes, defaultTheme, type Hex } from '$theme'
 
 const toUpper = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
-const fetchSillyName = () => toUpper(noun()) + adjective()
+let data: { adjective(): string; noun(): string } | undefined
+
+const fetchSillyName = async () => {
+  if (!data) {
+    data = await import('./data')
+  }
+
+  return toUpper(data.noun()) + data.adjective()
+}
+
+const interpolate = (a: Hex, b: Hex) => {
+  const ah = parseInt(a.replace(/#/g, ''), 16),
+    ar = ah >> 16,
+    ag = (ah >> 8) & 0xff,
+    ab = ah & 0xff,
+    bh = parseInt(b.replace(/#/g, ''), 16),
+    br = bh >> 16,
+    bg = (bh >> 8) & 0xff,
+    bb = bh & 0xff
+
+  return (amount: number) => {
+    const rr = ar + amount * (br - ar),
+      rg = ag + amount * (bg - ag),
+      rb = ab + amount * (bb - ab)
+
+    return '#' + (((1 << 24) + (rr << 16) + (rg << 8) + rb) | 0).toString(16).slice(1)
+  }
+}
 
 const DISCOVER_COUNT = 5
 
@@ -25,7 +50,7 @@ export class SillyName extends Component {
     const storage = props?.storage || new LocalStorage()
     const { warning, assurance } = themes[props?.theme || defaultTheme].colors
 
-    this.colorScheme = interpolate([warning, assurance])
+    this.colorScheme = interpolate(warning, assurance)
 
     if (storage.isDiscovered) {
       this.showURL()
@@ -33,7 +58,7 @@ export class SillyName extends Component {
       this.setCounter(0)
 
       interval({
-        callback: () => (this.text = `Made by ${fetchSillyName()}`),
+        callback: async () => (this.text = `Made by ${await fetchSillyName()}`),
         interval: 2000,
         leading: true,
         signal: this.controller.signal,
@@ -83,7 +108,7 @@ export class SillyName extends Component {
 
   setTheme(name: ThemeName) {
     const { warning, assurance } = themes[name].colors
-    this.colorScheme = interpolate([warning, assurance])
+    this.colorScheme = interpolate(warning, assurance)
     this.setStyle('--color', `${this.colorScheme(this.counter / 5)}`)
   }
 

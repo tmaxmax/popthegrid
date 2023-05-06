@@ -6,6 +6,13 @@
   }
 
   const modal = writable<Modal | undefined>();
+
+  function autosize(node: HTMLTextAreaElement) {
+    const computed = window.getComputedStyle(node);
+    // assume border-box sizing
+    const newHeight = node.scrollHeight + parseFloat(computed.borderTopWidth) + parseFloat(computed.borderBottomWidth);
+    node.style.height = `${newHeight}px`;
+  }
 </script>
 
 <script lang="ts">
@@ -15,8 +22,6 @@
   import { fade } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
   import { clickoutside } from '@svelte-put/clickoutside';
-  // @ts-expect-error this library does not have types.
-  import autosize from 'svelte-autosize';
 
   export let data: () => Promise<ShareData>;
   export let small = false;
@@ -184,8 +189,9 @@
     resize: none;
     border: none;
     -webkit-appearance: none;
-    height: fit-content;
     width: 100%;
+    overflow: hidden;
+    word-wrap: break-word;
     color: var(--color-body);
     font-family: 'Cutive Mono', 'Courier New', monospace;
     letter-spacing: -0.1em;
