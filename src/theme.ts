@@ -107,13 +107,13 @@ export const setTheme = (name: ThemeName, opts?: { global?: boolean }) => {
 
 export const isTheme = (name: string): name is ThemeName => name in themes
 
-export const getTheme = (): ThemeName => {
+export const getTheme = (): ThemeName | undefined => {
   const currentTheme = localStorage.getItem(key)
   if (currentTheme && isTheme(currentTheme)) {
     return currentTheme
   }
 
-  throw new Error('Theme is not set or is invalid')
+  return
 }
 
 export const listenToThemeChanges = (cb: (newTheme: ThemeName) => void) => {

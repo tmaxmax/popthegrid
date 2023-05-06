@@ -14,7 +14,7 @@ import { Redirect } from '$components/Redirect'
 import { defaultGamemode, gamemodes } from './gamemode'
 import { clearSharedRecord, getSharedRecord } from '$share/record'
 import MenuAccess from './menu/MenuAccess.svelte'
-import { getTheme, setTheme, defaultTheme, type ThemeName } from './theme'
+import { getTheme, setTheme, defaultTheme, themes } from './theme'
 import { contextKey, createContext, configureTitle, type Context } from './menu/context'
 import { getName, listenToNameChanges } from '$share/name'
 import { wait } from '$util'
@@ -22,15 +22,8 @@ import type { Writable } from 'svelte/store'
 import { pause, resume } from '$game/pause'
 
 const record = getSharedRecord()
-let theme: ThemeName
-
-try {
-  theme = record?.theme || getTheme()
-  setTheme(theme)
-} catch {
-  theme = defaultTheme
-  setTheme(theme)
-}
+const theme = record?.theme || getTheme() || defaultTheme
+setTheme(theme)
 
 const componentFrom = <T extends HTMLElement>(elem: T | null, name: string): Component<T> => {
   assertNonNull(elem, `${name} doesn't exist in the HTML document!`)
@@ -46,8 +39,6 @@ const gridParent = componentFrom(document.querySelector<HTMLElement>('.grid__par
 const footer = document.querySelector('footer')
 assertNonNull(footer)
 
-const NUM_COLORS = 5
-
 let context: Context | undefined
 
 const gamemode = record?.gamemode || defaultGamemode
@@ -55,7 +46,7 @@ const game = new Game({
   gamemode: gamemodes[gamemode].create(),
   grid: new DOMGrid({
     numTotalSquares: 48,
-    colors: Array.from({ length: NUM_COLORS }, (_, i) => `var(--color-square-${i + 1})`),
+    colors: themes[theme].colors.squares.map((_, i) => `var(--color-square-${i + 1})`),
     domParent: gridParent,
   }),
   onError(err) {
