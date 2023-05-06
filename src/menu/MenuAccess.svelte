@@ -67,6 +67,7 @@
   import { contextKey, getContext, type Attempts } from './context';
   import { gamemodes } from '../gamemode';
   import { duration } from './internal/duration';
+  import { pause, resume } from '$game/pause';
 
   const context = getContext();
 
@@ -89,38 +90,15 @@
 
     disabled = true;
 
-    let token: string | undefined;
-
+    const token = pause(game);
     const modal = new Modal({
       content: (target) => new Menu({ target, context: new Map([[contextKey, context]]) }),
       allowClose: true,
       animateClose: true,
       afterClose() {
-        if ($event.name !== 'transitionstart' && token) {
-          game.resume(token);
-        }
+        resume(game, token);
       },
     });
-
-    if ($event.name === 'transitionstart') {
-      if ($event.to === 'ongoing') {
-        await new Promise<void>((resolve, reject) => {
-          const unsubscribe = event.subscribe((e) => {
-            if (e.name === 'transitionend' && e.to === 'ongoing') {
-              resolve();
-            } else {
-              reject(e);
-            }
-
-            unsubscribe();
-          });
-        });
-
-        token = game.pause();
-      }
-    } else {
-      token = game.pause();
-    }
 
     await modal.create(Component.body, true);
 

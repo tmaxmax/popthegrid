@@ -19,6 +19,7 @@ import { contextKey, createContext, configureTitle, type Context } from './menu/
 import { getName, listenToNameChanges } from '$share/name'
 import { wait } from '$util'
 import type { Writable } from 'svelte/store'
+import { pause, resume } from '$game/pause'
 
 const record = getSharedRecord()
 let theme: ThemeName
@@ -209,17 +210,11 @@ const main = async () => {
   let token: string | undefined
 
   document.addEventListener('visibilitychange', () => {
-    try {
-      if (document.hidden) {
-        if (!token) {
-          token = game.pause()
-        }
-      } else if (token) {
-        game.resume(token)
-        token = undefined
-      }
-    } catch (err) {
-      void err
+    if (document.hidden) {
+      token = pause(game)
+    } else {
+      resume(game, token)
+      token = undefined
     }
   })
 }
