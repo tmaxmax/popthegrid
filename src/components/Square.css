@@ -47,10 +47,12 @@
   pointer-events: none;
 }
 
-.grid__square:hover {
-  z-index: 1;
-  border-radius: 20%;
-  transform: scale(1.33);
-  box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.53);
-  cursor: pointer;
+@media (hover: hover) {
+  .grid__square:hover {
+    z-index: 1;
+    border-radius: 20%;
+    transform: scale(1.33);
+    box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.53);
+    cursor: pointer;
+  }
 }
