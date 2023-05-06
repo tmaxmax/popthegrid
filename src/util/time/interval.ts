@@ -27,6 +27,12 @@ export interface IntervalFnParams {
  */
 export type IntervalFn = (params: IntervalFnParams) => number
 
+export interface IntervalCallbackParams {
+  iteration: number
+  time: number
+  lastTime?: number
+}
+
 /**
  * The parameters used to configure the interval.
  */
@@ -36,7 +42,7 @@ export interface IntervalProperties {
    *
    * @param iteration The number of the current repetition of the interval
    */
-  callback: (iteration: number) => unknown
+  callback: (params: IntervalCallbackParams) => unknown
   /**
    * The distance between two repetitions, either a value in milliseconds
    * or a function that returns a value in milliseconds. Defaults to 0.
@@ -110,6 +116,8 @@ function interval({
     })
 
     const frame = async (time: number) => {
+      const saveLastTime = lastTime
+
       timeoutID = undefined
       lastTime = undefined
 
@@ -118,7 +126,7 @@ function interval({
         return
       }
       try {
-        await callback(iteration)
+        await callback({ iteration, time, lastTime: saveLastTime })
         iteration++
         if (!paused) {
           schedule(time)

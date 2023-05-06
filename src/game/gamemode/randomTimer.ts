@@ -31,7 +31,7 @@ export class RandomTimer extends Gamemode {
         signal: this.controller.signal,
         iterations: this.numIterations + 1, // the interval is non-inclusive
         interval: 1000,
-        callback: (i) => this.markAsDone(i),
+        callback: ({ iteration }) => this.markAsDone(iteration),
         leading: true,
       })
       this.hasPoppedFirstSquare = true

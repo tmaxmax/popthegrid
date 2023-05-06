@@ -1,4 +1,4 @@
-import interval from '$util/time/interval'
+import interval, { type IntervalCallbackParams } from '$util/time/interval'
 import { wait } from '$util'
 
 import { describe, it, expect, vi } from 'vitest'
@@ -27,7 +27,7 @@ describe('interval', () => {
   })
   it('should abort on signal', async () => {
     const controller = new AbortController()
-    const callback = vi.fn((iteration: number) => {
+    const callback = vi.fn(({ iteration }: IntervalCallbackParams) => {
       if (iteration === 2) {
         controller.abort()
       }
@@ -38,8 +38,8 @@ describe('interval', () => {
   it('should be pausable', async () => {
     let iterations = 0
     const { done, pause, resume } = interval({
-      callback(i) {
-        iterations = i
+      callback({ iteration }) {
+        iterations = iteration
       },
       interval: 100,
       iterations: 5,
