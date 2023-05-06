@@ -1,5 +1,5 @@
 import { DOMParser, initParser, Element, HTMLDocument } from 'https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm-noinit.ts'
-import humanizeDuration from 'https://esm.sh/humanize-duration@3.28.0'
+import prettyMs, { Options } from 'https://esm.sh/pretty-ms@8.0.0'
 import { ContentType, parse } from 'https://deno.land/x/content_type@1.0.1/mod.ts'
 
 export const parseHTML = (() => {
@@ -94,7 +94,7 @@ export const toResponseBody = (document: HTMLDocument) => `
 
 export const toUpper = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
-export const formatDuration = humanizeDuration.humanizer({ units: ['s'], maxDecimalPoints: 2 })
+export const formatDuration = (ms: number, opts?: Options) => prettyMs(ms, { secondsDecimalDigits: 2, verbose: ms <= 60000, ...opts })
 
 export const makePossessive = (s: string) => {
   if (s.endsWith('s') || s.endsWith('z')) {
