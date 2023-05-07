@@ -86,7 +86,7 @@ export default defineConfig({
       workbox: {
         runtimeCaching: [
           {
-            handler: 'CacheFirst',
+            handler: 'NetworkFirst',
             urlPattern: /([a-zA-Z0-9]{6})?/,
           },
         ],
