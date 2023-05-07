@@ -83,6 +83,14 @@ export default defineConfig({
       devOptions: {
         enabled: true,
       },
+      workbox: {
+        runtimeCaching: [
+          {
+            handler: 'CacheFirst',
+            urlPattern: /([a-zA-Z0-9]{6})?/,
+          },
+        ],
+      },
     }),
   ],
 })
