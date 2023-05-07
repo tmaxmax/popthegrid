@@ -14,3 +14,16 @@ GO_IMPORT_PATH = "github.com/tmaxmax/popthegrid"
 from = "/"
 status = 200
 to = "/index.html"
+
+[[headers]]
+for = "/manifest.json"
+[headers.values]
+Content-Type = "application/manifest+json"
+
+[[headers]]
+for = "/assets/*"
+[headers.values]
+cache-control = '''
+max-age=31536000,
+immutable
+'''
