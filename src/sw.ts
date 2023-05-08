@@ -41,8 +41,10 @@ registerRoute(
   })
 )
 
+const assetsDestinations: RequestDestination[] = ['style', 'font', 'worker']
+
 registerRoute(
-  ({ request }) => request.destination === 'font' || request.destination === 'worker',
+  ({ request }) => assetsDestinations.includes(request.destination),
   new StaleWhileRevalidate({
     cacheName: 'assets',
     plugins: [new CacheableResponsePlugin({ statuses: [200] })],
