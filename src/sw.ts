@@ -41,7 +41,7 @@ registerRoute(
   })
 )
 
-const assetsDestinations: RequestDestination[] = ['style', 'font', 'worker']
+const assetsDestinations: RequestDestination[] = ['font', 'worker']
 
 registerRoute(
   ({ request }) => assetsDestinations.includes(request.destination),

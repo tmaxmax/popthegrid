@@ -1,4 +1,5 @@
 import './reset.css'
+import './fonts.css'
 import './style.css'
 
 import { Component } from '$components/internal/Component'
