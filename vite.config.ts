@@ -29,6 +29,7 @@ export default defineConfig({
       manifestFilename: 'manifest.json',
       filename: 'sw.ts',
       srcDir: 'src',
+      includeAssets: ['icons/*'],
       manifest: {
         name: 'Pop the grid!',
         short_name: 'Pop the grid!',

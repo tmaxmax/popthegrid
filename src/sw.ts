@@ -1,7 +1,7 @@
 import { getCodeFromPath } from '$edge/share'
 import { clientsClaim } from 'workbox-core'
 import { registerRoute, NavigationRoute } from 'workbox-routing'
-import { CacheFirst } from 'workbox-strategies'
+import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 import { CacheableResponsePlugin } from 'workbox-cacheable-response'
 import { createHandlerBoundToURL, precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching'
@@ -38,5 +38,13 @@ registerRoute(
         statuses: [200],
       }),
     ],
+  })
+)
+
+registerRoute(
+  ({ request }) => request.destination === 'font' || request.destination === 'worker',
+  new StaleWhileRevalidate({
+    cacheName: 'assets',
+    plugins: [new CacheableResponsePlugin({ statuses: [200] })],
   })
 )
