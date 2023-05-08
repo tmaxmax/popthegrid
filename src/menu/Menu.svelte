@@ -7,6 +7,7 @@
   import { getContext } from './context';
   import SillyName from './internal/SillyName.svelte';
   import Statistics from './internal/Statistics.svelte';
+  import PasteCode from './internal/PasteCode.svelte';
 
   const { game, record } = getContext();
   const events = createEventStore(game.events);
@@ -26,6 +27,9 @@
   <Theme />
   <h2>Statistics</h2>
   <Statistics />
+  <h2>Paste link</h2>
+  <p>This will take you directly to the challenge!</p>
+  <PasteCode />
   <SillyName />
 </section>
 

@@ -106,12 +106,12 @@
       </tfoot>
     </table>
   </div>
-  <p class="share bottom">
+  <p class="share">
     Note that you can share with your friends some of the statistics – tap or click the available Share buttons!{#if overflows}{' '}Scroll
       to the left for more.{/if}
   </p>
 {:else}
-  <p class="bottom">Nothing to show, go pop the grid!</p>
+  <p>Nothing to show, go pop the grid!</p>
 {/if}
 
 <style>
@@ -170,10 +170,6 @@
 
   .share {
     margin-top: 0.6em;
-  }
-
-  .bottom {
-    margin-bottom: 2.4em;
   }
 
   p.last-attempt {

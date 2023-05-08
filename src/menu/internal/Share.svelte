@@ -193,7 +193,7 @@
     overflow: hidden;
     word-wrap: break-word;
     color: var(--color-body);
-    font-family: 'Cutive Mono', 'Courier New', monospace;
+    font-family: var(--font-mono);
     letter-spacing: -0.1em;
     font-size: 1.1em;
     padding: 0 0.6em;

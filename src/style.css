@@ -18,6 +18,7 @@
   --weight-body: 450;
   --font-heading: 'Poppins', sans-serif;
   --font-body: 'Heebo', sans-serif;
+  --font-mono: 'Cutive Mono', 'Courier New', monospace;
 }
 
 html {
