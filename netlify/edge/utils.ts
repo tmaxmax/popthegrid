@@ -102,3 +102,10 @@ export const makePossessive = (s: string) => {
   }
   return s + "'s"
 }
+
+export const makePlural = (s: string, count: number) => {
+  if (count > 1) {
+    return s + 's'
+  }
+  return s
+}

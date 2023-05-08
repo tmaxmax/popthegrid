@@ -1,5 +1,5 @@
 import type { Context, Config } from 'https://edge.netlify.com'
-import { createOrChange, getContentType, parseHTML, makePossessive, toResponseBody, formatDuration } from '../edge/utils.ts'
+import { createOrChange, getContentType, parseHTML, makePossessive, toResponseBody, formatDuration, makePlural } from '../edge/utils.ts'
 import { Code, GameRecord, GamemodeName, getCodeFromPath, storageKey } from '../edge/share.ts'
 import { logRequest } from '../edge/log.ts'
 
@@ -93,7 +93,7 @@ const getDescription = (r: GameRecord) => {
 
   switch (r.gamemode) {
     case 'random':
-      return `${root} can you win more? They won ${r.data.numWins} times.`
+      return `${root} can you win more? They won ${r.data.numWins} ${makePlural('time', r.data.numWins)}.`
     case 'random-timer':
       return `${root} be quicker! They won in ${formatDuration(r.data.fastestWinDuration)}.`
     case 'same-square':
@@ -106,7 +106,7 @@ const getDescription = (r: GameRecord) => {
 }
 
 const metaAlts: Record<GamemodeName, string> = {
-  random: 'be more lucky than me.',
+  random: 'win more than me.',
   'random-timer': 'beat me on time.',
   'same-square': 'destroy faster the same squares.',
   passthrough: 'be faster than me.',
