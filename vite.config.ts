@@ -23,6 +23,7 @@ export default defineConfig({
   plugins: [
     svelte(),
     pwa({
+      selfDestroying: true,
       registerType: 'autoUpdate',
       manifestFilename: 'manifest.json',
       manifest: {
