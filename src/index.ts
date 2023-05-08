@@ -20,6 +20,7 @@ import { getName, listenToNameChanges } from '$share/name'
 import { wait } from '$util'
 import type { Writable } from 'svelte/store'
 import { pause, resume } from '$game/pause'
+import { parse } from 'cookie'
 
 const record = getSharedRecord()
 const theme = record?.theme || getTheme() || defaultTheme
@@ -128,19 +129,17 @@ const getRecordClearRedirect = () => {
 let db: IDBDatabase
 
 const handleURLAndTitle = async (name: Writable<string | undefined>) => {
-  const params = new URLSearchParams(location.search)
+  const { status } = parse(document.cookie)
 
   let text: string
-  if (params.has('error')) {
-    text = "The link couldn't be opened, try again later."
-  } else if (params.has('notFound')) {
-    text = 'The link was not found: is it correct?'
-  } else {
+  if (!status) {
     configureTitle(name, title, !!record)
     return
+  } else if (status === '404') {
+    text = 'The link was not found: is it correct?'
+  } else {
+    text = "The link couldn't be opened, try again later."
   }
-
-  history.replaceState({}, '', '/')
 
   const originalText = title.textContent
   title.textContent = text

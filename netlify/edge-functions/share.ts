@@ -1,6 +1,6 @@
 import type { Context, Config } from 'https://edge.netlify.com'
 import { createOrChange, getContentType, parseHTML, makePossessive, toResponseBody, formatDuration } from '../edge/utils.ts'
-import { GameRecord, GamemodeName, getCodeFromPath, storageKey } from '../edge/share.ts'
+import { Code, GameRecord, GamemodeName, getCodeFromPath, storageKey } from '../edge/share.ts'
 import { logRequest } from '../edge/log.ts'
 
 export default async (request: Request, context: Context) => {
@@ -16,27 +16,33 @@ export default async (request: Request, context: Context) => {
 
   logRequest(request, context)
 
-  const res = await context.next(new Request(`${baseURL}/.netlify/functions/share?code=${code}`), { sendConditionalRequest: false })
-  if (res.status !== 200) {
-    console.warn(`Request ${context.requestId}: fetch code ${code}: ${res.status} ${res.statusText}`)
-    console.warn(`Request ${context.requestId}: ${await res.text()}`)
-    return Response.redirect(`${baseURL}?${res.status === 404 ? 'notFound' : 'error'}`, 307)
+  const [server, homepage] = await Promise.all([
+    context.next(new Request(`${baseURL}/.netlify/functions/share?code=${code}`)),
+    context.next(new Request(baseURL)),
+  ])
+  if (server.status !== 200) {
+    console.warn(`Request ${context.requestId}: fetch code ${code}: ${server.status} ${server.statusText}`)
+    console.warn(`Request ${context.requestId}: ${await server.text()}`)
+
+    return createErrorResponse(code, homepage.body, homepage.headers, server.status, context)
   }
 
-  const response = await context.next(new Request(baseURL))
-  const contentType = getContentType(response.headers)
+  const contentType = getContentType(homepage.headers)
   if (contentType.type !== 'text/html') {
     console.warn(`Request ${context.requestId}: unexpected content type ${contentType.type}`)
-    return response
+
+    return createErrorResponse(code, homepage.body, homepage.headers, 500, context)
   }
 
-  const text = await response.text()
+  const text = await homepage.text()
   const html = await parseHTML(text, contentType)
   if (!html) {
-    return new Response(text, response)
+    return createErrorResponse(code, text, homepage.headers, 500, context)
   }
 
-  const record: GameRecord = await res.json()
+  context.cookies.delete({ name: 'status', path: `/${code}` })
+
+  const record: GameRecord = await server.json()
   const description = getDescription(record)
 
   createOrChange(
@@ -57,7 +63,7 @@ export default async (request: Request, context: Context) => {
 
   console.info(`Request ${context.requestId}: found code ${code}`)
 
-  const headers = new Headers(response.headers)
+  const headers = new Headers(homepage.headers)
   headers.set('Cache-Control', 'public, s-maxage=2592000, maxage=2592000')
 
   return new Response(toResponseBody(html), { status: 200, headers })
@@ -104,4 +110,16 @@ const metaAlts: Record<GamemodeName, string> = {
   'random-timer': 'beat me on time.',
   'same-square': 'destroy faster the same squares.',
   passthrough: 'be faster than me.',
+}
+
+const createErrorResponse = (code: Code, body: BodyInit | null, headers: HeadersInit, status: number, context: Context): Response => {
+  context.cookies.set({
+    name: 'status',
+    value: `${status}`,
+    path: `/${code}`,
+    secure: true,
+    sameSite: 'Strict',
+  })
+
+  return new Response(body, { headers, status })
 }
