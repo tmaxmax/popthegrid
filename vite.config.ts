@@ -23,11 +23,15 @@ export default defineConfig({
   plugins: [
     svelte(),
     pwa({
-      selfDestroying: true,
+      base: '/',
+      strategies: 'injectManifest',
       registerType: 'autoUpdate',
       manifestFilename: 'manifest.json',
+      filename: 'sw.ts',
+      srcDir: 'src',
       manifest: {
         name: 'Pop the grid!',
+        short_name: 'Pop the grid!',
         description: 'Pop all the squares in the grid. Will you make it?',
         icons: [
           {
@@ -80,17 +84,6 @@ export default defineConfig({
         start_url: '.',
         prefer_related_applications: false,
         id: '/',
-      },
-      devOptions: {
-        enabled: true,
-      },
-      workbox: {
-        runtimeCaching: [
-          {
-            handler: 'NetworkFirst',
-            urlPattern: /([a-zA-Z0-9]{6})?/,
-          },
-        ],
       },
     }),
   ],
