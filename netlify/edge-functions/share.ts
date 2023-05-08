@@ -63,9 +63,21 @@ export default async (request: Request, context: Context) => {
   return new Response(toResponseBody(html), { status: 200, headers })
 }
 
+const devExcludes: `/${string}`[] = Deno.env.get('DEV') === 'true' ? ['/src/*', '/node_modules/*', '/@vite*', '/netlify/*', '/*.js'] : []
+
 export const config: Config = {
   cache: 'manual',
-  excludedPath: ['/.netlify/functions/*', '/assets/*', '/icons/*', '/og/*', '/browserconfig.xml', '/manifest.json', '/favicon.ico', '/'],
+  excludedPath: [
+    '/.netlify/functions/*',
+    '/assets/*',
+    '/icons/*',
+    '/og/*',
+    '/browserconfig.xml',
+    '/manifest.json',
+    '/favicon.ico',
+    '/',
+    ...devExcludes,
+  ],
   path: '/*',
 }
 
