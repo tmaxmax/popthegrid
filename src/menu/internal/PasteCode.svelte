@@ -55,12 +55,6 @@
     margin-right: 0.2em;
   }
 
-  @media (min-width: 600px) {
-    input {
-      padding: 0 0.6em;
-    }
-  }
-
   a {
     text-align: center;
     height: 100%;
