@@ -1,7 +1,7 @@
 import { getCodeFromPath } from '$edge/share'
 import { clientsClaim } from 'workbox-core'
 import { registerRoute, NavigationRoute } from 'workbox-routing'
-import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies'
+import { StaleWhileRevalidate } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 import { CacheableResponsePlugin } from 'workbox-cacheable-response'
 import { createHandlerBoundToURL, precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching'
@@ -27,7 +27,7 @@ registerRoute(
     const url = new URL(request.url)
     return request.mode === 'navigate' && !!getCodeFromPath(url.pathname)
   },
-  new CacheFirst({
+  new StaleWhileRevalidate({
     cacheName: 'shared-urls',
     plugins: [
       new ExpirationPlugin({
