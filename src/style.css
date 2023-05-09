@@ -84,6 +84,28 @@ p {
   touch-action: none;
 }
 
+p.updates {
+  margin-top: 0.4em;
+}
+
+ul.updates {
+  font-family: var(--font-body);
+  color: var(--color-body);
+  font-weight: var(--weight-body);
+  list-style-type: disc;
+}
+
+ul.updates li {
+  margin-top: 0.2em;
+  margin-left: 1em;
+}
+
+ul.updates li > em {
+  font-style: normal;
+  font-family: var(--font-heading);
+  color: var(--color-heading);
+}
+
 footer {
   margin-top: auto;
   display: flex;

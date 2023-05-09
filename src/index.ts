@@ -120,6 +120,54 @@ const getVersionChangeModal = () => {
   })
 }
 
+const showNewUpdateModal = (): void | Promise<void> => {
+  const KEY = 'update-viewed'
+  const VERSION = '0.7.3'
+
+  const lastVersion = localStorage.getItem(KEY)
+  if (lastVersion === VERSION) {
+    return
+  }
+
+  const isIOS = ['iPad', 'iPhone', 'iPod'].includes(navigator.platform)
+  const content = `
+  <h2>Hello, ${getName() || 'friend'}!</h2>
+  <p class="updates">We've changed some things around!</p>
+  <ul class="updates">
+    <li><em>Shorter animations</em> between attempts, so you can grind faster 😎</li>
+    <li><em>Reset the game:</em> if you feel it's not the one, click or long tap outside the window!</li>
+    <li><em>Play offline:</em> just write the address in the browser, even without internet! ${
+      isIOS
+        ? 'You can also add Pop the grid to home screen by tapping the Share button, then "Add to Home screen" option, if in Safari.'
+        : 'Some browsers should even prompt you to add the app to your home screen!'
+    }</li>
+  </ul>
+  <p class="updates">That's it for now. Close this window and happy playing – see you in the next update!</p>
+`
+  const root = document.createElement('div')
+  root.style.height = '100%'
+  root.style.display = 'flex'
+  root.style.flexDirection = 'column'
+  root.style.margin = '0 auto'
+  root.style.padding = '3rem 0'
+  root.style.width = '100%'
+  root.style.maxWidth = '600px'
+
+  const html = new DOMParser().parseFromString(content, 'text/html')
+  root.append(...Array.from(html.body.children))
+
+  const modal = new Modal({
+    content: Animated.from(root),
+    allowClose: true,
+    animateClose: true,
+    afterClose() {
+      localStorage.setItem(KEY, VERSION)
+    },
+  })
+
+  return modal.create(Component.body, true)
+}
+
 const getRecordClearRedirect = () => {
   const element = document.createElement('span')
   element.append('Done')
@@ -235,7 +283,13 @@ const main = async () => {
     context!.name.set(newValue)
   })
 
-  const titleDone = handleURLAndTitle(context.name)
+  const updateModalDone = showNewUpdateModal()
+  let titleDone: Promise<void>
+  if (updateModalDone) {
+    titleDone = updateModalDone.then(() => handleURLAndTitle(context!.name))
+  } else {
+    titleDone = handleURLAndTitle(context.name)
+  }
 
   new MenuAccess({
     target: footer,
