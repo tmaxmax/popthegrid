@@ -106,7 +106,7 @@
   };
 </script>
 
-<button {disabled} class:error={isError} class:win={isWin} on:click={handler}>
+<button {disabled} class:error={isError} class:win={isWin} class="noselect" on:click={handler}>
   {#if isWin}
     <div transition:fade={{ duration: 100 }}>
       <Win class="your-game-icon" />

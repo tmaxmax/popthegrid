@@ -12,7 +12,7 @@ export interface RedirectParams {
 
 export class Redirect extends Animated {
   constructor({ href, title, on, content, animateDestroy }: RedirectParams) {
-    super({ tag: 'a', alreadyExisting: false, classList: ['redirect'] })
+    super({ tag: 'a', alreadyExisting: false, classList: ['redirect', 'noselect'] })
 
     this.appendChild(content)
     this.setAttribute('title', title)
