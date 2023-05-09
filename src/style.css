@@ -84,6 +84,22 @@ p {
   touch-action: none;
 }
 
+.updates__root {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  padding: 3rem 0;
+  width: 100%;
+  max-width: 600px;
+}
+
+.updates__root.center {
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
 p.updates {
   margin-top: 0.4em;
 }

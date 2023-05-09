@@ -99,12 +99,7 @@ attemptsChan.addEventListener('message', (ev: MessageEvent<InsertedAttempt>) => 
 
 const getVersionChangeModalContent = () => {
   const root = document.createElement('div')
-  root.style.margin = '0 auto'
-  root.style.height = '100%'
-  root.style.display = 'flex'
-  root.style.alignItems = 'center'
-  root.style.justifyContent = 'center'
-  root.style.flexDirection = 'column'
+  root.classList.add('updates__root', 'center')
   const title = document.createElement('h2')
   title.append('Game update!')
   title.style.marginBottom = '0.2em'
@@ -133,7 +128,7 @@ const showNewUpdateModal = (onClose?: (wasShown: boolean) => unknown): void | Pr
   }
 
   const isIOS = ['iPad', 'iPhone', 'iPod'].includes(navigator.platform)
-  const content = `
+  const content = /*html*/ `
   <h2>Hello, ${getName() || 'friend'}!</h2>
   <p class="updates">We've changed some things around!</p>
   <ul class="updates">
@@ -148,16 +143,8 @@ const showNewUpdateModal = (onClose?: (wasShown: boolean) => unknown): void | Pr
   <p class="updates">That's it for now. Close this window and happy playing – see you in the next update!</p>
 `
   const root = document.createElement('div')
-  root.style.height = '100%'
-  root.style.display = 'flex'
-  root.style.flexDirection = 'column'
-  root.style.margin = '0 auto'
-  root.style.padding = '3rem 0'
-  root.style.width = '100%'
-  root.style.maxWidth = '600px'
-
-  const html = new DOMParser().parseFromString(content, 'text/html')
-  root.append(...Array.from(html.body.children))
+  root.classList.add('updates__root')
+  root.innerHTML = content
 
   const modal = new Modal({
     content: Animated.from(root),
