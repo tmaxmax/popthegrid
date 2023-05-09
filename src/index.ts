@@ -121,12 +121,13 @@ const getVersionChangeModal = () => {
   })
 }
 
-const showNewUpdateModal = (): void | Promise<void> => {
+const showNewUpdateModal = (onClose?: (wasShown: boolean) => unknown): void | Promise<void> => {
   const KEY = 'update-viewed'
   const VERSION = '0.7.3'
 
   const lastVersion = localStorage.getItem(KEY)
   if (lastVersion === VERSION) {
+    onClose?.(false)
     return
   }
 
@@ -163,6 +164,7 @@ const showNewUpdateModal = (): void | Promise<void> => {
     animateClose: true,
     afterClose() {
       localStorage.setItem(KEY, VERSION)
+      onClose?.(true)
     },
   })
 
@@ -186,7 +188,7 @@ const getRecordClearRedirect = () => {
 
 let db: IDBDatabase
 
-const handleURLAndTitle = async (name: Writable<string | undefined>) => {
+const handleURLAndTitle = async (name: Writable<string | undefined>, duration: number) => {
   const { status } = parse(document.cookie)
 
   let text: string
@@ -202,7 +204,7 @@ const handleURLAndTitle = async (name: Writable<string | undefined>) => {
   const originalText = title.textContent
   title.textContent = text
   title.classList.add('error')
-  await wait(4500)
+  await wait(duration)
   title.classList.remove('error')
   title.textContent = originalText
 
@@ -264,10 +266,6 @@ const main = async () => {
     },
   })
 
-  if (record) {
-    await getRecordClearRedirect().create(objective, false)
-  }
-
   context = createContext({
     name: getName(),
     game,
@@ -284,24 +282,23 @@ const main = async () => {
     context!.name.set(newValue)
   })
 
-  const updateModalDone = showNewUpdateModal()
-  let titleDone: Promise<void>
-  if (updateModalDone) {
-    titleDone = updateModalDone.then(() => handleURLAndTitle(context!.name))
-  } else {
-    titleDone = handleURLAndTitle(context.name)
-  }
-
   new MenuAccess({
     target: footer,
     context: new Map([[contextKey, context]]),
+  })
+
+  const gamePrepare = game.prepare('long')
+
+  let titleDone: Promise<void>
+  await showNewUpdateModal((wasShown) => {
+    titleDone = handleURLAndTitle(context!.name, wasShown ? 3000 : 4200)
   })
 
   document.body.style.transition = 'background-color 0.4s ease-out'
   // prevents double-tap zoom
   gridParent.element.addEventListener('touchend', (e) => e.preventDefault())
 
-  await Promise.all([game.prepare('long'), titleDone])
+  await Promise.all([gamePrepare, titleDone!, record && getRecordClearRedirect().create(objective, false)])
 
   let token: string | undefined
 
