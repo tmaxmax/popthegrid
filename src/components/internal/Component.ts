@@ -23,7 +23,7 @@ type EventOptions = Omit<AddEventListenerOptions, 'once' | 'signal'> & {
 } & ({ timeout?: number } | { signal?: AbortSignal })
 
 export class Component<T extends KnownHTMLElement = HTMLElement> {
-  protected readonly element: T
+  public readonly element: T
   private computedStyle?: CSSStyleDeclaration
 
   protected constructor(props: ComponentProps<T>) {
