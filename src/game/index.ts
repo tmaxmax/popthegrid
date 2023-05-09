@@ -1,5 +1,5 @@
 import { UnreachableError, isDefined, randString } from '$util'
-import { writable, type Readable, type Writable } from 'svelte/store'
+import { writable, type Readable, type Writable, readonly } from 'svelte/store'
 import { startAttempt } from './attempt'
 import type { Attempt, OngoingAttempt } from './attempt'
 import { Gamemode, type GamemodeName } from './gamemode'
@@ -113,7 +113,7 @@ export class Game {
   }
 
   get events(): Readable<Event> {
-    return { subscribe: this.dispatchedEvents.subscribe }
+    return readonly(this.dispatchedEvents)
   }
 
   private setState(state: State): void | Promise<void> {
