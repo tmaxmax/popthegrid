@@ -20,8 +20,9 @@ import { contextKey, createContext, configureTitle, type Context } from './menu/
 import { getName, listenToNameChanges } from '$share/name'
 import { isDefined, wait } from '$util'
 import { get, type Writable } from 'svelte/store'
-import { pause, resume } from '$game/ops'
+import { pause, reset, resume } from '$game/ops'
 import { parse } from 'cookie'
+import type { Animation } from '$game/grid'
 
 const record = getSharedRecord()
 const theme = record?.theme || getTheme() || defaultTheme
@@ -159,6 +160,48 @@ const handleURLAndTitle = async (name: Writable<string | undefined>) => {
   configureTitle(name, title, !!record)
 }
 
+const configureGameReset = () => {
+  let downAt: number | undefined
+  let resetting = false
+
+  const doReset = async () => {
+    resetting = true
+    await reset(game)
+    resetting = false
+  }
+
+  document.body.addEventListener('pointerdown', (event) => {
+    if (event.target !== document.body || resetting || !event.isPrimary) {
+      return
+    }
+
+    const { top, bottom } = gridParent.element.getBoundingClientRect()
+    const deltaY = Math.min(event.clientY - top, bottom - event.clientY)
+
+    if (deltaY > -20) {
+      return
+    }
+
+    if (event.pointerType === 'touch') {
+      downAt = event.timeStamp
+    } else if (event.buttons === 1) {
+      doReset()
+    }
+  })
+
+  document.body.addEventListener('pointerup', (event) => {
+    if (event.target !== document.body || resetting || !event.isPrimary || !isDefined(downAt)) {
+      return
+    }
+
+    if (event.timeStamp - downAt > 300) {
+      doReset()
+    }
+
+    downAt = undefined
+  })
+}
+
 const main = async () => {
   if (navigator.storage && navigator.storage.persist) {
     await navigator.storage.persist()
@@ -215,6 +258,8 @@ const main = async () => {
       token = undefined
     }
   })
+
+  configureGameReset()
 }
 
 main()

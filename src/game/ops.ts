@@ -18,3 +18,32 @@ export function resume(game: Game, token: string | undefined) {
     game.resume(token)
   }
 }
+
+export async function reset(game: Game): Promise<void> {
+  let unsubscribe: () => void
+  const shouldReset = await new Promise<boolean>((resolve, reject) => {
+    unsubscribe = game.events.subscribe((event) => {
+      if (event.name === 'error') {
+        reject(event)
+
+        return
+      }
+
+      if (event.to === 'ongoing') {
+        if (event.name === 'transitionend') {
+          resolve(true)
+        }
+
+        return
+      }
+
+      resolve(false)
+    })
+  })
+  unsubscribe!()
+
+  if (shouldReset) {
+    await game.forceEnd(true)
+    await game.prepare('short')
+  }
+}
