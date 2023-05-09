@@ -1,36 +1,47 @@
-<script lang="ts">
-  import { getCodeFromPath } from '$edge/share';
+<script lang="ts" context="module">
+  import { getCodeFromPath, isCode, type Code } from '$edge/share';
 
-  let href = '';
-  let value = '';
+  const getCode = (urlOrCode: string): Code | undefined => {
+    if (isCode(urlOrCode)) {
+      return urlOrCode;
+    }
 
-  const onChange = () => {
     try {
-      const url = new URL(value);
-      const code = getCodeFromPath(url.pathname);
-      if (!code) {
-        href = '';
-        return;
-      }
-
-      href = value;
+      const { pathname } = new URL(urlOrCode);
+      return getCodeFromPath(pathname);
     } catch {
-      href = '';
+      return;
     }
   };
+</script>
+
+<script lang="ts">
+  let value = getCodeFromPath(window.location.pathname) ? window.location.href : '';
+  let href = '';
+
+  $: {
+    const code = getCode(value);
+    if (code) {
+      href = `${window.location.protocol}//${window.location.host}/${code}`;
+    } else {
+      href = '';
+    }
+  }
 
   const onClick = (e: Event) => {
-    e.preventDefault();
-    if (href === '' || !e.isTrusted) {
+    if (!href || !e.isTrusted) {
       return;
     }
 
-    window.location.href = href;
+    if (!(e instanceof KeyboardEvent) || e.key === 'Enter') {
+      e.preventDefault();
+      window.location.href = href;
+    }
   };
 </script>
 
 <div>
-  <input type="text" name="code" id="code" placeholder="Your link here..." bind:value on:input={onChange} />
+  <input type="text" name="code" id="code" placeholder="Your link here..." bind:value on:keydown={onClick} />
   <a aria-disabled={href === ''} class:disabled={href === ''} {href} on:click={onClick}>Go!</a>
 </div>
 
@@ -48,11 +59,12 @@
     width: 100%;
     background: none;
     border: none;
-    font-size: calc(1em + 1.2vmin);
+    font-size: calc(1em + 1.1vmin);
     letter-spacing: -0.1em;
     font-family: var(--font-mono);
     color: var(--color-heading);
     margin-right: 0.2em;
+    text-overflow: ellipsis;
   }
 
   a {
@@ -72,5 +84,11 @@
     opacity: 70%;
     pointer-events: none;
     cursor: default;
+  }
+
+  @media (hover: hover) {
+    a:hover {
+      text-decoration: underline;
+    }
   }
 </style>
