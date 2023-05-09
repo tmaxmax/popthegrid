@@ -5,7 +5,7 @@
   import type { Event } from '$game';
   import { duration } from './internal/duration';
 
-  const getRecordDelta = ({ statistics, last, ongoing }: Attempts, record: GameRecord): [number, boolean] | undefined => {
+  export const getRecordDelta = ({ statistics, last, ongoing }: Attempts, record: GameRecord): [number, boolean] | undefined => {
     const stat = statistics.find((v) => 'gamemode' in v && record.gamemode === v.gamemode) as Statistics | undefined;
     if (!stat || !last?.isWin || ongoing) {
       return undefined;

@@ -14,12 +14,12 @@ import { insertAttempt, retrieveAttempts, type InsertedAttempt } from '$db/attem
 import { Redirect } from '$components/Redirect'
 import { defaultGamemode, gamemodes } from './gamemode'
 import { clearSharedRecord, getSharedRecord } from '$share/record'
-import MenuAccess from './menu/MenuAccess.svelte'
+import MenuAccess, { getRecordDelta } from './menu/MenuAccess.svelte'
 import { getTheme, setTheme, defaultTheme, themes } from './theme'
 import { contextKey, createContext, configureTitle, type Context } from './menu/context'
 import { getName, listenToNameChanges } from '$share/name'
-import { wait } from '$util'
-import type { Writable } from 'svelte/store'
+import { isDefined, wait } from '$util'
+import { get, type Writable } from 'svelte/store'
 import { pause, resume } from '$game/ops'
 import { parse } from 'cookie'
 
@@ -77,7 +77,15 @@ const game = new Game({
         attemptsChan.postMessage(attempt)
       })
     } else if (when === 'after') {
-      game.prepare(attempt.isWin ? 'long' : 'short')
+      let animation: Animation
+      if (record) {
+        const [delta] = getRecordDelta(get(context!.attempts), record) || []
+        animation = isDefined(delta) ? (delta < 0 ? 'long' : 'short') : 'short'
+      } else {
+        animation = attempt.isWin ? 'long' : 'short'
+      }
+
+      game.prepare(animation)
     }
   },
 })
