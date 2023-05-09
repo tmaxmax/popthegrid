@@ -77,7 +77,7 @@ const game = new Game({
         attemptsChan.postMessage(attempt)
       })
     } else if (when === 'after') {
-      game.prepare()
+      game.prepare(attempt.isWin ? 'long' : 'short')
     }
   },
 })
@@ -195,7 +195,7 @@ const main = async () => {
   // prevents double-tap zoom
   document.querySelector('.grid__parent')!.addEventListener('touchend', (e) => e.preventDefault())
 
-  await Promise.all([game.prepare(), titleDone])
+  await Promise.all([game.prepare('long'), titleDone])
 
   let token: string | undefined
 

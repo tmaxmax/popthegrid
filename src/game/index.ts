@@ -3,7 +3,7 @@ import { writable, type Readable, type Writable } from 'svelte/store'
 import { startAttempt } from './attempt'
 import type { Attempt, OngoingAttempt } from './attempt'
 import { Gamemode, type GamemodeName } from './gamemode'
-import type { Grid, Square } from './grid'
+import type { Grid, Square, Animation } from './grid'
 
 export interface OnGameData {
   when: CallbackWhen
@@ -59,7 +59,7 @@ export type Event =
     }
 
 type GameEvent =
-  | { type: 'prepare' }
+  | { type: 'prepare'; animation: Animation }
   | { type: 'removeSquare'; square: Square }
   | { type: 'forceEnd'; canRestart?: boolean }
   | { type: 'pause'; token: string }
@@ -89,8 +89,8 @@ export class Game {
     this.setState(new Initial({ ...this.props }))
   }
 
-  prepare() {
-    return this.sendEvent({ type: 'prepare' })
+  prepare(animation: Animation) {
+    return this.sendEvent({ type: 'prepare', animation })
   }
 
   forceEnd(canRestart?: boolean) {
@@ -221,7 +221,7 @@ class Initial extends State {
   protected processEvent(event: GameEvent): void | State | Error {
     switch (event.type) {
       case 'prepare':
-        return new Ready(this.props)
+        return new Ready(this.props, event.animation)
       case 'forceEnd':
         if (event.canRestart) {
           return
@@ -258,7 +258,7 @@ class Initial extends State {
 
     const resetDone = this.props.gamemode.reset()
     if (this.props.grid.activeSquares.length > 0) {
-      return Promise.all([resetDone, this.props.grid.destroy('long')]).then(() => void 0)
+      return Promise.all([resetDone, this.props.grid.destroy('short')]).then(() => void 0)
     }
 
     return resetDone
@@ -266,14 +266,14 @@ class Initial extends State {
 
   private async transitionLastOp() {
     await this.lastOp
-    await Promise.all([this.props.grid.destroy('long'), this.props.gamemode.reset()])
+    await Promise.all([this.props.grid.destroy('none'), this.props.gamemode.reset()])
   }
 }
 
 class Ready extends State {
   private squareWasRemoved = false
 
-  constructor(props: BaseProps) {
+  constructor(props: BaseProps, private readonly animation: Animation) {
     super('ready', props)
   }
 
@@ -328,7 +328,7 @@ class Ready extends State {
   }
 
   transition() {
-    return this.props.grid.create('long')
+    return this.props.grid.create(this.animation)
   }
 }
 
