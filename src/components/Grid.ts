@@ -2,6 +2,7 @@ import './Grid.css'
 
 import { Component } from './internal/Component'
 import { Square } from './Square'
+import { type Animation } from '$game/grid'
 import baseLog from '$util/log'
 import { isDefined, randInt, wait } from '$util'
 import { map as mapAsync } from '$util/async'
@@ -95,7 +96,7 @@ export class Grid extends Component<HTMLDivElement> {
       throw new Error('Square does not exist in grid')
     }
     log('Square %d removed', i)
-    await Promise.all([this.squares.splice(i, 1)[0].destroy(true), this.setSquaresPosition(i)])
+    await Promise.all([this.squares.splice(i, 1)[0].destroy('long'), this.setSquaresPosition(i)])
   }
 
   addSquareEventListener<E extends keyof HTMLElementEventMap>(
@@ -122,7 +123,7 @@ export class Grid extends Component<HTMLDivElement> {
     this.addEventListener(event, cb, options)
   }
 
-  async create(parent: Component, animate: boolean): Promise<void> {
+  async create(parent: Component, animate: Animation): Promise<void> {
     if (this.activeSquares.length > 0) {
       return
     }
@@ -134,15 +135,17 @@ export class Grid extends Component<HTMLDivElement> {
     this.removeClass('grid--no-interaction')
   }
 
-  async destroy(animate: boolean): Promise<void> {
+  async destroy(animate: Animation): Promise<void> {
     log('Destroying grid')
     this.resizeObserver.disconnect()
     this.addClass('grid--no-interaction')
-    if (animate) {
+    if (animate !== 'none') {
       let promise: Promise<void> | undefined
       for (let square = this.squares.pop(); square; square = this.squares.pop()) {
-        promise = square.destroy(true)
-        await wait(this.properties.animationDelay)
+        promise = square.destroy(animate)
+        if (animate === 'long') {
+          await wait(this.properties.animationDelay)
+        }
       }
       await promise
     }
@@ -158,14 +161,14 @@ export class Grid extends Component<HTMLDivElement> {
     }
   }
 
-  private async appendSquares(squares: Square[], animate: boolean): Promise<void> {
+  private async appendSquares(squares: Square[], animate: Animation): Promise<void> {
     let promise: Promise<void> | undefined
     let i = this.squares.length
     this.squares.push(...squares)
     for (; i < this.squares.length; i++) {
       const square = this.squares[i]
       promise = square.create(this as unknown as Component, animate)
-      if (animate) {
+      if (animate === 'long') {
         await Promise.race([promise, wait(getDelay(this.properties.animationDelay, i, this.squares.length))])
       }
     }

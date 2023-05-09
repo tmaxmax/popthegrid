@@ -258,7 +258,7 @@ class Initial extends State {
 
     const resetDone = this.props.gamemode.reset()
     if (this.props.grid.activeSquares.length > 0) {
-      return Promise.all([resetDone, this.props.grid.destroy()]).then(() => void 0)
+      return Promise.all([resetDone, this.props.grid.destroy('long')]).then(() => void 0)
     }
 
     return resetDone
@@ -266,7 +266,7 @@ class Initial extends State {
 
   private async transitionLastOp() {
     await this.lastOp
-    await Promise.all([this.props.grid.destroy(), this.props.gamemode.reset()])
+    await Promise.all([this.props.grid.destroy('long'), this.props.gamemode.reset()])
   }
 }
 
@@ -328,7 +328,7 @@ class Ready extends State {
   }
 
   transition() {
-    return this.props.grid.create()
+    return this.props.grid.create('long')
   }
 }
 
@@ -402,7 +402,7 @@ class Over extends State {
   }
 
   async transition() {
-    await this.props.grid.destroy()
+    await this.props.grid.destroy('long')
   }
 }
 

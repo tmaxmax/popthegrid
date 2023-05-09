@@ -1,7 +1,7 @@
 import { Component } from '$components/internal/Component'
 import { Grid as GridComponent } from '$components/Grid'
 import { Square as SquareComponent } from '$components/Square'
-import type { Grid, GridProps, Square } from '.'
+import type { Animation, Grid, GridProps, Square } from '.'
 
 export class DOMGrid implements Grid {
   private readonly grid: GridComponent
@@ -35,12 +35,12 @@ export class DOMGrid implements Grid {
     this.grid.colors = cols
   }
 
-  create(): Promise<void> {
-    return this.grid.create(this.gridParent, true)
+  create(animation: Animation): Promise<void> {
+    return this.grid.create(this.gridParent, animation)
   }
 
-  destroy(): Promise<void> {
-    return this.grid.destroy(true)
+  destroy(animation: Animation): Promise<void> {
+    return this.grid.destroy(animation)
   }
 
   removeSquare(square: Square): Promise<void> {

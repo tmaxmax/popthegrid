@@ -31,7 +31,7 @@
 @keyframes insert-grid__square {
   0% {
     opacity: 0;
-    transform: scale(0) rotate(-180deg);
+    transform: scale(var(--scale)) rotate(var(--rotation));
     filter: blur(20px);
   }
   100% {
@@ -42,10 +42,17 @@
 }
 
 .grid__square--inserted {
+  --rotation: -180deg;
+  --scale: 0;
   animation-name: insert-grid__square;
   animation-duration: 0.5s;
   animation-timing-function: ease-out;
   pointer-events: none;
+}
+
+.grid__square--inserted.short {
+  --rotation: 0deg;
+  --scale: 1;
 }
 
 @media (hover: hover) {

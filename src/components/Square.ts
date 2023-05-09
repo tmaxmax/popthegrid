@@ -1,6 +1,7 @@
 import './Square.css'
 
 import { Component } from './internal/Component'
+import { type Animation } from '$game/grid'
 
 export interface SquareEventListener {
   event: keyof HTMLElementEventMap
@@ -64,21 +65,24 @@ export class Square extends Component<HTMLDivElement> {
     return this.colNum
   }
 
-  animate(which: string, animate = true): Promise<void> {
-    if (animate) {
-      const c = `grid__square--${which}`
-      this.addClass(c)
-      return this.eventsRace(['animationend', 'animationcancel']).then(() => this.removeClass(c))
+  animate(which: string, animate: Animation = 'long'): Promise<void> {
+    if (animate !== 'none') {
+      const c = [`grid__square--${which}`]
+      if (animate === 'short') {
+        c.push('short')
+      }
+      this.addClass(...c)
+      return this.eventsRace(['animationend', 'animationcancel']).then(() => this.removeClass(...c))
     }
     return Promise.resolve()
   }
 
-  create(parent: Component, animate: boolean): Promise<void> {
+  create(parent: Component, animate: Animation): Promise<void> {
     this.appendTo(parent)
     return this.animate('inserted', animate)
   }
 
-  destroy(animate: boolean): Promise<void> {
+  destroy(animate: Animation): Promise<void> {
     return this.animate('deleted', animate).then(() => this.remove())
   }
 }
