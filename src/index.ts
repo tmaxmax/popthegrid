@@ -20,7 +20,7 @@ import { contextKey, createContext, configureTitle, type Context } from './menu/
 import { getName, listenToNameChanges } from '$share/name'
 import { wait } from '$util'
 import type { Writable } from 'svelte/store'
-import { pause, resume } from '$game/pause'
+import { pause, resume } from '$game/ops'
 import { parse } from 'cookie'
 
 const record = getSharedRecord()

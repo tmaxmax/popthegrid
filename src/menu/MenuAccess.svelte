@@ -67,7 +67,7 @@
   import { fade } from 'svelte/transition';
   import { contextKey, getContext, type Attempts } from './context';
   import { gamemodes } from '../gamemode';
-  import { pause, resume } from '$game/pause';
+  import { pause, resume } from '$game/ops';
 
   const context = getContext();
 
