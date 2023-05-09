@@ -120,9 +120,8 @@ const getRecordClearRedirect = () => {
     href: '/',
     title: 'This will reload the page and end the current game.',
     content: Animated.from(element),
-    async on() {
+    on() {
       clearSharedRecord()
-      await game.forceEnd()
     },
   })
 }
