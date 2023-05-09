@@ -98,6 +98,7 @@ attemptsChan.addEventListener('message', (ev: MessageEvent<InsertedAttempt>) => 
 
 const getVersionChangeModalContent = () => {
   const root = document.createElement('div')
+  root.style.margin = '0 auto'
   root.style.height = '100%'
   root.style.display = 'flex'
   root.style.alignItems = 'center'
