@@ -1,5 +1,5 @@
-import { getCodeFromPath, storageKey } from '$edge/share'
-import type { GameRecord } from '$edge/share'
+import { getCodeFromPath, storageKey } from '$edge/share.ts'
+import type { GameRecord } from '$edge/share.ts'
 
 export const getSharedRecord = (): GameRecord | undefined => {
   const code = getCodeFromPath(location.pathname)

@@ -1,21 +1,16 @@
 import './index.css'
 
-import { Component } from '../internal/Component'
-import interval from '$util/time/interval'
-import { LocalStorage } from './storage'
-import type { EasterEggStorage } from './storage'
+import { Component } from '../internal/Component.ts'
+import interval from '$util/time/interval.ts'
+import { LocalStorage } from './storage.ts'
+import type { EasterEggStorage } from './storage.ts'
 import { type ThemeName, themes, defaultTheme, type Hex } from '$theme'
 
 const toUpper = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
-let data: { adjective(): string; noun(): string } | undefined
-
 const fetchSillyName = async () => {
-  if (!data) {
-    data = await import('./data')
-  }
-
-  return toUpper(data.noun()) + data.adjective()
+  const { noun, adjective } = await import('./data.ts')
+  return toUpper(noun()) + adjective()
 }
 
 const interpolate = (a: Hex, b: Hex) => {

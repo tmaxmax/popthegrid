@@ -1,13 +1,13 @@
-import type { InsertedAttempt } from '$db/attempt'
-import type { GamemodeName } from '$game/gamemode'
-import { addAttemptToStatistics, type Accumulator } from '$game/statistics'
+import type { InsertedAttempt } from '$db/attempt.ts'
+import type { GamemodeName } from '$game/gamemode/index.ts'
+import { addAttemptToStatistics, type Accumulator } from '$game/statistics.ts'
 import type { ThemeName } from '$theme'
 import { writable, type Readable, type Writable } from 'svelte/store'
 import { getContext as svelteGetContext } from 'svelte'
-import type { Game } from '$game'
-import type { GameRecord } from '$edge/share'
-import { getName } from '$share/name'
-import type { OngoingAttempt } from '$game/attempt'
+import type { Game } from '$game/index.ts'
+import type { GameRecord } from '$edge/share.ts'
+import { getName } from '$share/name.ts'
+import type { OngoingAttempt } from '$game/attempt.ts'
 
 export interface Context {
   name: Writable<string | undefined>

@@ -1,4 +1,4 @@
-import { isDefined } from '.'
+import { isDefined } from './index.ts'
 
 export type Callback<T, U> = (elem: T, i: number, arr: readonly T[]) => Promise<U>
 export type Reducer<T, U> = (acc: U, elem: T, i: number, arr: readonly T[]) => Promise<U>

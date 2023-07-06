@@ -1,6 +1,6 @@
 <script lang="ts" context="module">
-  import { entries } from '$util/objects';
-  import { type ThemeName, themes, setTheme } from '../../theme';
+  import { entries } from '$util/objects.ts';
+  import { type ThemeName, themes, setTheme } from '../../theme.ts';
   import { type Option } from './Fieldset.svelte';
 
   const getThemeOptions = (): Option<ThemeName>[] => {

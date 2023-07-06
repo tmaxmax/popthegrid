@@ -1,5 +1,5 @@
-import type { Time } from '.'
-import { isDefined } from '..'
+import type { Time } from './index.ts'
+import { isDefined } from '../index.ts'
 
 /**
  * Represents the parameters passed to an interval function.

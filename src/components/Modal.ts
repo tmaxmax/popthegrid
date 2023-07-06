@@ -1,6 +1,6 @@
 import './Modal.css'
 
-import { Animated } from './internal/Animated'
+import { Animated } from './internal/Animated.ts'
 import { SvelteComponent } from 'svelte'
 
 export interface SvelteComponentFactory {

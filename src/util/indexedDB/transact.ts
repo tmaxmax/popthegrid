@@ -1,4 +1,4 @@
-import { OperationError } from '.'
+import { OperationError } from './index.ts'
 
 export interface TransactOptions<T> {
   stores: string | string[]

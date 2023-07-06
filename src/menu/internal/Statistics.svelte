@@ -1,5 +1,5 @@
 <script lang="ts" context="module">
-  import { duration } from './duration';
+  import { duration } from './duration.ts';
   import humanDate from 'human-date';
 
   const durationProcessor = (n?: number | GamemodeName | Date) => {
@@ -21,11 +21,11 @@
 </script>
 
 <script lang="ts">
-  import { gamemodes } from '../../gamemode';
-  import { getContext } from '../context';
+  import { gamemodes } from '../../gamemode.ts';
+  import { getContext } from '../context.ts';
   import StatisticsCol from './StatisticsCol.svelte';
-  import type { GamemodeName } from '$game/gamemode';
-  import { getShareContent, isShareable, type ShareContentParams } from './share';
+  import type { GamemodeName } from '$game/gamemode/index.ts';
+  import { getShareContent, isShareable, type ShareContentParams } from './share.ts';
   import Share from './Share.svelte';
 
   const { attempts, database, theme, name } = getContext();

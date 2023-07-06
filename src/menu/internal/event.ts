@@ -1,5 +1,5 @@
 import { derived, type Readable } from 'svelte/store'
-import type { Event as GameEvent } from '$game'
+import type { Event as GameEvent } from '$game/index.ts'
 
 type Transition = Exclude<GameEvent, { name: 'error' }>
 type Event = { message: string; isTransition?: boolean; isError?: boolean }

@@ -1,5 +1,5 @@
 <script context="module" lang="ts">
-  import { createMediaMatcher } from './media';
+  import { createMediaMatcher } from './media.ts';
 
   export type Option<T extends string> = {
     display: string;

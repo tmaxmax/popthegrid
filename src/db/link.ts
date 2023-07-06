@@ -1,8 +1,8 @@
-import type { Code } from '$edge/share'
-import type { GamemodeName } from '$game/gamemode'
+import type { Code } from '$edge/share.ts'
+import type { GamemodeName } from '$game/gamemode/index.ts'
 import type { ThemeName } from '$theme'
-import { fromRequest } from '$util/indexedDB'
-import { transact } from '$util/indexedDB/transact'
+import { fromRequest } from '$util/indexedDB/index.ts'
+import { transact } from '$util/indexedDB/transact.ts'
 
 export const LINKS_STORE = 'links'
 export const LINKS_INDEX = 'data'

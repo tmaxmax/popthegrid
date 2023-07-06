@@ -1,5 +1,5 @@
-import type { Time } from '.'
-import { isDefined } from '..'
+import type { Time } from './index.ts'
+import { isDefined } from '../index.ts'
 
 export default class Stopwatch {
   private startedAt: number | undefined

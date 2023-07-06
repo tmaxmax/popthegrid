@@ -1,5 +1,5 @@
-import type { Grid, Square } from '$game/grid'
-import { Gamemode } from '.'
+import type { Grid, Square } from '$game/grid/index.ts'
+import { Gamemode } from './index.ts'
 
 export class SameSquare extends Gamemode {
   private lastColor?: string

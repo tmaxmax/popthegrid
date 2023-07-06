@@ -1,7 +1,7 @@
-import { createConfigurator } from '$util/indexedDB/schema'
-import type { Schema, Migration } from '$util/indexedDB/schema'
-import { ATTEMPTS_STORE } from './attempt'
-import { LINKS_INDEX, LINKS_STORE } from './link'
+import { createConfigurator } from '$util/indexedDB/schema.ts'
+import type { Schema, Migration } from '$util/indexedDB/schema.ts'
+import { ATTEMPTS_STORE } from './attempt.ts'
+import { LINKS_INDEX, LINKS_STORE } from './link.ts'
 
 const migrations: Migration[] = [
   (db) => {

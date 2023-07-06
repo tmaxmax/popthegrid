@@ -1,10 +1,10 @@
 <script context="module" lang="ts">
   import { type Option } from './Fieldset.svelte';
-  import { entries, keys } from '$util/objects';
-  import { type GamemodeSetWhen } from '$game';
-  import { type GamemodeName } from '$game/gamemode';
-  import { gamemodes } from '../../gamemode';
-  import { createMediaMatcher } from './media';
+  import { entries, keys } from '$util/objects.ts';
+  import { type GamemodeSetWhen } from '$game/index.ts';
+  import { type GamemodeName } from '$game/gamemode/index.ts';
+  import { gamemodes } from '../../gamemode.ts';
+  import { createMediaMatcher } from './media.ts';
 
   const getGamemodeOptions = (): Option<GamemodeName | 'random-pick'>[] => {
     const options: Option<GamemodeName | 'random-pick'>[] = entries(gamemodes).map(([value, { display, description }]) => ({

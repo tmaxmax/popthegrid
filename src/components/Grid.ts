@@ -1,11 +1,11 @@
 import './Grid.css'
 
-import { Component } from './internal/Component'
-import { Square } from './Square'
-import { type Animation } from '$game/grid'
-import baseLog from '$util/log'
-import { isDefined, randInt, wait } from '$util'
-import { map as mapAsync } from '$util/async'
+import { Component } from './internal/Component.ts'
+import { Square } from './Square.ts'
+import { type Animation } from '$game/grid/index.ts'
+import baseLog from '$util/log.ts'
+import { isDefined, randInt, wait } from '$util/index.ts'
+import { map as mapAsync } from '$util/async.ts'
 
 export interface GridProperties {
   colors?: string[]

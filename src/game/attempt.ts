@@ -1,5 +1,5 @@
-import Stopwatch from '$util/time/stopwatch'
-import type { GamemodeName } from './gamemode'
+import Stopwatch from '$util/time/stopwatch.ts'
+import type { GamemodeName } from './gamemode/index.ts'
 
 export interface OngoingAttempt {
   end(isWin: boolean): Attempt

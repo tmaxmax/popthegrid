@@ -1,7 +1,6 @@
-import interval from '$util/time/interval'
-import type { Interval } from '$util/time/interval'
-import { randInt } from '$util'
-import { Gamemode } from '.'
+import interval, { type Interval } from '$util/time/interval.ts'
+import { randInt } from '$util/index.ts'
+import { Gamemode } from './index.ts'
 
 export interface RandomTimerProps {
   minSeconds: number

@@ -1,9 +1,9 @@
-import { UnreachableError, isDefined, randString } from '$util'
+import { UnreachableError, isDefined, randString } from '$util/index.ts'
 import { writable, type Readable, type Writable, readonly } from 'svelte/store'
-import { startAttempt } from './attempt'
-import type { Attempt, OngoingAttempt } from './attempt'
-import { Gamemode, type GamemodeName } from './gamemode'
-import type { Grid, Square, Animation } from './grid'
+import { startAttempt } from './attempt.ts'
+import type { Attempt, OngoingAttempt } from './attempt.ts'
+import { Gamemode, type GamemodeName } from './gamemode/index.ts'
+import type { Grid, Square, Animation } from './grid/index.ts'
 
 export interface OnGameData {
   when: CallbackWhen

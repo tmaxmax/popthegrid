@@ -1,4 +1,4 @@
-import { randInt } from '$util'
+import { randInt } from '$util/index.ts'
 
 export const noun = () => pickRandom(nouns)
 export const adjective = () => pickRandom(adjectives)

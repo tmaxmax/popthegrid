@@ -1,10 +1,10 @@
-import { findCachedLink, type CodeInfo, cacheLink } from '$db/link'
+import { findCachedLink, type CodeInfo, cacheLink } from '$db/link.ts'
 
-import { entries } from '$util/objects'
-import type { Code, ThemeName } from '$edge/share'
-import type { Statistics, Counts } from '$game/statistics'
-import type { GamemodeName } from '$game/gamemode'
-import { UnreachableError } from '$util/index'
+import { entries } from '$util/objects.ts'
+import type { Code, ThemeName } from '$edge/share.ts'
+import type { Statistics, Counts } from '$game/statistics.ts'
+import type { GamemodeName } from '$game/gamemode/index.ts'
+import { UnreachableError } from '$util/index.ts'
 
 const display: Record<Exclude<keyof Statistics, 'when'>, string> = {
   fastestWinDuration: 'fastest win',

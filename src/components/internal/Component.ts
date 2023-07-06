@@ -1,5 +1,5 @@
-import { isDefined } from '$util'
-import { isBindable } from '$util/functions'
+import { isDefined } from '$util/index.ts'
+import { isBindable } from '$util/functions.ts'
 
 interface ComponentFromExisting<T extends HTMLElement> {
   alreadyExisting: true

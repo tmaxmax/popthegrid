@@ -1,5 +1,5 @@
 <script lang="ts" context="module">
-  import { getCodeFromPath, isCode, type Code } from '$edge/share';
+  import { getCodeFromPath, isCode, type Code } from '$edge/share.ts';
 
   const getCode = (urlOrCode: string): Code | undefined => {
     if (isCode(urlOrCode)) {

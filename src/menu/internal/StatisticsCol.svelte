@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { type ShareContentParams, isShareable, getShareContent } from './share';
-  import type { Statistics, Counts } from '$game/statistics';
-  import { getContext } from '../context';
-  import { type KeyOfUnion } from '$util/index';
+  import { type ShareContentParams, isShareable, getShareContent } from './share.ts';
+  import type { Statistics, Counts } from '$game/statistics.ts';
+  import { getContext } from '../context.ts';
+  import { type KeyOfUnion } from '$util/index.ts';
   import Share from './Share.svelte';
 
   type T = $$Generic<Counts | Statistics>;

@@ -1,5 +1,5 @@
-import interval, { type IntervalCallbackParams } from '$util/time/interval'
-import { wait } from '$util'
+import interval, { type IntervalCallbackParams } from '$util/time/interval.ts'
+import { wait } from '$util/index.ts'
 
 import { describe, it, expect, vi } from 'vitest'
 

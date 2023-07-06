@@ -1,6 +1,6 @@
 import './Redirect.css'
 
-import { Animated } from './internal/Animated'
+import { Animated } from './internal/Animated.ts'
 
 export interface RedirectParams {
   href: string

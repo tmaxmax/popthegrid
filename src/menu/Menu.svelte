@@ -1,10 +1,10 @@
 <script lang="ts">
   import NameInput from './internal/NameInput.svelte';
   import Gamemode from './internal/Gamemode.svelte';
-  import { createEventStore } from './internal/event';
+  import { createEventStore } from './internal/event.ts';
   import { fade } from 'svelte/transition';
   import Theme from './internal/Theme.svelte';
-  import { getContext } from './context';
+  import { getContext } from './context.ts';
   import SillyName from './internal/SillyName.svelte';
   import Statistics from './internal/Statistics.svelte';
   import PasteCode from './internal/PasteCode.svelte';

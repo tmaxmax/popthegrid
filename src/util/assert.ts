@@ -1,4 +1,4 @@
-import { isDefined, isNonNull } from '.'
+import { isDefined, isNonNull } from './index.ts'
 
 export function assert(p: boolean, message?: string): asserts p is true {
   if (!p) {

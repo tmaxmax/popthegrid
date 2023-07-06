@@ -1,4 +1,4 @@
-import { getCodeFromPath } from '$edge/share'
+import { getCodeFromPath } from '$edge/share.ts'
 import { clientsClaim } from 'workbox-core'
 import { registerRoute, NavigationRoute } from 'workbox-routing'
 import { StaleWhileRevalidate } from 'workbox-strategies'

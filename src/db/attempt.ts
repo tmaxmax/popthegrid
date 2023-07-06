@@ -1,6 +1,6 @@
-import type { Attempt } from '$game/attempt'
-import { fromRequest } from '$util/indexedDB'
-import { transact } from '$util/indexedDB/transact'
+import type { Attempt } from '$game/attempt.ts'
+import { fromRequest } from '$util/indexedDB/index.ts'
+import { transact } from '$util/indexedDB/transact.ts'
 
 export const ATTEMPTS_STORE = 'attempts'
 

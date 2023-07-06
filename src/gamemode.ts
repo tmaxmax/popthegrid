@@ -1,9 +1,8 @@
-import { Gamemode } from '$game/gamemode'
-import type { GamemodeName } from '$game/gamemode'
-import { Passthrough } from '$game/gamemode/passthrough'
-import { RandomCount } from '$game/gamemode/randomCount'
-import { RandomTimer } from '$game/gamemode/randomTimer'
-import { SameSquare } from '$game/gamemode/sameSquare'
+import { Gamemode, type GamemodeName } from '$game/gamemode/index.ts'
+import { Passthrough } from '$game/gamemode/passthrough.ts'
+import { RandomCount } from '$game/gamemode/randomCount.ts'
+import { RandomTimer } from '$game/gamemode/randomTimer.ts'
+import { SameSquare } from '$game/gamemode/sameSquare.ts'
 
 export const gamemodes = {
   random: {

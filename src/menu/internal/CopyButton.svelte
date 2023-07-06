@@ -2,7 +2,7 @@
   import ContentCopy from 'svelte-material-icons/ContentCopy.svelte';
   import CheckBold from 'svelte-material-icons/CheckBold.svelte';
   import { copy } from '@svelte-put/copy';
-  import { wait } from '$util/index';
+  import { wait } from '$util/index.ts';
 
   export let text: string;
 

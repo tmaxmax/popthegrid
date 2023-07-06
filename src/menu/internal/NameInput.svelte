@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { setName } from '$share/name';
-  import { getContext } from '../context';
+  import { setName } from '$share/name.ts';
+  import { getContext } from '../context.ts';
 
   const inputName = 'name';
   const inputID = 'name';

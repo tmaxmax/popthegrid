@@ -1,4 +1,4 @@
-import type { Game } from '$game'
+import type { Game } from './index.ts'
 import { get } from 'svelte/store'
 
 export function pause(game: Game): string | undefined {

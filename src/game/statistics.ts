@@ -1,5 +1,5 @@
-import type { Attempt } from './attempt'
-import type { GamemodeName } from './gamemode'
+import type { Attempt } from './attempt.ts'
+import type { GamemodeName } from './gamemode/index.ts'
 
 export interface Counts {
   numAttempts: number

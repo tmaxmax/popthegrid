@@ -1,5 +1,5 @@
 import { test, expect } from 'vitest'
-import Stopwatch from './stopwatch'
+import Stopwatch from './stopwatch.ts'
 
 const createMockTime = () => {
   const mock = {

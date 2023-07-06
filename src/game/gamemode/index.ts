@@ -1,14 +1,10 @@
-import type { Grid, Square } from '../grid'
-import type { Passthrough } from './passthrough'
-import { RandomCount } from './randomCount'
-import { RandomTimer } from './randomTimer'
-import type { SameSquare } from './sameSquare'
+import type { Grid, Square } from '../grid/index.ts'
+import type { Passthrough } from './passthrough.ts'
+import { RandomCount } from './randomCount.ts'
+import { RandomTimer } from './randomTimer.ts'
+import type { SameSquare } from './sameSquare.ts'
 
-export type GamemodeName =
-  | ReturnType<RandomCount['name']>
-  | ReturnType<RandomTimer['name']>
-  | ReturnType<SameSquare['name']>
-  | ReturnType<Passthrough['name']>
+export type GamemodeName = ReturnType<(RandomCount | RandomTimer | SameSquare | Passthrough)['name']>
 
 export abstract class Gamemode {
   abstract shouldDestroy(grid: Grid, destroyedSquare: Square): boolean

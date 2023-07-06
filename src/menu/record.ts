@@ -1,6 +1,6 @@
-import type { GameRecord } from '$edge/share'
-import type { Statistics } from '$game/statistics'
-import type { Attempts } from './context'
+import type { GameRecord } from '$edge/share.ts'
+import type { Statistics } from '$game/statistics.ts'
+import type { Attempts } from './context.ts'
 
 export const getRecordDelta = ({ statistics, last, ongoing }: Attempts, record: GameRecord): [number, boolean] | undefined => {
   const stat = statistics.find((v) => 'gamemode' in v && record.gamemode === v.gamemode) as Statistics | undefined

@@ -1,7 +1,7 @@
 import './Square.css'
 
-import { Component } from './internal/Component'
-import { type Animation } from '$game/grid'
+import { Component } from './internal/Component.ts'
+import { type Animation } from '$game/grid/index.ts'
 
 export interface SquareEventListener {
   event: keyof HTMLElementEventMap

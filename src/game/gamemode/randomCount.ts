@@ -1,6 +1,6 @@
-import type { Grid } from '$game/grid'
-import { randInt } from '$util/index'
-import { Gamemode } from '.'
+import type { Grid } from '$game/grid/index.ts'
+import { randInt } from '$util/index.ts'
+import { Gamemode } from './index.ts'
 
 export class RandomCount extends Gamemode {
   name() {

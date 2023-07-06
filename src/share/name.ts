@@ -1,4 +1,4 @@
-import { isDefined, isNonNull } from '$util/index'
+import { isDefined, isNonNull } from '$util/index.ts'
 
 const key = 'name'
 

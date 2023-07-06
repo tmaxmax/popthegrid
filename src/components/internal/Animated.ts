@@ -1,7 +1,7 @@
 import './Animated.css'
 
-import { Component } from './Component'
-import type { ComponentProps, KnownHTMLElement } from './Component'
+import { Component } from './Component.ts'
+import type { ComponentProps, KnownHTMLElement } from './Component.ts'
 
 const CREATE_ANIMATION_CLASS_NAME = 'visible'
 const DESTROY_ANIMATION_CLASS_NAME = 'hidden'

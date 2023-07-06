@@ -1,9 +1,9 @@
 <script context="module" lang="ts">
-  import type { GameRecord } from '$edge/share';
-  import { isDefined } from '$util/index';
+  import type { GameRecord } from '$edge/share.ts';
+  import { isDefined } from '$util/index.ts';
   import type { Event } from '$game';
-  import { duration } from './internal/duration';
-  import { getRecordDelta } from './record';
+  import { duration } from './internal/duration.ts';
+  import { getRecordDelta } from './record.ts';
 
   const isTransitionEvent = (e: Event): e is Extract<Event, { name: `transition${string}` }> => {
     return e.name.startsWith('transition');
@@ -39,16 +39,16 @@
 <script lang="ts">
   import Edit from 'svelte-material-icons/PuzzleEdit.svelte';
   import Win from 'svelte-material-icons/Trophy.svelte';
-  import { Modal } from '$components/Modal';
+  import { Modal } from '$components/Modal.ts';
   import Menu from './Menu.svelte';
-  import { Component } from '$components/internal/Component';
-  import { createEventStore } from './internal/event';
+  import { Component } from '$components/internal/Component.ts';
+  import { createEventStore } from './internal/event.ts';
   // @ts-expect-error Library has no type definitions.
   import { Confetti } from 'svelte-confetti';
   import { fade } from 'svelte/transition';
-  import { contextKey, getContext, type Attempts } from './context';
-  import { gamemodes } from '../gamemode';
-  import { pause, resume } from '$game/ops';
+  import { contextKey, getContext, type Attempts } from './context.ts';
+  import { gamemodes } from '../gamemode.ts';
+  import { pause, resume } from '$game/ops.ts';
 
   const context = getContext();
 
