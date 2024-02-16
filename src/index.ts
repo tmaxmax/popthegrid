@@ -20,6 +20,7 @@ import { getTheme, setTheme, defaultTheme, themes } from './theme.ts'
 import { contextKey, createContext, configureTitle, type Context } from './menu/context.ts'
 import { getName, listenToNameChanges } from '$share/name.ts'
 import { isDefined, wait } from '$util/index.ts'
+import { mount } from 'svelte'
 import { get, type Writable } from 'svelte/store'
 import { pause, reset, resume } from '$game/ops.ts'
 import { parse } from 'cookie'
@@ -270,7 +271,7 @@ const main = async () => {
     context!.name.set(newValue)
   })
 
-  new MenuAccess({
+  mount(MenuAccess, {
     target: footer,
     context: new Map([[contextKey, context]]),
   })

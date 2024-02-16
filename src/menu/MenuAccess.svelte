@@ -44,6 +44,7 @@
   import { Component } from '$components/internal/Component.ts';
   import { createEventStore } from './internal/event.ts';
   import { Confetti } from 'svelte-confetti';
+  import { mount } from 'svelte';
   import { fade } from 'svelte/transition';
   import { contextKey, getContext, type Attempts } from './context.ts';
   import { gamemodes } from '../gamemode.ts';
@@ -72,7 +73,7 @@
 
     const token = pause(game);
     const modal = new Modal({
-      content: (target) => new Menu({ target, context: new Map([[contextKey, context]]) }),
+      content: (target) => mount(Menu, { target, context: new Map([[contextKey, context]]) })[1],
       allowClose: true,
       animateClose: true,
       afterClose() {
