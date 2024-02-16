@@ -1,22 +1,11 @@
 {
+  "extends": "@tsconfig/svelte",
   "compilerOptions": {
-    "target": "ESNext",
-    "useDefineForClassFields": true,
-    "module": "ESNext",
     "lib": ["ESNext", "DOM", "WebWorker"],
-    "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "strict": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "esModuleInterop": true,
     "noEmit": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "verbatimModuleSyntax": true,
     "paths": {
       "$util/*": ["./src/util/*"],
       "$components/*": ["./src/components/*"],

@@ -1,7 +1,7 @@
 <script context="module" lang="ts">
   import type { GameRecord } from '$edge/share.ts';
   import { isDefined } from '$util/index.ts';
-  import type { Event } from '$game';
+  import type { Event } from '$game/index.ts';
   import { duration } from './internal/duration.ts';
   import { getRecordDelta } from './record.ts';
 
@@ -43,7 +43,6 @@
   import Menu from './Menu.svelte';
   import { Component } from '$components/internal/Component.ts';
   import { createEventStore } from './internal/event.ts';
-  // @ts-expect-error Library has no type definitions.
   import { Confetti } from 'svelte-confetti';
   import { fade } from 'svelte/transition';
   import { contextKey, getContext, type Attempts } from './context.ts';
