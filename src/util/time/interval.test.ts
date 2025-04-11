@@ -3,6 +3,11 @@ import { wait } from '$util/index.ts'
 
 import { describe, it, expect, vi } from 'vitest'
 
+function raf(cb: FrameRequestCallback) {
+  cb(performance.now())
+  return 0
+}
+
 describe('interval', () => {
   it("should respect the interval, compensate for the callback's duration and take leading into account", async () => {
     const time = 50
@@ -12,6 +17,7 @@ describe('interval', () => {
       interval: time * 2,
       iterations: 1,
       leading: true,
+      raf,
     }).done
     const end = performance.now()
     expect(Math.round(Math.abs(end - start - time * 2))).toBeLessThanOrEqual(20) // There is a constant overhead for configuring the interval
@@ -21,6 +27,7 @@ describe('interval', () => {
     const callCount = await interval({
       callback,
       iterations: 5,
+      raf,
     }).done
     expect(callback).toBeCalledTimes(5)
     expect(callCount).toBe(5)
@@ -32,7 +39,7 @@ describe('interval', () => {
         controller.abort()
       }
     })
-    await interval({ callback, signal: controller.signal }).done
+    await interval({ callback, signal: controller.signal, raf }).done
     expect(callback).toBeCalledTimes(3)
   })
   it('should be pausable', async () => {
@@ -44,10 +51,7 @@ describe('interval', () => {
       interval: 100,
       iterations: 5,
       leading: true,
-      raf(callback) {
-        callback(performance.now())
-        return 0
-      },
+      raf,
     })
 
     expect(iterations).toBe(0)
@@ -76,6 +80,7 @@ describe('interval', () => {
       callback: vi.fn(),
       interval: 1000,
       signal: controller.signal,
+      raf,
     })
     pause()
     expect(done).resolves
@@ -86,6 +91,7 @@ describe('interval', () => {
         callback: () => {
           throw 5
         },
+        raf,
       }).done
     ).rejects
   })

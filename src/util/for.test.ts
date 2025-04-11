@@ -3,8 +3,7 @@ import { test } from 'vitest'
 test('[meta] Allow test utils file to exist')
 
 export function fireClick(element: Node): void {
-  const ev = document.createEvent('HTMLEvents')
-  ev.initEvent('click', true, false)
+  const ev = new Event('click', { bubbles: true, cancelable: false })
   element.dispatchEvent(ev)
 }
 
