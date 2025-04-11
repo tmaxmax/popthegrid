@@ -8,32 +8,36 @@
   type T = $$Generic<Counts | Statistics>;
   type K = KeyOfUnion<T>;
 
-  export let statistics: T;
-  export let key: Exclude<K, 'gamemode' | 'when'>;
-  export let processor: ((key: T[K]) => string) | undefined = undefined;
+  interface Props {
+    statistics: T;
+    key: Exclude<K, 'gamemode' | 'when'>;
+    processor?: ((key: T[K]) => string) | undefined;
+  }
+
+  let { statistics, key, processor = undefined }: Props = $props();
 
   const { theme, name, database } = getContext();
-  let data: ShareContentParams;
-
-  $: processed = processor ? processor(statistics[key]) : statistics[key];
-
-  $: if (statistics[key]) {
-    data = {
-      record: {
-        gamemode: 'gamemode' in statistics ? statistics.gamemode : undefined,
-        theme: $theme,
-        name: $name,
-        data: {
-          [key]: statistics[key],
+  let data = $derived.by<ShareContentParams | undefined>(() => {
+    if (statistics[key]) {
+      return {
+        record: {
+          gamemode: 'gamemode' in statistics ? statistics.gamemode : undefined,
+          theme: $theme,
+          name: $name,
+          data: {
+            [key]: statistics[key],
+          },
+          when: statistics.when,
         },
-        when: statistics.when,
-      },
-      location: window.location,
-    };
-  }
+        location: window.location,
+      };
+    }
+  });
+
+  let processed = $derived(processor ? processor(statistics[key]) : statistics[key]);
 </script>
 
-{#if isShareable(statistics, key) && statistics[key]}
+{#if isShareable(statistics, key) && data}
   <Share data={() => getShareContent(database, data)}>{processed}</Share>
 {:else}
   {processed}

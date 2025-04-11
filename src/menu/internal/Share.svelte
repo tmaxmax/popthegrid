@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
   import { writable } from 'svelte/store';
 
   interface Modal {
@@ -23,23 +23,33 @@
   import { cubicOut } from 'svelte/easing';
   import { clickoutside } from '@svelte-put/clickoutside';
 
-  export let data: () => Promise<ShareData>;
-  export let small = false;
+  interface Props {
+    data: () => Promise<ShareData>;
+    small?: boolean;
+    children?: import('svelte').Snippet;
+  }
+
+  let { data, small = false, children }: Props = $props();
 
   let clicked = false;
-  let toShare: ShareData | Error | undefined;
-  let resolvePopUp: (() => void) | undefined;
-  let popUpPosition: { x: number; y: number } | undefined;
-  let absolute: HTMLElement | undefined;
-  let loading = false;
+  let toShare: ShareData | Error | undefined = $state();
+  let resolvePopUp: (() => void) | undefined = $state();
+  let popUpPosition: { x: number; y: number } | undefined = $state();
+  let loading = $state(false);
 
-  $: absolute && document.body.appendChild(absolute);
-  $: textAreaContent = toShare ? (toShare instanceof Error ? toShare.message : toShare.text + '\n' + toShare.url) : undefined;
+  let absolute: HTMLElement | undefined = $state();
+  $effect(() => {
+    absolute && document.body.appendChild(absolute);
+  });
+
+  let textAreaContent = $derived(toShare ? (toShare instanceof Error ? toShare.message : toShare.text + '\n' + toShare.url) : undefined);
 
   const popUpWidth = 20 * 16;
   const modalMargin = 2 * 16;
 
   const onClick = async (e: MouseEvent) => {
+    e.stopPropagation();
+
     if (clicked) {
       return;
     }
@@ -86,8 +96,8 @@
 </script>
 
 <div class="button" class:small>
-  <button on:click|stopPropagation={onClick}>
-    <slot />
+  <button onclick={onClick}>
+    {@render children?.()}
     {#if loading}
       <Loading class="share-icon share-icon--loading" />
     {:else}
@@ -100,24 +110,24 @@
     class="absolute"
     style="--width: {popUpWidth}px; --position-x: {popUpPosition.x}px; --position-y: {popUpPosition.y}px"
     bind:this={absolute}>
-    <div class="popup" transition:fade={{ duration: 400, easing: cubicOut }} use:clickoutside on:clickoutside={resolvePopUp}>
+    <div class="popup" transition:fade={{ duration: 400, easing: cubicOut }} use:clickoutside onclickoutside={resolvePopUp}>
       {#if toShare instanceof Error}
         <label class="popup-title" for="share-text">An error occurred :( try again later!</label>
         <textarea class="error" use:autosize name="share-text" autocomplete="off" autocorrect="off" cols="29" readonly
           >{textAreaContent}</textarea>
       {:else if toShare.url && !(toShare.text || toShare.title)}
         <label class="popup-title" for="share-text">Share this link with your friends! <CopyButton text={toShare.url} /></label>
-        <textarea on:click={onTextAreaClick} use:autosize name="share-text" autocomplete="off" autocorrect="off" rows="1" cols="29" readonly
+        <textarea onclick={onTextAreaClick} use:autosize name="share-text" autocomplete="off" autocorrect="off" rows="1" cols="29" readonly
           >{toShare.url}</textarea>
       {:else}
         <div class="popup-title">Share the following with your friends!</div>
         <label for="share-url" class="popup-subtitle">Link only: <CopyButton text={toShare.url || ''} /></label>
-        <textarea on:click={onTextAreaClick} use:autosize name="share-url" autocomplete="off" autocorrect="off" rows="1" cols="29" readonly
+        <textarea onclick={onTextAreaClick} use:autosize name="share-url" autocomplete="off" autocorrect="off" rows="1" cols="29" readonly
           >{toShare.url}</textarea>
         <label for="share-text" class="popup-subtitle">With text: <CopyButton text={textAreaContent || ''} /></label>
         <textarea
           class:error={toShare instanceof Error}
-          on:click={onTextAreaClick}
+          onclick={onTextAreaClick}
           use:autosize
           name="share-text"
           autocomplete="off"
@@ -189,6 +199,7 @@
     resize: none;
     border: none;
     -webkit-appearance: none;
+    appearance: none;
     width: 100%;
     overflow: hidden;
     word-wrap: break-word;

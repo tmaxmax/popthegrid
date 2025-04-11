@@ -5,13 +5,17 @@
   const inputName = 'name';
   const inputID = 'name';
 
-  export let pretentious = false;
+  interface Props {
+    pretentious?: boolean;
+  }
+
+  let { pretentious = false }: Props = $props();
 
   const { name } = getContext();
 
-  let value = $name;
+  let value = $state($name);
 
-  $: empty = (value || '') === '';
+  let empty = $derived((value || '') === '');
 
   const onBlur = (ev: HTMLElementEventMap['blur']) => {
     // This function helps iOS safari to correctly handle input blurring.
@@ -42,8 +46,8 @@
     placeholder="…"
     bind:value
     aria-label="Your name"
-    on:blur={onBlur}
-    on:change={onChange} />
+    onblur={onBlur}
+    onchange={onChange} />
 </label>
 
 <style>

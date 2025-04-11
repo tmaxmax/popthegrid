@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   import { type Option } from './Fieldset.svelte';
   import { entries, keys } from '$util/objects.ts';
   import { type GamemodeSetWhen } from '$game/index.ts';
@@ -47,9 +47,9 @@
 
   const { game, gamemode, nextGamemode } = getContext();
 
-  let waitPromise: Promise<void> | undefined;
-  let when: GamemodeSetWhen | undefined;
-  let selectedValue: GamemodeName | 'random-pick' = $nextGamemode;
+  let waitPromise: Promise<void> | undefined = $state();
+  let when: GamemodeSetWhen | undefined = $state();
+  let selectedValue: GamemodeName | 'random-pick' = $state($nextGamemode);
 
   const onChange = () => {
     if (selectedValue === 'random-pick') {
@@ -67,19 +67,25 @@
   };
 </script>
 
-<Fieldset name="gamemode" {options} bind:selectedValue let:value on:change={onChange}>
-  <span slot="legend">
-    Gamemode{#if !$isWide && when}
+<Fieldset name="gamemode" {options} bind:selectedValue onchange={onChange}>
+  {#snippet legend()}
+    <span>
+      Gamemode{#if !$isWide && when}
+        {#await waitPromise}
+          <span transition:fade={{ duration: 100 }} class="confirmation" class:next-game={when === 'next-game'}
+            >{' '}({getWhenDisplay(when, $isWide)})</span
+          >{/await}{/if}:
+    </span>
+  {/snippet}
+  {#snippet children({ value })}
+    {#if $isWide && value === $nextGamemode && when}
       {#await waitPromise}
-        <span transition:fade={{ duration: 100 }} class="confirmation" class:next-game={when === 'next-game'}
-          >{' '}({getWhenDisplay(when, $isWide)})</span
-        >{/await}{/if}:
-  </span>
-  {#if $isWide && value === $nextGamemode && when}
-    {#await waitPromise}
-      <p transition:fade={{ duration: 100 }} class="confirmation" class:next-game={when === 'next-game'}>{getWhenDisplay(when, $isWide)}</p>
-    {/await}
-  {/if}
+        <p transition:fade={{ duration: 100 }} class="confirmation" class:next-game={when === 'next-game'}>
+          {getWhenDisplay(when, $isWide)}
+        </p>
+      {/await}
+    {/if}
+  {/snippet}
 </Fieldset>
 
 <style>

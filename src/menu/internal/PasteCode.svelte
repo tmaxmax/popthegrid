@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
   import { getCodeFromPath, isCode, type Code } from '$edge/share.ts';
 
   const getCode = (urlOrCode: string): Code | undefined => {
@@ -16,17 +16,15 @@
 </script>
 
 <script lang="ts">
-  let value = getCodeFromPath(window.location.pathname) ? window.location.href : '';
-  let href = '';
-
-  $: {
+  let value = $state(getCodeFromPath(window.location.pathname) ? window.location.href : '');
+  let href = $derived.by(() => {
     const code = getCode(value);
     if (code) {
-      href = `${window.location.protocol}//${window.location.host}/${code}`;
-    } else {
-      href = '';
+      return `${window.location.protocol}//${window.location.host}/${code}`;
     }
-  }
+
+    return '';
+  });
 
   const onClick = (e: Event) => {
     if (!href || !e.isTrusted) {
@@ -41,8 +39,8 @@
 </script>
 
 <div>
-  <input type="text" name="code" id="code" placeholder="Your link here..." bind:value on:keydown={onClick} />
-  <a aria-disabled={href === ''} class:disabled={href === ''} {href} on:click={onClick}>Go!</a>
+  <input type="text" name="code" id="code" placeholder="Your link here..." bind:value onkeydown={onClick} />
+  <a aria-disabled={href === ''} class:disabled={href === ''} {href} onclick={onClick}>Go!</a>
 </div>
 
 <style>

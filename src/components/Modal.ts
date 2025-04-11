@@ -1,14 +1,14 @@
 import './Modal.css'
 
 import { Animated } from './internal/Animated.ts'
-import { SvelteComponent } from 'svelte'
+import { unmount, mount } from 'svelte'
 
 export interface SvelteComponentFactory {
-  (target: Element): SvelteComponent
+  (target: Element): ReturnType<typeof mount>
 }
 
 class ModalContent extends Animated<HTMLDivElement> {
-  private svelteComponent?: SvelteComponent
+  private svelteComponent?: ReturnType<typeof mount>
 
   constructor(element: Animated | SvelteComponentFactory) {
     super({ tag: 'div', alreadyExisting: false, classList: ['modal-content'], duration: { create: '1s', destroy: '0.3s' } })
@@ -21,7 +21,9 @@ class ModalContent extends Animated<HTMLDivElement> {
 
   async destroy(animate: boolean) {
     await super.destroy(animate)
-    this.svelteComponent?.$destroy()
+    if (this.svelteComponent) {
+      unmount(this.svelteComponent, { outro: true })
+    }
   }
 }
 

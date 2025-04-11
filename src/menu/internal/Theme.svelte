@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
   import { entries } from '$util/objects.ts';
   import { type ThemeName, themes, setTheme } from '../../theme.ts';
   import { type Option } from './Fieldset.svelte';
@@ -25,6 +25,8 @@
   };
 </script>
 
-<Fieldset margin name="theme" {options} bind:selectedValue={$theme} on:change={onChange}>
-  <span slot="legend">Theme:</span>
+<Fieldset margin name="theme" {options} bind:selectedValue={$theme} onchange={onChange}>
+  {#snippet legend()}
+    <span>Theme:</span>
+  {/snippet}
 </Fieldset>

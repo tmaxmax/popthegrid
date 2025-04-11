@@ -39,6 +39,9 @@ importers:
       '@tsconfig/svelte':
         specifier: ^5.0.4
         version: 5.0.4
+      '@types/human-date':
+        specifier: ^1.4.5
+        version: 1.4.5
       '@types/node':
         specifier: ^22.14.1
         version: 22.14.1
@@ -364,6 +367,9 @@ packages:
 
   '@types/estree@1.0.7':
     resolution: {integrity: sha512-w28IoSUCJpidD/TGviZwwMJckNESJZXFu7NBZ5YJ4mEUnNraUn9Pm8HSZm/jDF1pDWYKspWE7oVphigUPRakIQ==}
+
+  '@types/human-date@1.4.5':
+    resolution: {integrity: sha512-v5j3cmL6kCy3DwUoxYeVFTl+tQGlUtciMlKgSHONE1YW7uqrvaLO0UcovWYQq8cP/v+0W0hoQUjAfQghFrO7aQ==}
 
   '@types/node@22.14.1':
     resolution: {integrity: sha512-u0HuPQwe/dHrItgHHpmw3N2fYCR6x4ivMNbPHRkBVP4CvN+kiRrKHWk3i8tXiO/joPwXLMYvF9TTF0eqgHIuOw==}
@@ -767,6 +773,8 @@ snapshots:
   '@tsconfig/svelte@5.0.4': {}
 
   '@types/estree@1.0.7': {}
+
+  '@types/human-date@1.4.5': {}
 
   '@types/node@22.14.1':
     dependencies:

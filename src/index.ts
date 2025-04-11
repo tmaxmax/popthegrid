@@ -24,6 +24,7 @@ import { get, type Writable } from 'svelte/store'
 import { pause, reset, resume } from '$game/ops.ts'
 import { parse } from 'cookie'
 import type { Animation } from '$game/grid/index.ts'
+import { mount } from "svelte";
 
 const record = getSharedRecord()
 const theme = record?.theme || getTheme() || defaultTheme
@@ -270,10 +271,10 @@ const main = async () => {
     context!.name.set(newValue)
   })
 
-  new MenuAccess({
-    target: footer,
-    context: new Map([[contextKey, context]]),
-  })
+  mount(MenuAccess, {
+        target: footer,
+        context: new Map([[contextKey, context]]),
+      })
 
   const gamePrepare = game.prepare('long')
 

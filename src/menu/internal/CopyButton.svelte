@@ -4,9 +4,13 @@
   import { copy } from '@svelte-put/copy';
   import { wait } from '$util/index.ts';
 
-  export let text: string;
+  interface Props {
+    text: string;
+  }
 
-  let showSuccess = false;
+  let { text }: Props = $props();
+
+  let showSuccess = $state(false);
 
   const onCopied = async () => {
     showSuccess = true;
@@ -15,7 +19,7 @@
   };
 </script>
 
-<button use:copy={{ text, event: ['mousedown', 'touchend'] }} on:copied={onCopied}>
+<button use:copy={{ text, event: ['mousedown', 'touchend'] }} oncopied={onCopied}>
   {#if showSuccess}
     <CheckBold class="copy-icon check-bold-icon" />
   {:else}

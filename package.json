@@ -12,6 +12,7 @@
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^5.0.3",
     "@tsconfig/svelte": "^5.0.4",
+    "@types/human-date": "^1.4.5",
     "@types/node": "^22.14.1",
     "svelte": "^5.20.2",
     "svelte-check": "^4.1.4",

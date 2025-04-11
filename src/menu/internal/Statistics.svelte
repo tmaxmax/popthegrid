@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
   import { duration } from './duration.ts';
   import humanDate from 'human-date';
 
@@ -30,13 +30,13 @@
 
   const { attempts, database, theme, name } = getContext();
 
-  let layout: HTMLElement | undefined;
-  $: overflows = layout ? layout.scrollWidth > layout.clientWidth : false;
+  let layout: HTMLElement | undefined = $state();
+  let overflows = $derived(layout ? layout.scrollWidth > layout.clientWidth : false);
 
-  $: last = $attempts.last;
-  $: [total, ...rest] = $attempts.statistics;
-  $: statForAttempt = last ? $attempts.statistics.find((v) => 'gamemode' in v && v.gamemode === last!.gamemode) : undefined;
-  $: isShareableStat = last && statForAttempt ? isShareable(statForAttempt, 'fastestWinDuration') : false;
+  let last = $derived($attempts.last);
+  let [total, ...rest] = $derived($attempts.statistics);
+  let statForAttempt = $derived(last ? $attempts.statistics.find((v) => 'gamemode' in v && v.gamemode === last!.gamemode) : undefined);
+  let isShareableStat = $derived(last && statForAttempt ? isShareable(statForAttempt, 'fastestWinDuration') : false);
 
   const getShareData = () => {
     const shareData: ShareContentParams = {

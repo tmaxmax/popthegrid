@@ -1,4 +1,4 @@
-<script context="module" lang="ts">
+<script module lang="ts">
   import type { GameRecord } from '$edge/share.ts';
   import { isDefined } from '$util/index.ts';
   import type { Event } from '$game/index.ts';
@@ -48,6 +48,7 @@
   import { contextKey, getContext, type Attempts } from './context.ts';
   import { gamemodes } from '../gamemode.ts';
   import { pause, resume } from '$game/ops.ts';
+  import { mount } from 'svelte';
 
   const context = getContext();
 
@@ -55,13 +56,7 @@
   const event = game.events;
   const eventOutput = createEventStore(event, { short: true });
 
-  $: isError = $event.name === 'error';
-  $: recordPrompt = record && $attempts.last?.gamemode === record.gamemode ? getRecordPrompt($attempts, record) : undefined;
-  $: display = isError ? 'Something went wrong' : recordPrompt && isEnd ? recordPrompt : gamemodes[$gamemode].display;
-  $: isEnd = (isTransitionEvent($event) && $event.to === 'win') || ($event.name === 'transitionstart' && $event.from === 'win');
-  $: isWin = isEnd && (recordPrompt ? recordPrompt?.includes('beaten') : !record);
-
-  let disabled = false;
+  let disabled = $state(false);
 
   const handler = async () => {
     if (disabled || isError) {
@@ -72,7 +67,7 @@
 
     const token = pause(game);
     const modal = new Modal({
-      content: (target) => new Menu({ target, context: new Map([[contextKey, context]]) }),
+      content: (target) => mount(Menu, { target, context: new Map([[contextKey, context]]) }),
       allowClose: true,
       animateClose: true,
       afterClose() {
@@ -84,9 +79,15 @@
 
     disabled = false;
   };
+
+  let isError = $derived($event.name === 'error');
+  let recordPrompt = $derived(record && $attempts.last?.gamemode === record.gamemode ? getRecordPrompt($attempts, record) : undefined);
+  let isEnd = $derived((isTransitionEvent($event) && $event.to === 'win') || ($event.name === 'transitionstart' && $event.from === 'win'));
+  let display = $derived(isError ? 'Something went wrong' : recordPrompt && isEnd ? recordPrompt : gamemodes[$gamemode].display);
+  let isWin = $derived(isEnd && (recordPrompt ? recordPrompt?.includes('beaten') : !record));
 </script>
 
-<button {disabled} class:error={isError} class:win={isWin} class="noselect" on:click={handler}>
+<button {disabled} class:error={isError} class:win={isWin} class="noselect" onclick={handler}>
   {#if isWin}
     <div transition:fade={{ duration: 100 }}>
       <Win class="your-game-icon" />

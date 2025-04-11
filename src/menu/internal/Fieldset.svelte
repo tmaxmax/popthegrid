@@ -1,4 +1,5 @@
-<script context="module" lang="ts">
+<script module lang="ts">
+  import type { FormEventHandler } from 'svelte/elements';
   import { createMediaMatcher } from './media.ts';
 
   export type Option<T extends string> = {
@@ -15,31 +16,38 @@
 
   type T = $$Generic<string>;
 
-  export let options: Option<T>[];
-  export let name: string;
-  export let disabled = false;
-  export let selectedValue: T;
-  export let margin = false;
+  interface Props {
+    options: Option<T>[];
+    name: string;
+    disabled?: boolean;
+    selectedValue: T;
+    margin?: boolean;
+    legend?: import('svelte').Snippet;
+    children?: import('svelte').Snippet<[{ value: T }]>;
+    onchange?: FormEventHandler<HTMLFieldSetElement>;
+  }
 
-  let hovering = '';
+  let { options, name, disabled = false, selectedValue = $bindable(), margin = false, legend, children, onchange }: Props = $props();
 
-  $: selectedOrHovered = options.find((v) => v.value === (($canHover ? hovering : '') || selectedValue));
+  let hovering = $state('');
+
+  let selectedOrHovered = $derived(options.find((v) => v.value === (($canHover ? hovering : '') || selectedValue)));
 </script>
 
-<fieldset class:disabled class:margin on:change>
-  {#if $$slots.legend}
+<fieldset class:disabled class:margin {onchange}>
+  {#if legend}
     <legend>
-      <slot name="legend" />
+      {@render legend?.()}
     </legend>
   {/if}
   <div class="layout">
     {#each options as { value, display }, i (value)}
-      <label for="{value}-{i}" on:mouseenter={() => (hovering = value)} on:mouseleave={() => (hovering = '')}>
+      <label for="{value}-{i}" onmouseenter={() => (hovering = value)} onmouseleave={() => (hovering = '')}>
         <input type="radio" bind:group={selectedValue} {name} id="{value}-{i}" {value} {disabled} />
         <span class="display">
-          <span class="radio" />
+          <span class="radio"></span>
           {display}
-          <slot {value} />
+          {@render children?.({ value })}
         </span>
       </label>
     {/each}
@@ -127,7 +135,9 @@
     text-align: center;
     font-weight: bold;
     margin-right: 0.3rem;
-    transition: border-color 0.1s ease-in, background-color 0.1s ease-in;
+    transition:
+      border-color 0.1s ease-in,
+      background-color 0.1s ease-in;
   }
 
   label {
