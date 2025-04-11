@@ -1,4 +1,4 @@
-import type { GameRecord } from '$edge/share.ts'
+import type { GameRecord } from '$share/record.ts'
 import type { Statistics } from '$game/statistics.ts'
 import type { Attempts } from './context.ts'
 

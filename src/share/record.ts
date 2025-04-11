@@ -1,5 +1,11 @@
-import { getCodeFromPath, storageKey } from '$edge/share.ts'
-import type { GameRecord } from '$edge/share.ts'
+import { getCodeFromPath, storageKey } from './code.ts'
+import type { ThemeName } from '$theme'
+
+// keep in sync with Go's share.Record
+export type GameRecord = { name?: string; theme: ThemeName; when: Date } & (
+  | { gamemode: 'random'; data: { numWins: number } }
+  | { gamemode: 'random-timer' | 'same-square' | 'passthrough'; data: { fastestWinDuration: number } }
+)
 
 export const getSharedRecord = (): GameRecord | undefined => {
   const code = getCodeFromPath(location.pathname)

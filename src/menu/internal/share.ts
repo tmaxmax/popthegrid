@@ -1,7 +1,8 @@
 import { findCachedLink, type CodeInfo, cacheLink } from '$db/link.ts'
 
 import { entries } from '$util/objects.ts'
-import type { Code, ThemeName } from '$edge/share.ts'
+import type { Code } from '$share/code.ts'
+import type { ThemeName } from '$theme'
 import type { Statistics, Counts } from '$game/statistics.ts'
 import type { GamemodeName } from '$game/gamemode/index.ts'
 import { UnreachableError } from '$util/index.ts'

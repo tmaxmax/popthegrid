@@ -1,8 +1,8 @@
 <script module lang="ts">
-  import type { GameRecord } from '$edge/share.ts';
   import { isDefined } from '$util/index.ts';
   import type { Event } from '$game/index.ts';
   import { duration } from './internal/duration.ts';
+  import type { GameRecord } from '$share/record.ts';
   import { getRecordDelta } from './record.ts';
 
   const isTransitionEvent = (e: Event): e is Extract<Event, { name: `transition${string}` }> => {
