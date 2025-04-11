@@ -1,0 +1,23 @@
+{
+  "extends": "@tsconfig/svelte/tsconfig.json",
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "paths": {
+      "$util/*": ["./src/util/*"],
+      "$components/*": ["./src/components/*"],
+      "$db/*": ["./src/db/*"],
+      "$game/*": ["./src/game/*"],
+      "$edge/*": ["./netlify/edge/*"],
+      "$share/*": ["./src/share/*"],
+      "$theme": ["./src/theme.ts"]
+    }
+  },
+  "include": ["./src/**/*.ts", "./src/**/*.svelte"]
+}

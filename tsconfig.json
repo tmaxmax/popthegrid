@@ -1,20 +1,7 @@
 {
-  "extends": "@tsconfig/svelte",
-  "compilerOptions": {
-    "lib": ["ESNext", "DOM", "WebWorker"],
-    "allowImportingTsExtensions": true,
-    "noEmit": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "paths": {
-      "$util/*": ["./src/util/*"],
-      "$components/*": ["./src/components/*"],
-      "$db/*": ["./src/db/*"],
-      "$game/*": ["./src/game/*"],
-      "$edge/*": ["./netlify/edge/*"],
-      "$share/*": ["./src/share/*"],
-      "$theme": ["./src/theme.ts"]
-    }
-  },
-  "include": ["src"]
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
 }

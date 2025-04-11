@@ -30,7 +30,7 @@ export class Component<T extends KnownHTMLElement = HTMLElement> {
     if (props.alreadyExisting) {
       this.element = props.element
     } else {
-      this.element = document.createElement(props.tag) as T
+      this.element = document.createElement(props.tag) as unknown as T
       if (isDefined(props.classList)) {
         this.addClass(...props.classList)
       }
@@ -107,7 +107,7 @@ export class Component<T extends KnownHTMLElement = HTMLElement> {
   protected addEventListener<S extends Component<T>, E extends keyof HTMLElementEventMap>(
     event: E,
     callback: (this: S, ev: HTMLElementEventMap[E]) => void,
-    options?: AddEventListenerOptions
+    options?: AddEventListenerOptions,
   ): void {
     if (isBindable(callback)) {
       // @ts-expect-error if the function is bindable then it has no `this`.
@@ -127,7 +127,7 @@ export class Component<T extends KnownHTMLElement = HTMLElement> {
   protected removeEventListener<S extends Component<T>, E extends keyof HTMLElementEventMap>(
     event: E,
     callback: (this: S, ev: HTMLElementEventMap[E]) => void,
-    options?: AddEventListenerOptions
+    options?: AddEventListenerOptions,
   ): void {
     // @ts-expect-error same as above
     this.element.removeEventListener(event, callback, options)
