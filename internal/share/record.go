@@ -66,12 +66,19 @@ const (
 	ThemeCozy  Theme = "cozy"
 )
 
+type RecordData struct {
+	// random gamemode.
+	NumWins int `json:"numWins,omitempty"`
+	// In milliseconds; random-timer, same-square, passthrough gamemodes.
+	FastestWinDuration int `json:"fastestWinDuration,omitempty"`
+}
+
 type Record struct {
-	Gamemode Gamemode       `json:"gamemode"`
-	Theme    Theme          `json:"theme"`
-	Name     string         `json:"name,omitempty"`
-	When     time.Time      `json:"when"`
-	Data     map[string]any `json:"data"`
+	Gamemode Gamemode   `json:"gamemode"`
+	Theme    Theme      `json:"theme"`
+	Name     string     `json:"name,omitempty"`
+	When     time.Time  `json:"when"`
+	Data     RecordData `json:"data"`
 }
 
 func (r *Record) Validate() error {
@@ -79,7 +86,7 @@ func (r *Record) Validate() error {
 		return errors.New("record time must be provided")
 	}
 
-	if len(r.Data) == 0 {
+	if r.Data == (RecordData{}) {
 		return errors.New("data must be provided")
 	}
 
@@ -96,17 +103,14 @@ func (r *Record) Description() string {
 
 	switch r.Gamemode {
 	case GamemodeRandom:
-		numWins := int(r.Data["numWins"].(float64))
+		numWins := r.Data.NumWins
 		return fmt.Sprintf("%s can you win more? They won %d %s.", root, numWins, makePlural("time", numWins))
 	case GamemodeRandomTimer:
-		dur := int(r.Data["fastestWinDuration"].(float64))
-		return fmt.Sprintf("%s be quicker! They won in %s.", root, formatDuration(dur))
+		return fmt.Sprintf("%s be quicker! They won in %s.", root, formatDuration(r.Data.FastestWinDuration))
 	case GamemodeSameSquare:
-		dur := int(r.Data["fastestWinDuration"].(float64))
-		return fmt.Sprintf("%s zerstöre schneller die gleichen Karos! They did it in %s.", root, formatDuration(dur))
+		return fmt.Sprintf("%s zerstöre schneller die gleichen Karos! They did it in %s.", root, formatDuration(r.Data.FastestWinDuration))
 	case GamemodePassthrough:
-		dur := int(r.Data["fastestWinDuration"].(float64))
-		return fmt.Sprintf("%s do you have the FFITW? Beat %s to win!", root, formatDuration(dur))
+		return fmt.Sprintf("%s do you have the FFITW? Beat %s to win!", root, formatDuration(r.Data.FastestWinDuration))
 	default:
 		panic(fmt.Errorf("unknown gamemode %q", r.Gamemode))
 	}
