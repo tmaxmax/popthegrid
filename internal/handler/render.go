@@ -83,6 +83,7 @@ func (codeRenderer) cookie(code share.Code, statusCode int) *http.Cookie {
 	if statusCode == 0 {
 		c.MaxAge = -1
 	} else {
+		c.MaxAge = 15
 		c.Value = strconv.Itoa(statusCode)
 	}
 
