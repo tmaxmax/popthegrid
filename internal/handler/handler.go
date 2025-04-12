@@ -1,10 +1,14 @@
 package handler
 
 import (
+	"fmt"
 	"html/template"
 	"io/fs"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/httplog/v2"
 	"github.com/rs/cors"
 )
 
@@ -24,6 +28,7 @@ type Config struct {
 	Records          RecordsRepository
 	RecordStorageKey string
 	CORS             cors.Options
+	Logger           httplog.Options
 }
 
 func New(c Config) http.Handler {
@@ -56,5 +61,25 @@ func New(c Config) http.Handler {
 	})
 	m.Handle("POST /share", shareHandler{records: c.Records})
 
-	return cors.New(c.CORS).Handler(m)
+	logger := httplog.NewLogger("popthegrid", c.Logger)
+	if c.CORS.Logger == nil {
+		c.CORS.Logger = corsLogger{l: logger}
+	}
+
+	return chi.Chain(
+		middleware.RequestID,
+		middleware.RealIP,
+		httplog.Handler(logger, []string{c.Assets.Path, c.Public.Path}),
+		middleware.Recoverer,
+		cors.New(c.CORS).Handler,
+	).Handler(m)
+}
+
+type corsLogger struct {
+	l *httplog.Logger
+}
+
+// Printf implements cors.Logger.
+func (c corsLogger) Printf(format string, args ...any) {
+	c.l.Debug(fmt.Sprintf(format, args...))
 }

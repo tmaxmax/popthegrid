@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/go-chi/httplog/v2"
 	"github.com/olivere/vite"
 	"github.com/rs/cors"
 	resources "github.com/tmaxmax/popthegrid"
@@ -56,6 +57,12 @@ func run() error {
 		CORS: cors.Options{
 			AllowedOrigins: []string{env.URL},
 			AllowedMethods: []string{http.MethodGet, http.MethodPost},
+		},
+		Logger: httplog.Options{
+			LogLevel: env.LogLevel,
+			JSON:     true,
+			Concise:  true,
+			Writer:   os.Stderr,
 		},
 	})
 

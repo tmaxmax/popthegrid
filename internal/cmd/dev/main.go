@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/go-chi/httplog/v2"
 	"github.com/olivere/vite"
 	"github.com/rs/cors"
 	"github.com/tmaxmax/popthegrid/internal/cmd/internal"
@@ -51,6 +52,11 @@ func run() error {
 			AllowedOrigins: []string{env.URL},
 			AllowedMethods: []string{http.MethodGet, http.MethodPost},
 			Debug:          true,
+		},
+		Logger: httplog.Options{
+			LogLevel: env.LogLevel,
+			Concise:  true,
+			Writer:   os.Stderr,
 		},
 	})
 

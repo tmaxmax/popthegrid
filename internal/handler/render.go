@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/go-chi/httplog/v2"
 	"github.com/tmaxmax/popthegrid/internal/share"
 )
 
@@ -19,6 +20,8 @@ type codeRenderer struct {
 }
 
 func (c codeRenderer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	l := httplog.LogEntry(r.Context())
+
 	code := share.Code(r.PathValue("code"))
 	if err := code.Validate(); err != nil {
 		c.error(w, r, code, http.StatusNotFound)
@@ -30,13 +33,11 @@ func (c codeRenderer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		var rerr RepositoryError
 		var statusCode int
 
-		if errors.As(err, &rerr) {
-			switch rerr.Kind {
-			case ErrorNotFound:
-				statusCode = http.StatusNotFound
-			default:
-				statusCode = http.StatusInternalServerError
-			}
+		if errors.As(err, &rerr) && rerr.Kind == ErrorNotFound {
+			statusCode = http.StatusNotFound
+		} else {
+			l.ErrorContext(r.Context(), "get record", "err", err)
+			statusCode = http.StatusInternalServerError
 		}
 
 		c.error(w, r, code, statusCode)
