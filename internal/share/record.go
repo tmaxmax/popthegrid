@@ -70,7 +70,7 @@ type RecordData struct {
 	// random gamemode.
 	NumWins int `json:"numWins,omitempty"`
 	// In milliseconds; random-timer, same-square, passthrough gamemodes.
-	FastestWinDuration int `json:"fastestWinDuration,omitempty"`
+	FastestWinDuration float64 `json:"fastestWinDuration,omitempty"`
 }
 
 type Record struct {
@@ -116,7 +116,7 @@ func (r *Record) Description() string {
 	}
 }
 
-func formatDuration(ms int) string {
+func formatDuration(ms float64) string {
 	dur := time.Duration(ms) * time.Millisecond
 	if dur > time.Second {
 		dur = dur.Round(time.Second / 100)
