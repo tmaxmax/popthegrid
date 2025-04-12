@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -34,6 +35,7 @@ func run() error {
 		FS:           dist,
 		IsDev:        true,
 		ViteEntry:    "src/index.ts",
+		ViteURL:      fmt.Sprintf("http://%s:5173", localIP()),
 		ViteTemplate: vite.SvelteTs,
 	})
 	if err != nil {
@@ -81,4 +83,21 @@ func runServer(ctx context.Context, s *http.Server) error {
 	}
 
 	return <-shutdownError
+}
+
+func localIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "localhost"
+	}
+
+	for _, a := range addrs {
+		if ip, ok := a.(*net.IPNet); ok && !ip.IP.IsLoopback() {
+			if ip.IP.To4() != nil {
+				return ip.IP.String()
+			}
+		}
+	}
+
+	return "localhost"
 }

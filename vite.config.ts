@@ -23,7 +23,7 @@ export default defineConfig({
   },
   server: {
     cors: {
-      origin: `http://localhost:${process.env.PORT}`,
+      origin: process.env.URL,
     },
   },
   plugins: [svelte()],
