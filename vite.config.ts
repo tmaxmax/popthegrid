@@ -14,5 +14,17 @@ export default defineConfig({
       $theme: path.resolve(__dirname, 'src', 'theme.ts'),
     },
   },
+  publicDir: false,
+  build: {
+    manifest: true,
+    rollupOptions: {
+      input: path.resolve(__dirname, 'src', 'index.ts'),
+    },
+  },
+  server: {
+    cors: {
+      origin: `http://localhost:${process.env.PORT}`,
+    },
+  },
   plugins: [svelte()],
 })

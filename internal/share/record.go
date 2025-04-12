@@ -3,6 +3,7 @@ package share
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -19,6 +20,21 @@ func (g Gamemode) Validate() error {
 
 func (g *Gamemode) UnmarshalJSON(data []byte) error {
 	return unmarshalEnum(data, g)
+}
+
+func (g Gamemode) Description() string {
+	switch g {
+	case GamemodeRandom:
+		return "win more than me."
+	case GamemodeRandomTimer:
+		return "beat me on time."
+	case GamemodeSameSquare:
+		return "destroy faster the same squares."
+	case GamemodePassthrough:
+		return "be faster than me."
+	default:
+		panic(fmt.Errorf("unknown gamemode %q", g))
+	}
 }
 
 const (
@@ -68,4 +84,55 @@ func (r *Record) Validate() error {
 	}
 
 	return nil
+}
+
+func (r *Record) Description() string {
+	name := r.Name
+	if name == "" {
+		name = "your friend"
+	}
+
+	root := fmt.Sprintf("You're in %s world:", makePossessive(name))
+
+	switch r.Gamemode {
+	case GamemodeRandom:
+		numWins := int(r.Data["numWins"].(float64))
+		return fmt.Sprintf("%s can you win more? They won %d %s.", root, numWins, makePlural("time", numWins))
+	case GamemodeRandomTimer:
+		dur := int(r.Data["fastestWinDuration"].(float64))
+		return fmt.Sprintf("%s be quicker! They won in %s.", root, formatDuration(dur))
+	case GamemodeSameSquare:
+		dur := int(r.Data["fastestWinDuration"].(float64))
+		return fmt.Sprintf("%s zerstöre schneller die gleichen Karos! They did it in %s.", root, formatDuration(dur))
+	case GamemodePassthrough:
+		dur := int(r.Data["fastestWinDuration"].(float64))
+		return fmt.Sprintf("%s do you have the FFITW? Beat %s to win!", root, formatDuration(dur))
+	default:
+		panic(fmt.Errorf("unknown gamemode %q", r.Gamemode))
+	}
+}
+
+func formatDuration(ms int) string {
+	dur := time.Duration(ms) * time.Millisecond
+	if dur > time.Second {
+		dur = dur.Round(time.Second / 100)
+	}
+
+	return dur.String()
+}
+
+func makePossessive(s string) string {
+	if strings.HasSuffix(s, "s") || strings.HasSuffix(s, "z") {
+		return s + "'"
+	}
+
+	return s + "'s"
+}
+
+func makePlural(s string, count int) string {
+	if count > 1 {
+		return s + "s"
+	}
+
+	return s
 }

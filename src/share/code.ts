@@ -11,4 +11,4 @@ export const getCodeFromPath = (path: string): Code | undefined => {
 
 export const isCode = (s: string): s is Code => /^[A-Za-z0-9]{6}$/.test(s)
 
-export const storageKey = 'record-data'
+export const storageKey = import.meta.env.VITE_RECORD_STORAGE_KEY

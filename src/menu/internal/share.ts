@@ -88,7 +88,7 @@ export async function getShareContent(db: IDBDatabase, { record, location: { pro
   let code = await findCachedLink(db, record)
 
   if (!code) {
-    const res = await fetch(`${import.meta.env.VITE_FUNCTIONS_ROOT}/share`, {
+    const res = await fetch(`/share`, {
       method: 'POST',
       body: JSON.stringify(record),
     })

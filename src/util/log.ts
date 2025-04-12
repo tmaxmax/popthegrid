@@ -2,7 +2,7 @@ import debug from 'debug'
 
 const log = debug('popthegrid')
 
-if (import.meta.env.DEV) {
+if (import.meta.env.MODE == 'development') {
   debug.enable(import.meta.env.VITE_DEBUG)
 } else {
   debug.disable()

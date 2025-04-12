@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="{{ .Description }}" />
+    <meta property="og:description" content="{{ .Description }}" />
+    <meta property="og:title" content="Pop the grid!" />
+    <meta property="og:url" content="{{ .OG.URL }}" />
+    {{if .OG.Image.Path }}
+    <meta property="og:image" content="{{ .OG.Image.Path }}" />
+    <meta property="og:image:type" content="{{ .OG.Image.Type }}" />
+    <meta property="og:image:width" content="{{ .OG.Image.Width }}" />
+    <meta property="og:image:height" content="{{ .OG.Image.Height }}" />
+    <meta property="og:image:alt" content="{{ .OG.Image.Alt }}" />
+    {{end}}
+    <title>Pop the grid!</title>
+    <link rel="apple-touch-icon" sizes="57x57" href="/static/icons/apple-icon-57x57.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="/static/icons/apple-icon-60x60.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="/static/icons/apple-icon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="/static/icons/apple-icon-76x76.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="/static/icons/apple-icon-114x114.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="/static/icons/apple-icon-120x120.png" />
+    <link rel="apple-touch-icon" sizes="144x144" href="/static/icons/apple-icon-144x144.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/static/icons/apple-icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/icons/apple-icon-180x180.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/icons/android-icon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/static/icons/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/icons/favicon-16x16.png" />
+    <link rel="icon" href="/static/icons/favicon.ico" type="image/x-icon" />
+    <meta name="msapplication-TileColor" content="#000f1e" />
+    <meta name="msapplication-TileImage" content="/static/icons/ms-icon-144x144.png" />
+    <meta name="theme-color" content="#000f1e" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Pop the grid!" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    {{if .Robots }}
+    <meta name="robots" content="{{ .Robots }}" />
+    {{end}} {{ Tags }} {{if .Script}}
+    <script>
+      {{ .Script }}
+    </script>
+    {{end}}
+  </head>
+  <body>
+    <section class="greeting">
+      <h1 id="title">Pop the grid!</h1>
+      <p id="objective">{{ .Objective }}</p>
+    </section>
+    <main class="grid__parent noselect"></main>
+    <footer></footer>
+  </body>
+</html>
