@@ -1,12 +1,15 @@
 package internal
 
-import "os"
+import (
+	"os"
+)
 
 type Env struct {
 	Port             string
 	URL              string
 	RecordStorageKey string
 	Entrypoint       string
+	Database         string
 }
 
 func Getenv() Env {
@@ -15,5 +18,6 @@ func Getenv() Env {
 		URL:              os.Getenv("URL"),
 		RecordStorageKey: os.Getenv("VITE_RECORD_STORAGE_KEY"),
 		Entrypoint:       os.Getenv("ENTRYPOINT"),
+		Database:         os.Getenv("DATABASE"),
 	}
 }

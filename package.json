@@ -8,8 +8,9 @@
     "dev:server": "env-cmd -f .env.local -- go run ./internal/cmd/dev",
     "dev": "run-p dev:*",
     "test": "vitest",
-    "build": "vite build --mode staging",
-    "build:prod": "vite build --mode production",
+    "build:client": "vite build --mode production",
+    "build:server": "go build -o popthegrid.out ./internal/cmd/popthegrid",
+    "build": "env-cmd -f .env.production -- run-s build:client build:server",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
   },
