@@ -2,9 +2,7 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -36,7 +34,7 @@ func run() error {
 		FS:           dist,
 		IsDev:        true,
 		ViteEntry:    env.Entrypoint,
-		ViteURL:      fmt.Sprintf("http://%s:5173", localIP()),
+		ViteURL:      fmt.Sprintf("http://%s:5173", internal.LocalIP()),
 		ViteTemplate: vite.SvelteTs,
 	})
 	if err != nil {
@@ -62,41 +60,5 @@ func run() error {
 		ReadHeaderTimeout: time.Second * 10,
 	}
 
-	return runServer(ctx, s)
-}
-
-func runServer(ctx context.Context, s *http.Server) error {
-	shutdownError := make(chan error)
-
-	go func() {
-		<-ctx.Done()
-
-		sctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-		defer cancel()
-
-		shutdownError <- s.Shutdown(sctx)
-	}()
-
-	if err := s.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		return err
-	}
-
-	return <-shutdownError
-}
-
-func localIP() string {
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		return "localhost"
-	}
-
-	for _, a := range addrs {
-		if ip, ok := a.(*net.IPNet); ok && !ip.IP.IsLoopback() {
-			if ip.IP.To4() != nil {
-				return ip.IP.String()
-			}
-		}
-	}
-
-	return "localhost"
+	return internal.RunServer(ctx, s)
 }
