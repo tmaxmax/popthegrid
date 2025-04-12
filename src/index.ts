@@ -24,7 +24,7 @@ import { get, type Writable } from 'svelte/store'
 import { pause, reset, resume } from '$game/ops.ts'
 import { parse } from 'cookie'
 import type { Animation } from '$game/grid/index.ts'
-import { mount } from "svelte";
+import { mount } from 'svelte'
 
 const record = getSharedRecord()
 const theme = record?.theme || getTheme() || defaultTheme
@@ -123,7 +123,7 @@ const showNewUpdateModal = (onClose?: (wasShown: boolean) => unknown): void | Pr
   const VERSION = '0.7.3'
 
   const lastVersion = localStorage.getItem(KEY)
-  if (lastVersion === VERSION) {
+  if (lastVersion === null || lastVersion === VERSION) {
     onClose?.(false)
     return
   }
@@ -272,9 +272,9 @@ const main = async () => {
   })
 
   mount(MenuAccess, {
-        target: footer,
-        context: new Map([[contextKey, context]]),
-      })
+    target: footer,
+    context: new Map([[contextKey, context]]),
+  })
 
   const gamePrepare = game.prepare('long')
 
