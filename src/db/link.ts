@@ -1,4 +1,4 @@
-import type { Code } from '$edge/share.ts'
+import type { Code } from '$share/code.ts'
 import type { GamemodeName } from '$game/gamemode/index.ts'
 import type { ThemeName } from '$theme'
 import { fromRequest } from '$util/indexedDB/index.ts'

@@ -5,7 +5,7 @@ import type { ThemeName } from '$theme'
 import { writable, type Readable, type Writable } from 'svelte/store'
 import { getContext as svelteGetContext } from 'svelte'
 import type { Game } from '$game/index.ts'
-import type { GameRecord } from '$edge/share.ts'
+import type { GameRecord } from '$share/record.ts'
 import { getName } from '$share/name.ts'
 import type { OngoingAttempt } from '$game/attempt.ts'
 
