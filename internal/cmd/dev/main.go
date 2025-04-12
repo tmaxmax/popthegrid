@@ -29,20 +29,19 @@ func run() error {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
+	env := internal.Getenv()
 	dist := os.DirFS("dist")
 
 	v, err := vite.HTMLFragment(vite.Config{
 		FS:           dist,
 		IsDev:        true,
-		ViteEntry:    "src/index.ts",
+		ViteEntry:    env.Entrypoint,
 		ViteURL:      fmt.Sprintf("http://%s:5173", localIP()),
 		ViteTemplate: vite.SvelteTs,
 	})
 	if err != nil {
 		return fmt.Errorf("create Vite fragment: %w", err)
 	}
-
-	env := internal.Getenv()
 
 	h := handler.New(handler.Config{
 		AssetsTags:       v.Tags,

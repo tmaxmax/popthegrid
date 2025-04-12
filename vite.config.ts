@@ -18,7 +18,7 @@ export default defineConfig({
   build: {
     manifest: true,
     rollupOptions: {
-      input: path.resolve(__dirname, 'src', 'index.ts'),
+      input: path.resolve(__dirname, process.env.ENTRYPOINT!),
     },
   },
   server: {
