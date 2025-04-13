@@ -8,9 +8,30 @@
   import SillyName from './internal/SillyName.svelte';
   import Statistics from './internal/Statistics.svelte';
   import PasteCode from './internal/PasteCode.svelte';
+  import { onMount } from 'svelte';
+  import baseLog from '$util/log.ts';
 
-  const { game, record } = getContext();
+  const { game, record, sessionIntervalID } = getContext();
   const events = createEventStore(game.events);
+
+  onMount(async () => {
+    if ($sessionIntervalID != null) {
+      return;
+    }
+
+    const log = baseLog.extend('Session');
+    const refreshFn = async () => {
+      log('refreshing session');
+      const resp = await fetch('/session', { method: 'POST' });
+      if (!resp.ok) {
+        const err = await resp.json();
+        console.error(err);
+      }
+    };
+
+    $sessionIntervalID = setInterval(refreshFn, import.meta.env.VITE_SESSION_EXPIRY * 50 * 1000);
+    await refreshFn();
+  });
 </script>
 
 <section>

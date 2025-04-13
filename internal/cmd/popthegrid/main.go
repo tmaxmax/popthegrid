@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
 	"fmt"
+	"hash"
 	"io/fs"
 	"net/http"
 	"os"
@@ -59,11 +62,14 @@ func run() error {
 			AllowedMethods: []string{http.MethodGet, http.MethodPost},
 		},
 		Logger: httplog.Options{
-			LogLevel: env.LogLevel,
-			JSON:     true,
-			Concise:  true,
-			Writer:   os.Stderr,
+			LogLevel:       env.LogLevel,
+			JSON:           true,
+			Concise:        true,
+			RequestHeaders: true,
+			Writer:         os.Stderr,
 		},
+		HMAC:          func() hash.Hash { return hmac.New(sha256.New, env.HMACSecret) },
+		SessionExpiry: env.SessionExpiry,
 	})
 
 	s := &http.Server{

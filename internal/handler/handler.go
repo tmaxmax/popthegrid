@@ -2,9 +2,11 @@ package handler
 
 import (
 	"fmt"
+	"hash"
 	"html/template"
 	"io/fs"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -29,6 +31,8 @@ type Config struct {
 	RecordStorageKey string
 	CORS             cors.Options
 	Logger           httplog.Options
+	HMAC             func() hash.Hash
+	SessionExpiry    time.Duration
 }
 
 func New(c Config) http.Handler {
@@ -51,6 +55,12 @@ func New(c Config) http.Handler {
 		}).
 		Parse(indexHTML))
 
+	sess := sessionHandler{
+		hmac:   c.HMAC,
+		expiry: c.SessionExpiry,
+	}
+
+	m.Handle("POST /session", sess)
 	m.Handle("GET /{code}", codeRenderer{
 		records:    c.Records,
 		storageKey: c.RecordStorageKey,
@@ -59,7 +69,7 @@ func New(c Config) http.Handler {
 	m.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		renderIndex(w, index, defaultIndex(r))
 	})
-	m.Handle("POST /share", shareHandler{records: c.Records})
+	m.Handle("POST /share", sess.middleware(true)(shareHandler{records: c.Records}))
 
 	logger := httplog.NewLogger("popthegrid", c.Logger)
 	if c.CORS.Logger == nil {
@@ -67,6 +77,7 @@ func New(c Config) http.Handler {
 	}
 
 	return chi.Chain(
+		sess.middleware(false),
 		middleware.RequestID,
 		middleware.RealIP,
 		httplog.Handler(logger, []string{c.Assets.Path, c.Public.Path}),
