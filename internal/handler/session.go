@@ -9,7 +9,6 @@ import (
 	"encoding/gob"
 	"fmt"
 	"hash"
-	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -32,19 +31,16 @@ func (s sessionPayload) id() string {
 }
 
 func (s sessionPayload) toCookieValue(hm func() hash.Hash) string {
-	sb := &strings.Builder{}
-	bb := &bytes.Buffer{}
-	b := base64.NewEncoder(base64.RawURLEncoding, sb)
-	defer b.Close()
-
-	if err := gob.NewEncoder(io.MultiWriter(b, bb)).Encode(s); err != nil {
+	var b bytes.Buffer
+	if err := gob.NewEncoder(&b).Encode(s); err != nil {
 		panic(err)
 	}
 
-	b.Close()
+	h := hm()
+	h.Write(b.Bytes())
 
-	signature := base64.RawURLEncoding.EncodeToString(hm().Sum(bb.Bytes()))
-	data := sb.String()
+	signature := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
+	data := base64.RawURLEncoding.EncodeToString(b.Bytes())
 
 	return data + "." + signature
 }
@@ -113,7 +109,10 @@ func (s sessionHandler) verify(value string) ([]byte, bool) {
 		return nil, false
 	}
 
-	return dataRaw, hmac.Equal(s.hmac().Sum(dataRaw), signatureRaw)
+	h := s.hmac()
+	h.Write(dataRaw)
+
+	return dataRaw, hmac.Equal(h.Sum(nil), signatureRaw)
 }
 
 func (s sessionHandler) gen(realIP string, now time.Time) *http.Cookie {
