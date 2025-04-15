@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/httplog/v2"
 	"github.com/gofrs/uuid"
 	"github.com/tmaxmax/popthegrid/internal/crypto/altcha"
 	"github.com/tmaxmax/popthegrid/internal/crypto/macval"
@@ -66,7 +67,7 @@ type sessionHandler struct {
 }
 
 func (s sessionHandler) GET(w http.ResponseWriter, r *http.Request) {
-	exp := time.Now().Add(time.Minute)
+	exp := time.Now().Add(time.Second * 10)
 	opts := s.challenge
 	opts.Expires = &exp
 
@@ -109,9 +110,13 @@ func (s sessionHandler) verifyChallenge(r *http.Request) error {
 		return err
 	}
 
-	if !altcha.VerifySolution(payload, s.challenge.HMACKey, true) {
-		return errors.New("challenge not passed")
+	l := httplog.LogEntry(r.Context())
+	if err := altcha.VerifySolution(payload, s.challenge.HMACKey, true); err != nil {
+		l.WarnContext(r.Context(), "challenge failed", "err", err)
+		return err
 	}
+
+	l.InfoContext(r.Context(), "challenge passed", "took", payload.Duration())
 
 	return nil
 }

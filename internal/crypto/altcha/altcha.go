@@ -33,6 +33,7 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"hash"
 	"io"
@@ -92,13 +93,15 @@ type Challenge struct {
 }
 
 type Payload struct {
-	Algorithm Algorithm     `json:"algorithm"`
-	Challenge string        `json:"challenge"`
-	Number    int64         `json:"number"`
-	Salt      string        `json:"salt"`
-	Signature string        `json:"signature"`
-	Took      time.Duration `json:"took"`
+	Algorithm Algorithm `json:"algorithm"`
+	Challenge string    `json:"challenge"`
+	Number    int64     `json:"number"`
+	Salt      string    `json:"salt"`
+	Signature string    `json:"signature"`
+	Took      int       `json:"took"` // in milliseconds
 }
+
+func (p Payload) Duration() time.Duration { return time.Duration(p.Took) * time.Millisecond }
 
 func CreateChallenge(options ChallengeOptions) Challenge {
 	maxNumber := options.MaxNumber
@@ -148,13 +151,20 @@ func CreateChallenge(options ChallengeOptions) Challenge {
 	}
 }
 
-func VerifySolution(payload Payload, hmacKey []byte, checkExpires bool) bool {
+var ErrExpired = errors.New("challenge expired")
+var ErrWrong = errors.New("solution is wrong")
+
+func VerifySolution(payload Payload, hmacKey []byte, checkExpires bool) error {
 	params := extractParams(payload)
 	expires := params.Get("expires")
 	if checkExpires {
-		expireTime, _ := strconv.ParseInt(expires, 10, 64)
-		if time.Now().Unix() > expireTime {
-			return false
+		expireTime, err := strconv.ParseInt(expires, 10, 64)
+		if err != nil {
+			return err
+		}
+
+		if now := time.Now().Unix(); now > expireTime {
+			return fmt.Errorf("%w (delta %ds)", ErrExpired, now-expireTime)
 		}
 	}
 
@@ -166,7 +176,11 @@ func VerifySolution(payload Payload, hmacKey []byte, checkExpires bool) bool {
 	}
 	expectedChallenge := CreateChallenge(challengeOptions)
 
-	return expectedChallenge.Challenge == payload.Challenge && expectedChallenge.Signature == payload.Signature
+	if expectedChallenge.Challenge == payload.Challenge && expectedChallenge.Signature == payload.Signature {
+		return nil
+	}
+
+	return ErrWrong
 }
 
 // Extracts parameters from the payload

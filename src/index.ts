@@ -244,10 +244,30 @@ const configureGameReset = () => {
   })
 }
 
-const configureSession = async (store: Context['sessionStatus']) => {
-  try {
-    if (get(store) !== 'error') {
+let sessionBackoffTimeoutID: number | undefined
+let sessionBackoffDuration = 2000
+const maxSessionBackoffDuration = 16000
+
+const configureSession = async (store: Context['sessionStatus'], isTimeout: boolean = false) => {
+  const backoff = () => {
+    if (sessionBackoffDuration > maxSessionBackoffDuration) {
+      store.update(() => 'error')
       return
+    }
+
+    store.update(() => 'pending')
+    sessionBackoffTimeoutID = setTimeout(() => configureSession(store, true), sessionBackoffDuration)
+    sessionBackoffDuration *= 2
+  }
+
+  try {
+    if (get(store) !== 'error' && sessionBackoffTimeoutID == null) {
+      return
+    }
+
+    clearTimeout(sessionBackoffTimeoutID)
+    if (!isTimeout) {
+      sessionBackoffDuration = 2000
     }
 
     store.update(() => 'pending')
@@ -259,13 +279,13 @@ const configureSession = async (store: Context['sessionStatus']) => {
         await fetchSession(false)
       } catch (err) {
         console.error(err)
-        store.update(() => 'error')
         clearInterval(intervalID)
+        backoff()
       }
     }, import.meta.env.VITE_SESSION_EXPIRY * 50 * 1000)
   } catch (err) {
     console.error(err)
-    store.update(() => 'error')
+    backoff()
   }
 }
 
