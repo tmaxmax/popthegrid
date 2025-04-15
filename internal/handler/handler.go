@@ -51,8 +51,6 @@ func New(c Config) http.Handler {
 		http.ServeFileFS(w, r, c.Public.Data, "manifest.json")
 	})
 
-	m.Handle("GET /health", healthHandler{ping: c.Repository})
-
 	index := template.Must(template.
 		New("index").
 		Funcs(template.FuncMap{
@@ -77,6 +75,8 @@ func New(c Config) http.Handler {
 		renderIndex(w, index, defaultIndex(r))
 	})
 	m.Handle("POST /share", sess.middleware(true)(shareHandler{records: c.Repository}))
+
+	m.Handle("GET /health", healthHandler{ping: c.Repository})
 
 	logger := httplog.NewLogger("popthegrid", c.Logger)
 	if c.CORS.Logger == nil {
