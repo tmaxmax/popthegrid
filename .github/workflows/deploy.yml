@@ -54,7 +54,7 @@ jobs:
         if: steps.changes.outputs.env == 'true'
         run: |
           scp .env.production deploy:env.production
-          ssh deploy 'cat env.production env.secret > env'
+          ssh deploy 'awk "1" env.production env.secret > env'
       - name: Copy NGINX
         if: steps.changes.outputs.nginx == 'true'
         run: |
