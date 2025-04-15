@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
+	"path/filepath"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -21,6 +22,32 @@ type FS struct {
 
 func (f FS) register(m *http.ServeMux) {
 	m.Handle("GET "+f.Path, http.StripPrefix(f.Path, http.FileServerFS(f.Data)))
+}
+
+func (f FS) readdir(paths []string) ([]string, error) {
+	root, err := fs.ReadDir(f.Data, ".")
+	if err != nil {
+		return nil, err
+	}
+
+	for _, p := range root {
+		pt := filepath.Join(f.Path, p.Name())
+		if p.IsDir() {
+			s, err := fs.Sub(f.Data, p.Name())
+			if err != nil {
+				return nil, err
+			}
+
+			paths, err = FS{Data: s, Path: pt}.readdir(paths)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			paths = append(paths, pt)
+		}
+	}
+
+	return paths, nil
 }
 
 type Repository interface {
@@ -47,6 +74,10 @@ func New(c Config) http.Handler {
 
 	c.Assets.register(m)
 	c.Public.register(m)
+
+	var staticPaths []string
+	staticPaths, _ = c.Assets.readdir(staticPaths)
+	staticPaths, _ = c.Public.readdir(staticPaths)
 
 	m.HandleFunc("GET /manifest.json", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/manifest+json")
@@ -96,7 +127,7 @@ func New(c Config) http.Handler {
 		sess.middleware,
 		middleware.RequestID,
 		middleware.RealIP,
-		httplog.Handler(logger, []string{c.Assets.Path, c.Public.Path}),
+		httplog.Handler(logger, staticPaths),
 		middleware.Recoverer,
 		cors.New(c.CORS).Handler,
 	).Handler(m)
