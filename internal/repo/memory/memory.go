@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"math/rand"
+	"os"
 	"time"
 
 	"github.com/tmaxmax/popthegrid/internal/handler"
@@ -44,3 +45,5 @@ func (r *Repository) Save(ctx context.Context, record share.Record) (share.Code,
 	}
 
 }
+
+func (*Repository) Ping(context.Context) error { return os.ErrClosed }

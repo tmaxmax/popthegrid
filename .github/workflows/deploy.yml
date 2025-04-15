@@ -65,3 +65,7 @@ jobs:
         run: |
           scp popthegrid.out deploy:popthegrid.new
           ssh deploy 'mv popthegrid.new popthegrid.out'
+      - name: Run healthcheck
+        run: |
+          sleep 10
+          curl --fail-with-body https://popthegrid.com/health

@@ -23,11 +23,16 @@ func (f FS) register(m *http.ServeMux) {
 	m.Handle("GET "+f.Path, http.StripPrefix(f.Path, http.FileServerFS(f.Data)))
 }
 
+type Repository interface {
+	RecordsRepository
+	PingRepository
+}
+
 type Config struct {
 	AssetsTags       template.HTML
 	Assets           FS
 	Public           FS
-	Records          RecordsRepository
+	Repository       Repository
 	RecordStorageKey string
 	CORS             cors.Options
 	Logger           httplog.Options
@@ -46,6 +51,8 @@ func New(c Config) http.Handler {
 		http.ServeFileFS(w, r, c.Public.Data, "manifest.json")
 	})
 
+	m.Handle("GET /health", healthHandler{ping: c.Repository})
+
 	index := template.Must(template.
 		New("index").
 		Funcs(template.FuncMap{
@@ -62,14 +69,14 @@ func New(c Config) http.Handler {
 
 	m.Handle("POST /session", sess)
 	m.Handle("GET /{code}", codeRenderer{
-		records:    c.Records,
+		records:    c.Repository,
 		storageKey: c.RecordStorageKey,
 		index:      index,
 	})
 	m.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		renderIndex(w, index, defaultIndex(r))
 	})
-	m.Handle("POST /share", sess.middleware(true)(shareHandler{records: c.Records}))
+	m.Handle("POST /share", sess.middleware(true)(shareHandler{records: c.Repository}))
 
 	logger := httplog.NewLogger("popthegrid", c.Logger)
 	if c.CORS.Logger == nil {

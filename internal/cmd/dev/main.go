@@ -49,7 +49,7 @@ func run() error {
 		AssetsTags:       v.Tags,
 		Assets:           handler.FS{Data: dist, Path: "/assets/"},
 		Public:           handler.FS{Data: os.DirFS("public"), Path: "/static/"},
-		Records:          &memory.Repository{Data: map[share.Code]share.Record{}},
+		Repository:       &memory.Repository{Data: map[share.Code]share.Record{}},
 		RecordStorageKey: env.RecordStorageKey,
 		CORS: cors.Options{
 			AllowedOrigins: []string{env.URL},

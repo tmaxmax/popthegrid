@@ -55,7 +55,7 @@ func run() error {
 		AssetsTags:       v.Tags,
 		Assets:           handler.FS{Data: assets, Path: "/assets/"},
 		Public:           handler.FS{Data: public, Path: "/static/"},
-		Records:          &sqlite.Repository{DB: db},
+		Repository:       &sqlite.Repository{DB: db},
 		RecordStorageKey: env.RecordStorageKey,
 		CORS: cors.Options{
 			AllowedOrigins: []string{env.URL},

@@ -78,6 +78,8 @@ func (r *Repository) trySaveWithCode(ctx context.Context, record share.Record, c
 	return false, createError(handler.ErrorInternal, err)
 }
 
+func (r *Repository) Ping(ctx context.Context) error { return r.DB.PingContext(ctx) }
+
 func createError(kind handler.ErrorKind, err error) handler.RepositoryError {
 	return handler.RepositoryError{
 		Kind:  kind,
