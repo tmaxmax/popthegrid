@@ -8,81 +8,13 @@
   import SillyName from './internal/SillyName.svelte';
   import Statistics from './internal/Statistics.svelte';
   import PasteCode from './internal/PasteCode.svelte';
-  import { onMount } from 'svelte';
-  import baseLog from '$util/log.ts';
-  import { solveChallenge, type Challenge, type Payload } from './altcha.ts';
-  import { derived } from 'svelte/store';
 
-  const { game, record, sessionStatus } = getContext();
+  const { onOpen }: { onOpen(): void } = $props();
+
+  const { game, record } = getContext();
   const events = createEventStore(game.events);
 
-  const requiresChallenge = derived(sessionStatus, (v) => v === 'none' || v === 'error');
-
-  onMount(() => {
-    // TODO: Make all this happen when game starts and on relevant interactions.
-
-    if (!$requiresChallenge) {
-      return;
-    }
-
-    let intervalID: number;
-
-    const log = baseLog.extend('Session');
-    const refreshFn = async () => {
-      try {
-        let payload: string | null = null;
-        if ($requiresChallenge) {
-          log('Requesting challenge');
-
-          const res = await fetch('/session', { method: 'GET', credentials: 'same-origin' });
-          if (!res.ok) {
-            throw new Error('failed to fetch challenge', { cause: await res.text() });
-          }
-
-          const data: Challenge = await res.json();
-
-          log('Solving challenge', data);
-
-          const solution = await solveChallenge(data);
-          if (solution === null) {
-            throw new Error('failed to get solution');
-          }
-
-          payload = JSON.stringify({
-            algorithm: data.algorithm,
-            challenge: data.challenge,
-            number: solution.number,
-            salt: data.salt,
-            signature: data.signature,
-            took: solution.took,
-          } satisfies Payload);
-        }
-
-        log('Refreshing session');
-
-        const res = await fetch('/session', {
-          method: 'POST',
-          body: payload,
-          credentials: 'same-origin',
-        });
-        if (!res.ok) {
-          throw new Error('failed to get session', { cause: await res.text() });
-        }
-
-        $sessionStatus = 'valid';
-
-        log('Success');
-      } catch (err) {
-        console.error(err);
-        $sessionStatus = 'error';
-        clearInterval(intervalID);
-      }
-    };
-
-    intervalID = setInterval(refreshFn, import.meta.env.VITE_SESSION_EXPIRY * 50 * 1000) as any;
-
-    refreshFn();
-  });
+  $effect(onOpen);
 </script>
 
 <section>

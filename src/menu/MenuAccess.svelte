@@ -56,6 +56,8 @@
   const event = game.events;
   const eventOutput = createEventStore(event, { short: true });
 
+  const { onMenuOpen }: { onMenuOpen(): unknown } = $props();
+
   let disabled = $state(false);
 
   const handler = async () => {
@@ -67,7 +69,16 @@
 
     const token = pause(game);
     const modal = new Modal({
-      content: (target) => mount(Menu, { target, context: new Map([[contextKey, context]]) }),
+      content: (target) =>
+        mount(Menu, {
+          target,
+          context: new Map([[contextKey, context]]),
+          props: {
+            onOpen() {
+              onMenuOpen();
+            },
+          },
+        }),
       allowClose: true,
       animateClose: true,
       afterClose() {

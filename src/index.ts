@@ -25,6 +25,7 @@ import { pause, reset, resume } from '$game/ops.ts'
 import { parse } from 'cookie'
 import type { Animation } from '$game/grid/index.ts'
 import { mount } from 'svelte'
+import { fetchSession } from './session.ts'
 
 const record = getSharedRecord()
 const theme = record?.theme || getTheme() || defaultTheme
@@ -89,6 +90,7 @@ const game = new Game({
       }
 
       game.prepare(animation)
+      configureSession(context!.sessionStatus)
     }
   },
 })
@@ -242,6 +244,31 @@ const configureGameReset = () => {
   })
 }
 
+const configureSession = async (store: Context['sessionStatus']) => {
+  try {
+    if (get(store) !== 'error') {
+      return
+    }
+
+    store.update(() => 'pending')
+    await fetchSession(true)
+    store.update(() => 'valid')
+
+    let intervalID = setInterval(async () => {
+      try {
+        await fetchSession(false)
+      } catch (err) {
+        console.error(err)
+        store.update(() => 'error')
+        clearInterval(intervalID)
+      }
+    }, import.meta.env.VITE_SESSION_EXPIRY * 50 * 1000)
+  } catch (err) {
+    console.error(err)
+    store.update(() => 'error')
+  }
+}
+
 const main = async () => {
   if (navigator.storage && navigator.storage.persist) {
     await navigator.storage.persist()
@@ -274,7 +301,12 @@ const main = async () => {
   mount(MenuAccess, {
     target: footer,
     context: new Map([[contextKey, context]]),
+    props: {
+      onMenuOpen: () => configureSession(context!.sessionStatus),
+    },
   })
+
+  configureSession(context.sessionStatus)
 
   const gamePrepare = game.prepare('long')
 
