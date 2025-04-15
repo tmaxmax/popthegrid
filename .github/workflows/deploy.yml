@@ -1,0 +1,63 @@
+name: Deploy to production
+on:
+  release:
+    types: [published]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            nginx:
+              - 'nginx/**'
+            env:
+              - .env.production
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ~1.24
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 23.x
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --strict-peer-dependencies
+      - name: Build
+        run: pnpm build
+        env:
+          GOOS: linux
+          GOARCH: arm64
+      - name: Setup SSH
+        run: |
+          env
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DSSH }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p 22 -t ed25519 ${{ secrets.DHOST }} >> ~/.ssh/known_hosts
+          cat >> ~/.ssh/config <<END
+          Host deploy
+            HostName ${{ secrets.DHOST }}
+            User ${{ secrets.DNAME }}
+            IdentityFile ~/.ssh/id_ed25519
+          END
+      - name: Copy new env config
+        if: steps.changes.outputs.env == 'true'
+        run: |
+          scp .env.production deploy:env.production
+          ssh deploy 'cat env.production env.secret > env'
+      - name: Copy NGINX
+        if: steps.changes.outputs.nginx == 'true'
+        run: |
+          scp nginx/popthegrid.com deploy:/etc/nginx/sites-available/popthegrid.com
+          scp -r nginx/njs/**/*.js deploy:/etc/nginx/njs/
+          ssh deploy 'nginx -s reload'
+      - name: Copy server artifact
+        run: |
+          scp popthegrid.out deploy:popthegrid.new
+          ssh deploy 'mv popthegrid.new popthegrid.out'
