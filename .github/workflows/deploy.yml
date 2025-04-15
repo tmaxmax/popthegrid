@@ -59,7 +59,7 @@ jobs:
         if: steps.changes.outputs.nginx == 'true'
         run: |
           scp nginx/popthegrid.com deploy:/etc/nginx/sites-available/popthegrid.com
-          scp -r nginx/njs/**/*.js deploy:/etc/nginx/njs/
+          scp -r nginx/njs/ deploy:/etc/nginx/
           ssh deploy 'nginx -s reload'
       - name: Copy server artifact
         run: |
