@@ -12,7 +12,7 @@ jobs:
         with:
           filters: |
             nginx:
-              - 'nginx/**'
+              - 'nginx/**/*'
             env:
               - .env.production
       - uses: actions/setup-go@v5
