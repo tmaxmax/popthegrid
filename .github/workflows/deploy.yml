@@ -1,10 +1,13 @@
 name: Deploy to production
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - '*'
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -71,3 +74,7 @@ jobs:
         run: |
           sleep 5
           curl --fail-with-body https://popthegrid.com/health
+      - name: Create release
+        uses: ghalactic/github-release-from-tag@v5
+        with:
+          prerelease: 'false'
