@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
 	"errors"
@@ -95,12 +96,15 @@ func (s sessionHandler) middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		payload, err := s.retrieve(r, time.Now())
 		if err != nil || payload.Exp.IsZero() {
-			r.Header.Set(middleware.RequestIDHeader, "*")
+			var id [8]byte
+			rand.Read(id[:])
+
+			r.Header.Set(middleware.RequestIDHeader, "anon/"+base64.RawURLEncoding.EncodeToString(id[:]))
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		r.Header.Set(middleware.RequestIDHeader, payload.id())
+		r.Header.Set(middleware.RequestIDHeader, "sess/"+payload.id())
 
 		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), sessionContextKey{}, payload)))
 	})
