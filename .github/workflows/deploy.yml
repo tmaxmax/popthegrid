@@ -7,9 +7,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: previous-release
+        uses: sammcoe/get-previous-release-action@v1
       - uses: dorny/paths-filter@v3
         id: changes
         with:
+          base: ${{ steps.previous-release.outputs.release }}
           filters: |
             nginx:
               - 'nginx/**/*'
