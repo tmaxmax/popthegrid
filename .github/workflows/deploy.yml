@@ -35,7 +35,6 @@ jobs:
           GOARCH: arm64
       - name: Setup SSH
         run: |
-          env
           mkdir -p ~/.ssh
           echo "${{ secrets.DSSH }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
