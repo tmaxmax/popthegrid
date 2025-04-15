@@ -64,8 +64,10 @@ jobs:
       - name: Copy server artifact
         run: |
           scp popthegrid.out deploy:popthegrid.new
+          ssh deploy 'systemctl stop popthegrid'
           ssh deploy 'mv popthegrid.new popthegrid.out'
+          ssh deploy 'systemctl start popthegrid'
       - name: Run healthcheck
         run: |
-          sleep 10
+          sleep 5
           curl --fail-with-body https://popthegrid.com/health
