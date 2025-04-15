@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"slices"
@@ -12,7 +13,9 @@ import (
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gofrs/uuid"
+	"github.com/tmaxmax/popthegrid/internal/crypto/altcha"
 	"github.com/tmaxmax/popthegrid/internal/crypto/macval"
+	"schneider.vip/problem"
 )
 
 const sessionCookieName = "session"
@@ -57,22 +60,60 @@ func (s *sessionPayload) UnmarshalBinary(data []byte) error {
 }
 
 type sessionHandler struct {
-	secret []byte
-	expiry time.Duration
+	secret    []byte
+	expiry    time.Duration
+	challenge altcha.ChallengeOptions
 }
 
-func (s sessionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	now := time.Now()
+func (s sessionHandler) GET(w http.ResponseWriter, r *http.Request) {
+	exp := time.Now().Add(time.Minute)
+	opts := s.challenge
+	opts.Expires = &exp
 
-	payload, ok := r.Context().Value(sessionContextKey{}).(sessionPayload)
+	if _, ok := s.retrieveFromContext(r); ok {
+		// Speedrun challenge for already authenticated users that have first opened the page.
+		// We have no way to update client's state to not request a challenge so we make it very simple.
+		// This case is expected to appear especially when opening links from friends.
+		opts.Number = 1
+	}
+
+	encodeIndent(w, altcha.CreateChallenge(opts))
+}
+
+func (s sessionHandler) POST(w http.ResponseWriter, r *http.Request) {
+	payload, ok := s.retrieveFromContext(r)
 	if !ok {
+		if err := s.verifyChallenge(r); err != nil {
+			problem.Of(http.StatusUnauthorized).Append(problem.WrapSilent(err), problem.Detail("challenge not passed")).WriteTo(w)
+			return
+		}
+
 		payload.ID = uuid.Must(uuid.NewV4())
 	}
 
-	payload.Exp = now.Add(s.expiry)
+	payload.Exp = time.Now().Add(s.expiry)
 
 	http.SetCookie(w, payload.cookie(s.secret))
 	w.WriteHeader(http.StatusOK)
+}
+
+func (s sessionHandler) verifyChallenge(r *http.Request) error {
+	defer r.Body.Close()
+
+	var payload altcha.Payload
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		return err
+	}
+
+	if err := payload.Algorithm.Validate(); err != nil {
+		return err
+	}
+
+	if !altcha.VerifySolution(payload, s.challenge.HMACKey, true) {
+		return errors.New("challenge not passed")
+	}
+
+	return nil
 }
 
 func (s sessionHandler) retrieve(r *http.Request, now time.Time) (sessionPayload, error) {
@@ -91,6 +132,11 @@ func (s sessionHandler) retrieve(r *http.Request, now time.Time) (sessionPayload
 	}
 
 	return payload, nil
+}
+
+func (s sessionHandler) retrieveFromContext(r *http.Request) (sessionPayload, bool) {
+	p, ok := r.Context().Value(sessionContextKey{}).(sessionPayload)
+	return p, ok
 }
 
 func (s sessionHandler) middleware(next http.Handler) http.Handler {

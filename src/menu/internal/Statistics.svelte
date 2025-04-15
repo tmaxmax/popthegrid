@@ -28,7 +28,7 @@
   import { getShareContent, isShareable, type ShareContentParams } from './share.ts';
   import Share from './Share.svelte';
 
-  const { attempts, database, theme, name } = getContext();
+  const { attempts, database, theme, name, sessionStatus } = getContext();
 
   let layout: HTMLElement | undefined = $state();
   let overflows = $derived(layout ? layout.scrollWidth > layout.clientWidth : false);
@@ -52,7 +52,7 @@
       location: window.location,
     };
 
-    return getShareContent(database, shareData);
+    return getShareContent(database, shareData, $sessionStatus === 'valid');
   };
 </script>
 
@@ -61,7 +61,7 @@
   <ul>
     <li>Gamemode: {gamemodes[last.gamemode].display}</li>
     <li>
-      {#if isShareableStat && last.isWin}
+      {#if isShareableStat && last.isWin && ($sessionStatus === 'valid' || $sessionStatus === 'error')}
         <Share small data={getShareData}>Duration: {duration(last.duration)}</Share>
       {:else}
         Duration: {duration(last.duration)}

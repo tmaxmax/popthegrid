@@ -74,7 +74,11 @@ export function isShareable(s: Counts | Statistics, key: keyof Statistics) {
 }
 
 /** Mimics share.Record from Go code. Keep in sync. */
-export async function getShareContent(db: IDBDatabase, { record, location: { protocol, host } }: ShareContentParams): Promise<ShareData> {
+export async function getShareContent(
+  db: IDBDatabase,
+  { record, location: { protocol, host } }: ShareContentParams,
+  validSession: boolean
+): Promise<ShareData> {
   if (!recordCanBeCodeInfo(record)) {
     const [[key, value]] = entries(record.data)
 
@@ -88,6 +92,10 @@ export async function getShareContent(db: IDBDatabase, { record, location: { pro
   let code = await findCachedLink(db, record)
 
   if (!code) {
+    if (!validSession) {
+      throw new ResponseError({ status: 401, title: 'Unauthorized', reason: 'You are offline or something went wrong in the background.' })
+    }
+
     const res = await fetch(`/share`, {
       method: 'POST',
       credentials: 'same-origin',

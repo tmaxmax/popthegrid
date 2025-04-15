@@ -16,7 +16,7 @@
 
   let { statistics, key, processor = undefined }: Props = $props();
 
-  const { theme, name, database } = getContext();
+  const { theme, name, database, sessionStatus } = getContext();
   let data = $derived.by<ShareContentParams | undefined>(() => {
     if (statistics[key]) {
       return {
@@ -37,8 +37,9 @@
   let processed = $derived(processor ? processor(statistics[key]) : statistics[key]);
 </script>
 
-{#if isShareable(statistics, key) && data}
-  <Share data={() => getShareContent(database, data)}>{processed}</Share>
+<!-- TODO: better way of signaling that one cannot yet share. -->
+{#if isShareable(statistics, key) && data && ($sessionStatus === 'valid' || $sessionStatus === 'error')}
+  <Share data={() => getShareContent(database, data, $sessionStatus === 'valid')}>{processed}</Share>
 {:else}
   {processed}
 {/if}

@@ -18,7 +18,7 @@ export interface Context {
   nextGamemode: Writable<GamemodeName>
   theme: Writable<ThemeName>
   database: IDBDatabase
-  sessionIntervalID: Writable<number | undefined>
+  sessionStatus: Writable<'valid' | 'pending' | 'error' | 'none'>
 }
 
 export interface Attempts {
@@ -52,7 +52,7 @@ export function createContext({ name, attemptsLoader, gamemode, game, theme, dat
     theme: writable<ThemeName>(theme),
     database,
     record,
-    sessionIntervalID: writable<number>(),
+    sessionStatus: writable('none'),
   }
 }
 

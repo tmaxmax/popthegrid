@@ -11,6 +11,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httplog/v2"
 	"github.com/rs/cors"
+	"github.com/tmaxmax/popthegrid/internal/crypto/altcha"
 )
 
 type FS struct {
@@ -42,6 +43,8 @@ type Config struct {
 func New(c Config) http.Handler {
 	m := http.NewServeMux()
 
+	m.Handle("GET /health", healthHandler{ping: c.Repository})
+
 	c.Assets.register(m)
 	c.Public.register(m)
 
@@ -59,12 +62,6 @@ func New(c Config) http.Handler {
 		}).
 		Parse(indexHTML))
 
-	sess := sessionHandler{
-		secret: c.SessionSecret,
-		expiry: c.SessionExpiry,
-	}
-
-	m.Handle("POST /session", sess)
 	m.Handle("GET /{code}", codeRenderer{
 		records:    c.Repository,
 		storageKey: c.RecordStorageKey,
@@ -73,9 +70,22 @@ func New(c Config) http.Handler {
 	m.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		renderIndex(w, index, defaultIndex(r))
 	})
-	m.Handle("POST /share", shareHandler{records: c.Repository})
 
-	m.Handle("GET /health", healthHandler{ping: c.Repository})
+	sess := sessionHandler{
+		secret: c.SessionSecret,
+		expiry: c.SessionExpiry,
+		challenge: altcha.ChallengeOptions{
+			Algorithm:  altcha.SHA256,
+			MaxNumber:  200000,
+			SaltLength: 12,
+			HMACKey:    c.SessionSecret,
+		},
+	}
+
+	m.HandleFunc("GET /session", sess.GET)
+	m.HandleFunc("POST /session", sess.POST)
+
+	m.Handle("POST /share", shareHandler{records: c.Repository})
 
 	logger := httplog.NewLogger("popthegrid", c.Logger)
 	if c.CORS.Logger == nil {
