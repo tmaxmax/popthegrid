@@ -15,6 +15,11 @@ type shareHandler struct {
 }
 
 func (s shareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if _, ok := r.Context().Value(sessionContextKey{}).(sessionPayload); !ok {
+		problem.Of(http.StatusUnauthorized).WriteTo(w)
+		return
+	}
+
 	record, ok := s.unmarshalPost(w, r)
 	if !ok {
 		return

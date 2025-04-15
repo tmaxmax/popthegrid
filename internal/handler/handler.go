@@ -2,7 +2,6 @@ package handler
 
 import (
 	"fmt"
-	"hash"
 	"html/template"
 	"io/fs"
 	"net/http"
@@ -36,7 +35,7 @@ type Config struct {
 	RecordStorageKey string
 	CORS             cors.Options
 	Logger           httplog.Options
-	HMAC             func() hash.Hash
+	SessionSecret    []byte
 	SessionExpiry    time.Duration
 }
 
@@ -61,7 +60,7 @@ func New(c Config) http.Handler {
 		Parse(indexHTML))
 
 	sess := sessionHandler{
-		hmac:   c.HMAC,
+		secret: c.SessionSecret,
 		expiry: c.SessionExpiry,
 	}
 
@@ -74,7 +73,7 @@ func New(c Config) http.Handler {
 	m.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		renderIndex(w, index, defaultIndex(r))
 	})
-	m.Handle("POST /share", sess.middleware(true)(shareHandler{records: c.Repository}))
+	m.Handle("POST /share", shareHandler{records: c.Repository})
 
 	m.Handle("GET /health", healthHandler{ping: c.Repository})
 
@@ -84,7 +83,7 @@ func New(c Config) http.Handler {
 	}
 
 	return chi.Chain(
-		sess.middleware(false),
+		sess.middleware,
 		middleware.RequestID,
 		middleware.RealIP,
 		httplog.Handler(logger, []string{c.Assets.Path, c.Public.Path}),

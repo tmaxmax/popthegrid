@@ -2,10 +2,7 @@ package main
 
 import (
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
 	"fmt"
-	"hash"
 	"io/fs"
 	"net/http"
 	"os"
@@ -68,7 +65,7 @@ func run() error {
 			RequestHeaders: true,
 			Writer:         os.Stderr,
 		},
-		HMAC:          func() hash.Hash { return hmac.New(sha256.New, env.HMACSecret) },
+		SessionSecret: env.HMACSecret,
 		SessionExpiry: env.SessionExpiry,
 	})
 
