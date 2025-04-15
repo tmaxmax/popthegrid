@@ -22,7 +22,7 @@
     const log = baseLog.extend('Session');
     const refreshFn = async () => {
       log('refreshing session');
-      const resp = await fetch('/session', { method: 'POST' });
+      const resp = await fetch('/session', { method: 'POST', credentials: 'same-origin' });
       if (!resp.ok) {
         const err = await resp.json();
         console.error(err);

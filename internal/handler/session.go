@@ -36,6 +36,7 @@ func (s sessionPayload) cookie(secret []byte) *http.Cookie {
 		Value:    val,
 		Expires:  s.Exp,
 		Secure:   true,
+		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 	}
 }

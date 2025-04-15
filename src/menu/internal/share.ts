@@ -90,6 +90,7 @@ export async function getShareContent(db: IDBDatabase, { record, location: { pro
   if (!code) {
     const res = await fetch(`/share`, {
       method: 'POST',
+      credentials: 'same-origin',
       body: JSON.stringify(record),
     })
 
