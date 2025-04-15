@@ -34,7 +34,7 @@
         if ($requiresChallenge) {
           log('Requesting challenge');
 
-          const res = await fetch('/session', { method: 'GET' });
+          const res = await fetch('/session', { method: 'GET', credentials: 'same-origin' });
           if (!res.ok) {
             throw new Error('failed to fetch challenge', { cause: await res.text() });
           }
