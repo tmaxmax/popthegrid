@@ -8,9 +8,10 @@ async function validate_hmac(r) {
   const valid = await crypto.subtle.verify(algorithm, key, parts[1], parts[0])
 
   if (valid) {
-    r.return(200)
+    r.return(204)
   } else {
-    r.return(401)
+    r.headersOut['Content-Type'] = 'application/problem+json'
+    r.return(401, JSON.stringify({ title: '401 Unauthorized', status: 401 }))
   }
 }
 
