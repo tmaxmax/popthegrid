@@ -12,7 +12,7 @@ import (
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gofrs/uuid"
-	"github.com/tmaxmax/popthegrid/internal/macval"
+	"github.com/tmaxmax/popthegrid/internal/crypto/macval"
 )
 
 const sessionCookieName = "session"
