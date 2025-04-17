@@ -5,7 +5,7 @@
   left: calc(var(--offset) + var(--col) * var(--size));
   position: absolute;
   background: var(--color);
-  transition: all 0.5s ease-out;
+  transition: all 0.5s ease-out, transform 0.2s ease-out, border-radius 0.2s ease-out, box-shadow 0.2s ease-out;
   touch-action: none;
 }
 

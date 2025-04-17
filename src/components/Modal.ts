@@ -11,7 +11,7 @@ class ModalContent extends Animated<HTMLDivElement> {
   private svelteComponent?: ReturnType<typeof mount>
 
   constructor(element: Animated | SvelteComponentFactory) {
-    super({ tag: 'div', alreadyExisting: false, classList: ['modal-content'], duration: { create: '1s', destroy: '0.3s' } })
+    super({ tag: 'div', alreadyExisting: false, classList: ['modal-content'], duration: { create: '0.3s', destroy: '0.2s' } })
     if (element instanceof Animated) {
       this.appendChild(element)
     } else {
@@ -46,7 +46,7 @@ export type ModalProperties = { content: Animated | SvelteComponentFactory } & (
 
 export class Modal extends Animated<HTMLDivElement> {
   constructor(props: ModalProperties) {
-    super({ tag: 'div', classList: ['modal'], duration: { create: '2s', destroy: '0.3s' } })
+    super({ tag: 'div', classList: ['modal'], duration: { create: '0.5s', destroy: '0.2s' } })
 
     this.appendChild(new ModalContent(props.content))
     if (props.allowClose) {
