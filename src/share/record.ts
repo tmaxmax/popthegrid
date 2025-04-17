@@ -18,7 +18,13 @@ export const getSharedRecord = (): GameRecord | undefined => {
     return
   }
 
-  return JSON.parse(data)
+  return JSON.parse(data, (key, value) => {
+    if (key == 'when') {
+      return new Date(value)
+    }
+
+    return value
+  })
 }
 
 export const clearSharedRecord = () => {

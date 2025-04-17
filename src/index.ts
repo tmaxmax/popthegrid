@@ -26,6 +26,7 @@ import { parse } from 'cookie'
 import type { Animation } from '$game/grid/index.ts'
 import { mount } from 'svelte'
 import { fetchSession } from './session.ts'
+import { findCachedLink } from '$db/link.ts'
 
 const record = getSharedRecord()
 const theme = record?.theme || getTheme() || defaultTheme
@@ -122,8 +123,12 @@ const handleURLAndTitle = async (name: Writable<string | undefined>, duration: n
 
   let text: string
   if (!status) {
-    configureTitle(name, title, !!record)
-    return
+    if (record && (await findCachedLink(db, record))) {
+      const old = objective.element.firstChild!.nodeValue!
+      objective.element.firstChild!.nodeValue = old.replace(/You're in (?:.*) world/, 'Against yourself').replaceAll('They', 'You')
+    }
+
+    return configureTitle(name, title, !!record)
   } else if (status === '404') {
     text = 'The link was not found: is it correct?'
   } else {
@@ -137,7 +142,7 @@ const handleURLAndTitle = async (name: Writable<string | undefined>, duration: n
   title.classList.remove('error')
   title.textContent = originalText
 
-  configureTitle(name, title, !!record)
+  return configureTitle(name, title, !!record)
 }
 
 const configureGameReset = () => {
