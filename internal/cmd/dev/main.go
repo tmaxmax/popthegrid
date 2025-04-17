@@ -11,10 +11,10 @@ import (
 	"github.com/go-chi/httplog/v2"
 	"github.com/olivere/vite"
 	"github.com/rs/cors"
+	resources "github.com/tmaxmax/popthegrid"
 	"github.com/tmaxmax/popthegrid/internal/cmd/internal"
 	"github.com/tmaxmax/popthegrid/internal/handler"
-	"github.com/tmaxmax/popthegrid/internal/repo/memory"
-	"github.com/tmaxmax/popthegrid/internal/share"
+	"github.com/tmaxmax/popthegrid/internal/repo/sqlite"
 )
 
 func main() {
@@ -31,6 +31,12 @@ func run() error {
 	env := internal.Getenv()
 	dist := os.DirFS("dist")
 
+	db, err := internal.CreateDB(ctx, env.Database, resources.Migrations)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
 	v, err := vite.HTMLFragment(vite.Config{
 		FS:           dist,
 		IsDev:        true,
@@ -46,7 +52,7 @@ func run() error {
 		AssetsTags:       v.Tags,
 		Assets:           handler.FS{Data: dist, Path: "/assets/"},
 		Public:           handler.FS{Data: os.DirFS("public"), Path: "/static/"},
-		Repository:       &memory.Repository{Data: map[share.Code]share.Record{}},
+		Repository:       &sqlite.Repository{DB: db},
 		RecordStorageKey: env.RecordStorageKey,
 		CORS: cors.Options{
 			AllowedOrigins: []string{env.URL},
