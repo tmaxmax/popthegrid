@@ -100,68 +100,6 @@ attemptsChan.addEventListener('message', (ev: MessageEvent<InsertedAttempt>) => 
   context?.attempts.update(ev.data)
 })
 
-const getVersionChangeModalContent = () => {
-  const root = document.createElement('div')
-  root.classList.add('updates__root', 'center')
-  const title = document.createElement('h2')
-  title.append('Game update!')
-  title.style.marginBottom = '0.2em'
-  root.append(title)
-  const content = document.createElement('p')
-  content.append('The game was updated! Please refresh the page.')
-  root.append(content)
-  return Animated.from(root)
-}
-
-const getVersionChangeModal = () => {
-  return new Modal({
-    content: getVersionChangeModalContent(),
-    allowClose: false,
-  })
-}
-
-const showNewUpdateModal = (onClose?: (wasShown: boolean) => unknown): void | Promise<void> => {
-  const KEY = 'update-viewed'
-  const VERSION = '0.7.3'
-
-  const lastVersion = localStorage.getItem(KEY)
-  if (lastVersion === null || lastVersion === VERSION) {
-    onClose?.(false)
-    return
-  }
-
-  const isIOS = ['iPad', 'iPhone', 'iPod'].includes(navigator.platform)
-  const content = /*html*/ `
-  <h2>Hello, ${getName() || 'friend'}!</h2>
-  <p class="updates">We've changed some things around!</p>
-  <ul class="updates">
-    <li><em>Shorter animations</em> between attempts, so you can grind faster 😎</li>
-    <li><em>Reset the game:</em> if you feel it's not the one, click or long tap outside the window!</li>
-    <li><em>Play offline:</em> just write the address in the browser, even without internet! ${
-      isIOS
-        ? 'You can also add Pop the grid to home screen by tapping the Share button, then "Add to Home screen" option, if in Safari.'
-        : 'Some browsers should even prompt you to add the app to your home screen!'
-    }</li>
-  </ul>
-  <p class="updates">That's it for now. Close this window and happy playing – see you in the next update!</p>
-`
-  const root = document.createElement('div')
-  root.classList.add('updates__root')
-  root.innerHTML = content
-
-  const modal = new Modal({
-    content: Animated.from(root),
-    allowClose: true,
-    animateClose: true,
-    afterClose() {
-      localStorage.setItem(KEY, VERSION)
-      onClose?.(true)
-    },
-  })
-
-  return modal.create(Component.body, true)
-}
-
 const getRecordClearRedirect = () => {
   const element = document.createElement('span')
   element.append('Done')
