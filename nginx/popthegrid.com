@@ -17,7 +17,7 @@ server {
 
 	location /session {
 		limit_req zone=share_ip burst=10 nodelay;
-		limit_req_status 429;
+		limit_req_status 503;
 		limit_req_log_level warn;
 
 		proxy_pass http://localhost:3000;
@@ -33,7 +33,7 @@ server {
 
 		limit_req zone=share_session burst=2 nodelay;
 		limit_req zone=share_ip burst=10 nodelay;
-		limit_req_status 429;
+		limit_req_status 503;
 		limit_req_log_level warn;
 
 		proxy_pass http://localhost:3000;
