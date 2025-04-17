@@ -155,7 +155,7 @@ var ErrExpired = errors.New("challenge expired")
 var ErrWrong = errors.New("solution is wrong")
 
 func VerifySolution(payload Payload, hmacKey []byte, checkExpires bool) error {
-	params := extractParams(payload)
+	params := ExtractParams(payload)
 	expires := params.Get("expires")
 	if checkExpires {
 		expireTime, err := strconv.ParseInt(expires, 10, 64)
@@ -184,7 +184,7 @@ func VerifySolution(payload Payload, hmacKey []byte, checkExpires bool) error {
 }
 
 // Extracts parameters from the payload
-func extractParams(payload Payload) url.Values {
+func ExtractParams(payload Payload) url.Values {
 	splitSalt := strings.Split(payload.Salt, "?")
 	if len(splitSalt) > 1 {
 		params, _ := url.ParseQuery(splitSalt[1])

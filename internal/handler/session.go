@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
 	"slices"
 	"time"
 
@@ -70,6 +71,8 @@ func (s sessionHandler) GET(w http.ResponseWriter, r *http.Request) {
 	exp := time.Now().Add(time.Second * 10)
 	opts := s.challenge
 	opts.Expires = &exp
+	opts.Params = url.Values{}
+	opts.Params.Set("resource", "session")
 
 	if _, ok := s.retrieveFromContext(r); ok {
 		// Speedrun challenge for already authenticated users that have first opened the page.
@@ -108,6 +111,10 @@ func (s sessionHandler) verifyChallenge(r *http.Request) error {
 
 	if err := payload.Algorithm.Validate(); err != nil {
 		return err
+	}
+
+	if altcha.ExtractParams(payload).Get("resource") != "session" {
+		return altcha.ErrWrong
 	}
 
 	l := httplog.LogEntry(r.Context())
