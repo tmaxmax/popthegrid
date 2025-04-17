@@ -236,7 +236,6 @@ const main = async () => {
     schema,
     onVersionChange() {
       game.forceEnd()
-      getVersionChangeModal().create(Component.body, true)
     },
   })
 
@@ -267,11 +266,7 @@ const main = async () => {
   configureSession(context.sessionStatus)
 
   const gamePrepare = game.prepare('long')
-
-  let titleDone: Promise<void>
-  await showNewUpdateModal((wasShown) => {
-    titleDone = handleURLAndTitle(context!.name, wasShown ? 3000 : 4200)
-  })
+  const titleDone = handleURLAndTitle(context!.name, 4200)
 
   document.body.style.transition = 'background-color 0.4s ease-out'
   // prevents double-tap zoom
