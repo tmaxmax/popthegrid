@@ -98,8 +98,8 @@ func New(c Config) http.Handler {
 		storageKey: c.RecordStorageKey,
 		index:      index,
 	})
-	m.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		renderIndex(w, index, defaultIndex(r))
+	m.HandleFunc("GET /", func(w http.ResponseWriter, _ *http.Request) {
+		renderIndex(w, http.StatusOK, index, defaultIndex())
 	})
 
 	sess := sessionHandler{
@@ -130,7 +130,7 @@ func New(c Config) http.Handler {
 		httplog.Handler(logger, staticPaths),
 		middleware.Recoverer,
 		cors.New(c.CORS).Handler,
-	).Handler(m)
+	).Handler(http.MaxBytesHandler(m, 1<<14))
 }
 
 type corsLogger struct {

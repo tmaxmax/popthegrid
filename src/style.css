@@ -39,6 +39,11 @@ body {
   background-color: var(--color-background);
 }
 
+h1 {
+  margin-block: 0;
+  font-size: 1.5em;
+}
+
 h1,
 h2 {
   font-family: var(--font-heading);

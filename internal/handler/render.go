@@ -24,7 +24,7 @@ func (c codeRenderer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	code := share.Code(r.PathValue("code"))
 	if err := code.Validate(); err != nil {
-		c.error(w, r, code, http.StatusNotFound)
+		c.error(w, code, http.StatusNotFound)
 		return
 	}
 
@@ -40,13 +40,13 @@ func (c codeRenderer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			statusCode = http.StatusInternalServerError
 		}
 
-		c.error(w, r, code, statusCode)
+		c.error(w, code, statusCode)
 		return
 	}
 
 	http.SetCookie(w, c.cookie(code, 0))
 
-	data := defaultIndex(r)
+	data := defaultIndex()
 	data.OG.URL += "/" + string(code)
 	data.Description = record.Description()
 	data.Objective = data.Description
@@ -63,14 +63,12 @@ func (c codeRenderer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	data.Robots = "noindex"
 
-	w.WriteHeader(http.StatusOK)
-	renderIndex(w, c.index, data)
+	renderIndex(w, http.StatusOK, c.index, data)
 }
 
-func (c codeRenderer) error(w http.ResponseWriter, r *http.Request, code share.Code, statusCode int) {
+func (c codeRenderer) error(w http.ResponseWriter, code share.Code, statusCode int) {
 	http.SetCookie(w, c.cookie(code, statusCode))
-	w.WriteHeader(statusCode)
-	renderIndex(w, c.index, defaultIndex(r))
+	renderIndex(w, statusCode, c.index, defaultIndex())
 }
 
 func (codeRenderer) cookie(code share.Code, statusCode int) *http.Cookie {
@@ -111,23 +109,21 @@ type indexData struct {
 	Script template.JS
 }
 
-func defaultIndex(r *http.Request) indexData {
+func defaultIndex() indexData {
 	var data indexData
 
 	data.Description = "Pop all the squares in the grid. Will you make it?"
 	data.Objective = "Objective: pop all the squares in the grid. Will you make it?"
-
-	scheme := "http"
-	if r.TLS != nil {
-		scheme += "s"
-	}
-
-	data.OG.URL = fmt.Sprintf("%s://%s", scheme, r.Host)
+	data.OG.URL = "https://popthegrid.com"
 
 	return data
 }
 
-func renderIndex(w http.ResponseWriter, index *template.Template, data indexData) {
+func renderIndex(w http.ResponseWriter, statusCode int, index *template.Template, data indexData) {
+	w.Header().Set("Cross-Origin-Opener-Policy", "same-origin")
+	w.Header().Set("Cross-Origin-Embedder-Policy", "require-corp")
+	w.WriteHeader(statusCode)
+
 	if err := index.Execute(w, data); err != nil {
 		panic(err)
 	}
