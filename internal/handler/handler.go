@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"html/template"
 	"io/fs"
 	"net/http"
+	"net/netip"
 	"path/filepath"
 	"time"
 
@@ -103,13 +105,17 @@ func New(c Config) http.Handler {
 		renderIndex(w, http.StatusOK, index, defaultIndex())
 	})
 
-	pow := altcha.Handler{
+	pow := altcha.NewHandler(altcha.HandlerConfig{
 		HMACKey: c.SessionSecret,
 		Exempt: func(r *http.Request) bool {
 			_, ok := session.Get(r.Context())
 			return ok
 		},
-	}
+		ID: func(r *http.Request) ([]byte, error) {
+			return netip.MustParseAddr(r.Header.Get("X-Real-Ip")).MarshalBinary()
+		},
+	})
+	go pow.Start(context.TODO())
 
 	sess := session.Handler{
 		Secret: c.SessionSecret,
