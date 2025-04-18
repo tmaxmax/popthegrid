@@ -13,6 +13,7 @@ import (
 	"github.com/go-chi/httplog/v2"
 	"github.com/rs/cors"
 	"github.com/tmaxmax/popthegrid/internal/crypto/altcha"
+	"github.com/tmaxmax/popthegrid/internal/handler/session"
 )
 
 type FS struct {
@@ -98,23 +99,24 @@ func New(c Config) http.Handler {
 		storageKey: c.RecordStorageKey,
 		index:      index,
 	})
-	m.HandleFunc("GET /", func(w http.ResponseWriter, _ *http.Request) {
+	m.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		renderIndex(w, http.StatusOK, index, defaultIndex())
 	})
 
-	sess := sessionHandler{
-		secret: c.SessionSecret,
-		expiry: c.SessionExpiry,
-		challenge: altcha.ChallengeOptions{
-			Algorithm:  altcha.SHA256,
-			MaxNumber:  200000,
-			SaltLength: 12,
-			HMACKey:    c.SessionSecret,
+	pow := altcha.Handler{
+		HMACKey: c.SessionSecret,
+		Exempt: func(r *http.Request) bool {
+			_, ok := session.Get(r.Context())
+			return ok
 		},
 	}
 
-	m.HandleFunc("GET /session", sess.GET)
-	m.HandleFunc("POST /session", sess.POST)
+	sess := session.Handler{
+		Secret: c.SessionSecret,
+		Expiry: c.SessionExpiry,
+	}
+
+	m.Handle("POST /session", pow.WithChallenge(sess))
 
 	m.Handle("POST /share", shareHandler{records: c.Repository})
 
@@ -124,7 +126,7 @@ func New(c Config) http.Handler {
 	}
 
 	return chi.Chain(
-		sess.middleware,
+		sess.Middleware,
 		middleware.RequestID,
 		middleware.RealIP,
 		httplog.Handler(logger, staticPaths),

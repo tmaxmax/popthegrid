@@ -33,6 +33,7 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"hash"
@@ -103,6 +104,20 @@ type Payload struct {
 
 func (p Payload) Duration() time.Duration { return time.Duration(p.Took) * time.Millisecond }
 
+func (p *Payload) UnmarshalJSON(b []byte) error {
+	type payload Payload
+
+	if err := json.Unmarshal(b, (*payload)(p)); err != nil {
+		return err
+	}
+
+	if err := p.Algorithm.Validate(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func CreateChallenge(options ChallengeOptions) Challenge {
 	maxNumber := options.MaxNumber
 	saltLength := options.SaltLength
@@ -155,7 +170,7 @@ var ErrExpired = errors.New("challenge expired")
 var ErrWrong = errors.New("solution is wrong")
 
 func VerifySolution(payload Payload, hmacKey []byte, checkExpires bool) error {
-	params := ExtractParams(payload)
+	params := extractParams(payload)
 	expires := params.Get("expires")
 	if checkExpires {
 		expireTime, err := strconv.ParseInt(expires, 10, 64)
@@ -184,7 +199,7 @@ func VerifySolution(payload Payload, hmacKey []byte, checkExpires bool) error {
 }
 
 // Extracts parameters from the payload
-func ExtractParams(payload Payload) url.Values {
+func extractParams(payload Payload) url.Values {
 	splitSalt := strings.Split(payload.Salt, "?")
 	if len(splitSalt) > 1 {
 		params, _ := url.ParseQuery(splitSalt[1])

@@ -199,7 +199,7 @@ const configureSession = async (store: Context['sessionStatus'], isTimeout: bool
     }
 
     store.update(() => 'pending')
-    sessionBackoffTimeoutID = setTimeout(() => configureSession(store, true), sessionBackoffDuration)
+    sessionBackoffTimeoutID = window.setTimeout(() => configureSession(store, true), sessionBackoffDuration)
     sessionBackoffDuration *= 2
   }
 
@@ -214,12 +214,12 @@ const configureSession = async (store: Context['sessionStatus'], isTimeout: bool
     }
 
     store.update(() => 'pending')
-    await fetchSession(true)
+    await fetchSession()
     store.update(() => 'valid')
 
     let intervalID = setInterval(async () => {
       try {
-        await fetchSession(false)
+        await fetchSession()
       } catch (err) {
         console.error(err)
         clearInterval(intervalID)

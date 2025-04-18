@@ -2,10 +2,11 @@ package handler
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 
 	"github.com/go-chi/httplog/v2"
+	"github.com/tmaxmax/popthegrid/internal/handler/session"
+	"github.com/tmaxmax/popthegrid/internal/httpx"
 	"github.com/tmaxmax/popthegrid/internal/share"
 	"schneider.vip/problem"
 )
@@ -15,7 +16,7 @@ type shareHandler struct {
 }
 
 func (s shareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if _, ok := r.Context().Value(sessionContextKey{}).(sessionPayload); !ok {
+	if _, ok := session.Get(r.Context()); !ok {
 		problem.Of(http.StatusUnauthorized).WriteTo(w)
 		return
 	}
@@ -37,7 +38,7 @@ func (s shareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	encodeIndent(w, map[string]any{
+	httpx.JSON(w, map[string]any{
 		"code": code,
 	})
 }
@@ -60,12 +61,4 @@ func (s shareHandler) unmarshalPost(w http.ResponseWriter, r *http.Request) (sha
 	}
 
 	return input, true
-}
-
-func encodeIndent(w io.Writer, v any) {
-	enc := json.NewEncoder(w)
-	enc.SetIndent("", "  ")
-	if err := enc.Encode(v); err != nil {
-		panic(err)
-	}
 }
