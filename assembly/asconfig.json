@@ -1,0 +1,13 @@
+{
+  "targets": {
+    "release": {
+      "outFile": "build/index.wasm",
+      "textFile": "build/index.wat",
+      "sourceMap": false,
+      "optimizeLevel": 3,
+      "shrinkLevel": 2,
+      "converge": true,
+      "noAssert": false
+    }
+  }
+}
