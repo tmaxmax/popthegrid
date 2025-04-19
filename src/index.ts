@@ -28,7 +28,12 @@ import { fetchSession } from './session.ts'
 import { findCachedLink } from '$db/link.ts'
 import rand from './rand.ts'
 
-rand.set({ key: [0xea3742c7, 0x6bf95d47], mask: 0 })
+const randData = localStorage.getItem('rand')
+if (randData === null) {
+  rand.set({ key: [0xea3742c7, 0x6bf95d47], mask: 0 })
+} else {
+  rand.set(JSON.parse(randData))
+}
 
 const record = getSharedRecord()
 const theme = record?.theme || getTheme() || defaultTheme
@@ -289,6 +294,10 @@ const main = async () => {
     } else {
       resume(game, token)
       token = undefined
+    }
+
+    if (document.visibilityState === 'hidden' && get(context!.sessionStatus) === 'valid') {
+      localStorage.setItem('rand', JSON.stringify(rand.state()))
     }
   })
 

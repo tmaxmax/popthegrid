@@ -21,6 +21,7 @@ export async function fetchSession() {
   let body: Response = await res.json()
   if (body.challenge == null) {
     if (body.rand) {
+      log('Setting random', body.rand)
       rand.set(body.rand)
     }
 
@@ -58,6 +59,7 @@ export async function fetchSession() {
 
   body = await res.json()
   if ('rand' in body && body.rand) {
+    log('Setting random', body.rand)
     rand.set(body.rand)
   }
 }
