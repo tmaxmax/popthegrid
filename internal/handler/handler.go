@@ -112,6 +112,9 @@ func New(c Config) http.Handler {
 			return ok
 		},
 		ID: func(r *http.Request) ([]byte, error) {
+			if c.CORS.Debug {
+				return netip.MustParseAddrPort(r.RemoteAddr).Addr().MarshalBinary()
+			}
 			return netip.MustParseAddr(r.Header.Get("X-Real-Ip")).MarshalBinary()
 		},
 	})
