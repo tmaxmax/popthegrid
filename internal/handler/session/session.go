@@ -2,9 +2,10 @@ package session
 
 import (
 	"context"
-	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/binary"
+	"math/rand/v2"
 	"net/http"
 	"time"
 
@@ -60,7 +61,7 @@ func (s Handler) Middleware(next http.Handler) http.Handler {
 		payload, expired, err := s.retrieve(r, time.Now())
 		if err != nil || payload.Exp.IsZero() {
 			var id [8]byte
-			rand.Read(id[:])
+			binary.LittleEndian.PutUint64(id[:], rand.Uint64())
 
 			r.Header.Set(middleware.RequestIDHeader, "anon/"+idReplacer.Replace(base64.RawURLEncoding.EncodeToString(id[:])))
 			next.ServeHTTP(w, r)
