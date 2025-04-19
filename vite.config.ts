@@ -12,6 +12,7 @@ export default defineConfig({
       $game: path.resolve(__dirname, 'src', 'game'),
       $share: path.resolve(__dirname, 'src', 'share'),
       $theme: path.resolve(__dirname, 'src', 'theme.ts'),
+      rand: path.resolve(__dirname, 'src', 'rand.ts'),
     },
   },
   publicDir: false,

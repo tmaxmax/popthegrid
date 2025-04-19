@@ -1,12 +1,11 @@
 import interval, { type Interval } from '$util/time/interval.ts'
 import { intn } from '$util/index.ts'
 import { Gamemode } from './index.ts'
-import type { Rand } from '../../rand.ts'
+import rand from '$rand'
 
 export interface RandomTimerProps {
   minSeconds: number
   maxSeconds: number
-  rand: Rand
 }
 
 export class RandomTimer extends Gamemode {
@@ -16,7 +15,7 @@ export class RandomTimer extends Gamemode {
   private interval?: Interval
   private done = false
 
-  constructor({ minSeconds, maxSeconds, rand }: RandomTimerProps) {
+  constructor({ minSeconds, maxSeconds }: RandomTimerProps) {
     super()
     this.numIterations = minSeconds + intn(rand.next(), maxSeconds - minSeconds + 1)
   }

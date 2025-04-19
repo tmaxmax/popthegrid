@@ -1,7 +1,7 @@
 import baseLog from '$util/log.ts'
 import { solveChallenge, type Challenge, type Payload } from '$util/altcha.ts'
 import type { RandConfig } from './rand.ts'
-import rand from './rand.ts'
+import rand from '$rand'
 
 type Response = { challenge: null; rand?: RandConfig } | Challenge
 

@@ -25,14 +25,10 @@ export type RandState = RandConfig & {
 const max = Number((1n << 32n) - 1n)
 const valid = (n: number) => n >= 0 && n <= max
 
-export class Rand {
-  #state: RandState | null
+class Rand {
+  #state?: RandState
 
-  constructor() {
-    this.#state = null
-  }
-
-  set({ key, mask, off }: RandConfig & { off?: number | null }): this {
+  set({ key, mask, off }: RandConfig & { off?: number }) {
     if (off == null) {
       off = 0
     }

@@ -6,7 +6,7 @@ import { type Animation } from '$game/grid/index.ts'
 import baseLog from '$util/log.ts'
 import { isDefined, intn, wait } from '$util/index.ts'
 import { map as mapAsync } from '$util/async.ts'
-import { Rand } from '../rand.ts'
+import rand from '$rand'
 
 export interface GridProperties {
   colors?: string[]
@@ -16,7 +16,7 @@ export interface GridProperties {
 
 const log = baseLog.extend('Grid')
 
-const generateSquares = (props: Required<GridProperties>, rand: Rand) =>
+const generateSquares = (props: Required<GridProperties>) =>
   Array.from(
     { length: props.squareCount },
     () =>
@@ -41,15 +41,13 @@ const defaultProps: Required<GridProperties> = {
 
 export class Grid extends Component<HTMLDivElement> {
   private readonly properties: Required<GridProperties>
-  private readonly rand: Rand
   private squares: Square[] = []
   private readonly resizeObserver: ResizeObserver
 
-  constructor(properties: GridProperties, rand: Rand) {
+  constructor(properties: GridProperties) {
     super({ tag: 'div', classList: ['grid'] })
     this.properties = { ...defaultProps, ...properties }
     log('Grid properties: %O', this.properties)
-    this.rand = rand
     this.resizeObserver = new ResizeObserver(() => {
       this.setSquaresPosition()
     })
@@ -78,7 +76,7 @@ export class Grid extends Component<HTMLDivElement> {
 
   set colors(colors: readonly string[]) {
     this.properties.colors = [...colors]
-    this.squares.forEach((square) => (square.color = colors[intn(this.rand.next(), colors.length)]))
+    this.squares.forEach((square) => (square.color = colors[intn(rand.next(), colors.length)]))
   }
 
   get activeSquares(): readonly Square[] {
@@ -134,7 +132,7 @@ export class Grid extends Component<HTMLDivElement> {
     this.appendTo(parent)
     this.resizeObserver.observe(this.element)
     this.addClass('grid--no-interaction')
-    await this.appendSquares(generateSquares(this.properties, this.rand), animate)
+    await this.appendSquares(generateSquares(this.properties), animate)
     this.removeClass('grid--no-interaction')
   }
 

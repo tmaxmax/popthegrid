@@ -16,7 +16,8 @@
       "$db/*": ["./src/db/*"],
       "$game/*": ["./src/game/*"],
       "$share/*": ["./src/share/*"],
-      "$theme": ["./src/theme.ts"]
+      "$theme": ["./src/theme.ts"],
+      "$rand": ["./src/rand.ts"]
     }
   },
   "include": ["./src/**/*.ts", "./src/**/*.svelte"]

@@ -26,7 +26,7 @@ import type { Animation } from '$game/grid/index.ts'
 import { mount } from 'svelte'
 import { fetchSession } from './session.ts'
 import { findCachedLink } from '$db/link.ts'
-import rand from './rand.ts'
+import rand from '$rand'
 
 const randData = localStorage.getItem('rand')
 if (randData === null) {
