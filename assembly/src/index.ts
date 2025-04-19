@@ -1,7 +1,5 @@
-const stride: u64 = 0xffffffff
-
-function rand(cnt_mul: u32, n: u32, keya: u32, keyb: u32): f64 {
-  const cnt = stride * cnt_mul + n
+function rand(mask: u32, off: u32, keya: u32, keyb: u32): f64 {
+  const cnt = (u64(mask) << 32) | off
   const key = (u64(keya) << 32) | keyb
 
   let x = cnt * key
