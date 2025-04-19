@@ -7,8 +7,9 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "moduleDetection": "force",
+    "emitDeclarationOnly": true,
+    "composite": true,
     "allowImportingTsExtensions": true,
-    "noEmit": true,
     "paths": {
       "$util/*": ["./src/util/*"],
       "$components/*": ["./src/components/*"],
