@@ -23,16 +23,20 @@ type Handler struct {
 }
 
 func (s Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	resp := map[string]any{"challenge": nil}
+
 	payload, exp, ok := getInternal(r.Context())
 	if !ok || exp {
 		payload.ID = uuid.Must(uuid.NewV4())
+		payload.Rand = newRand()
+		resp["rand"] = payload.Rand
 	}
 
 	payload.Exp = time.Now().Add(s.Expiry)
 
 	http.SetCookie(w, payload.cookie(s.Secret))
 	w.WriteHeader(http.StatusOK)
-	httpx.JSON(w, map[string]any{"challenge": nil})
+	httpx.JSON(w, resp)
 }
 
 func (s Handler) retrieve(r *http.Request, now time.Time) (Payload, bool, error) {

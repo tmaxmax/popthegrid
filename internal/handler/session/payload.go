@@ -1,11 +1,11 @@
 package session
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/base64"
-	"errors"
+	"encoding/gob"
 	"net/http"
-	"slices"
 	"strings"
 	"time"
 
@@ -14,8 +14,9 @@ import (
 )
 
 type Payload struct {
-	ID  uuid.UUID
-	Exp time.Time
+	ID   uuid.UUID
+	Exp  time.Time
+	Rand Rand
 }
 
 var idReplacer = strings.NewReplacer("-", "", "_", "")
@@ -38,17 +39,21 @@ func (s Payload) cookie(secret []byte) *http.Cookie {
 	}
 }
 
+type payload Payload
+
 func (s Payload) MarshalBinary() ([]byte, error) {
-	return s.Exp.AppendBinary(slices.Clone(s.ID[:]))
+	var b byteWriter
+	err := gob.NewEncoder(&b).Encode(payload(s))
+	return b, err
 }
 
 func (s *Payload) UnmarshalBinary(data []byte) error {
-	if len(data) < uuid.Size {
-		return errors.New("invalid session payload")
-	}
+	return gob.NewDecoder(bytes.NewReader(data)).Decode((*payload)(s))
+}
 
-	return errors.Join(
-		s.ID.UnmarshalBinary(data[:uuid.Size]),
-		s.Exp.UnmarshalBinary(data[uuid.Size:]),
-	)
+type byteWriter []byte
+
+func (b *byteWriter) Write(s []byte) (int, error) {
+	*b = append(*b, s...)
+	return len(s), nil
 }
