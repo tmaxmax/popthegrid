@@ -7,7 +7,11 @@ export function isNonNull<T>(arg: T | null | undefined): arg is T {
 }
 
 export function randInt(limit: number): number {
-  return Math.floor(Math.random() * limit)
+  return intn(Math.random(), limit)
+}
+
+export function intn(f: number, limit: number): number {
+  return Math.floor(f * limit)
 }
 
 export function randString(length: number): string {

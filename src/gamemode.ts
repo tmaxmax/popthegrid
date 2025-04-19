@@ -3,17 +3,18 @@ import { Passthrough } from '$game/gamemode/passthrough.ts'
 import { RandomCount } from '$game/gamemode/randomCount.ts'
 import { RandomTimer } from '$game/gamemode/randomTimer.ts'
 import { SameSquare } from '$game/gamemode/sameSquare.ts'
+import rand from './rand'
 
 export const gamemodes = {
   random: {
     display: 'Mystery',
     description: 'You will win... somehow. Can you do it?',
-    create: () => new RandomCount(),
+    create: () => new RandomCount(rand),
   },
   'random-timer': {
     display: 'Lucky Timer',
     description: "You're on time! Win before the timer ends – but who knows how long you have...",
-    create: () => new RandomTimer({ minSeconds: 4, maxSeconds: 9 }),
+    create: () => new RandomTimer({ minSeconds: 4, maxSeconds: 9, rand }),
   },
   'same-square': {
     display: 'Gleich',

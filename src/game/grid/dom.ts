@@ -2,16 +2,20 @@ import { Component } from '$components/internal/Component.ts'
 import { Grid as GridComponent } from '$components/Grid.ts'
 import { Square as SquareComponent } from '$components/Square.ts'
 import type { Animation, Grid, GridProps, Square } from './index.ts'
+import rand from '../../rand.ts'
 
 export class DOMGrid implements Grid {
   private readonly grid: GridComponent
   private readonly gridParent: Component
 
   constructor(props: GridProps & { domParent: Component }) {
-    this.grid = new GridComponent({
-      squareCount: props.numTotalSquares,
-      colors: props.colors,
-    })
+    this.grid = new GridComponent(
+      {
+        squareCount: props.numTotalSquares,
+        colors: props.colors,
+      },
+      rand
+    )
     this.gridParent = props.domParent
   }
 

@@ -1,7 +1,9 @@
 import baseLog from '$util/log.ts'
 import { solveChallenge, type Challenge, type Payload } from '$util/altcha.ts'
+import type { RandConfig } from './rand.ts'
+import rand from './rand.ts'
 
-type Response = { challenge: null } | Challenge
+type Response = { challenge: null; rand?: RandConfig } | Challenge
 
 export async function fetchSession() {
   const log = baseLog.extend('Session')
@@ -16,8 +18,12 @@ export async function fetchSession() {
     throw new Error('failed to get session', { cause: await res.text() })
   }
 
-  const body: Response = await res.json()
-  if (!body.challenge) {
+  let body: Response = await res.json()
+  if (body.challenge == null) {
+    if (body.rand) {
+      rand.set(body.rand)
+    }
+
     return
   }
 
@@ -48,5 +54,10 @@ export async function fetchSession() {
   })
   if (!res.ok) {
     throw new Error('failed to refresh session', { cause: await res.text() })
+  }
+
+  body = await res.json()
+  if ('rand' in body && body.rand) {
+    rand.set(body.rand)
   }
 }

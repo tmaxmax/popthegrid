@@ -7,7 +7,6 @@ import { Animated } from '$components/internal/Animated.ts'
 import { open as openIndexedDB } from '$util/indexedDB/index.ts'
 import schema from '$db/schema.ts'
 import { assertNonNull } from '$util/assert.ts'
-import { Modal } from '$components/Modal.ts'
 import { Game } from '$game/index.ts'
 import { DOMGrid } from '$game/grid/dom.ts'
 import { insertAttempt, retrieveAttempts, type InsertedAttempt } from '$db/attempt.ts'
@@ -27,6 +26,9 @@ import type { Animation } from '$game/grid/index.ts'
 import { mount } from 'svelte'
 import { fetchSession } from './session.ts'
 import { findCachedLink } from '$db/link.ts'
+import rand from './rand.ts'
+
+rand.set({ key: [0xea3742c7, 0x6bf95d47], mask: 0 })
 
 const record = getSharedRecord()
 const theme = record?.theme || getTheme() || defaultTheme

@@ -4,8 +4,9 @@ import { Component } from './internal/Component.ts'
 import { Square } from './Square.ts'
 import { type Animation } from '$game/grid/index.ts'
 import baseLog from '$util/log.ts'
-import { isDefined, randInt, wait } from '$util/index.ts'
+import { isDefined, intn, wait } from '$util/index.ts'
 import { map as mapAsync } from '$util/async.ts'
+import { Rand } from '../rand.ts'
 
 export interface GridProperties {
   colors?: string[]
@@ -15,12 +16,12 @@ export interface GridProperties {
 
 const log = baseLog.extend('Grid')
 
-const generateSquares = (props: Required<GridProperties>) =>
+const generateSquares = (props: Required<GridProperties>, rand: Rand) =>
   Array.from(
     { length: props.squareCount },
     () =>
       new Square({
-        color: props.colors[randInt(props.colors.length)],
+        color: props.colors[intn(rand.next(), props.colors.length)],
       })
   )
 
@@ -40,13 +41,15 @@ const defaultProps: Required<GridProperties> = {
 
 export class Grid extends Component<HTMLDivElement> {
   private readonly properties: Required<GridProperties>
+  private readonly rand: Rand
   private squares: Square[] = []
   private readonly resizeObserver: ResizeObserver
 
-  constructor(properties: GridProperties) {
+  constructor(properties: GridProperties, rand: Rand) {
     super({ tag: 'div', classList: ['grid'] })
     this.properties = { ...defaultProps, ...properties }
     log('Grid properties: %O', this.properties)
+    this.rand = rand
     this.resizeObserver = new ResizeObserver(() => {
       this.setSquaresPosition()
     })
@@ -75,7 +78,7 @@ export class Grid extends Component<HTMLDivElement> {
 
   set colors(colors: readonly string[]) {
     this.properties.colors = [...colors]
-    this.squares.forEach((square) => (square.color = colors[randInt(colors.length)]))
+    this.squares.forEach((square) => (square.color = colors[intn(this.rand.next(), colors.length)]))
   }
 
   get activeSquares(): readonly Square[] {
@@ -131,7 +134,7 @@ export class Grid extends Component<HTMLDivElement> {
     this.appendTo(parent)
     this.resizeObserver.observe(this.element)
     this.addClass('grid--no-interaction')
-    await this.appendSquares(generateSquares(this.properties), animate)
+    await this.appendSquares(generateSquares(this.properties, this.rand), animate)
     this.removeClass('grid--no-interaction')
   }
 
