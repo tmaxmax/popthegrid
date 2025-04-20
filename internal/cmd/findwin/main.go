@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -10,23 +11,24 @@ import (
 	"os"
 	"runtime"
 	"sync"
-	"time"
 
 	"github.com/tmaxmax/popthegrid/internal/srand"
 )
 
 func main() {
 	var src srand.Source
-	var mystery bool
+	var mystery string
 	var gleich, take int
+	var masks int
 
 	f := flag.NewFlagSet("findwin", flag.ContinueOnError)
 	f.Uint64Var(&src.Key, "key", srand.Key(0), "the Squares RNG key to use")
 	f.Uint64Var(&src.Cnt, "cnt", 0, "the counter to start at")
 	f.IntVar(&take, "take", 100, "number of matching starting counters to output")
+	f.IntVar(&masks, "masks", 0, "cycle through multiple random counter masks (if provided cnt is 0)")
 
 	f.IntVar(&gleich, "gleich", 0, "search for trivial Gleich games (grid of given number of colours or less)")
-	f.BoolVar(&mystery, "mystery", false, "search for winning Mystery games")
+	f.StringVar(&mystery, "mystery", "", "search for winning Mystery games ('all' for all possible games, 'encountered' for actual real wins only)")
 
 	if err := f.Parse(os.Args[1:]); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
@@ -36,35 +38,45 @@ func main() {
 		os.Exit(1)
 	}
 
-	if mystery {
-		if take > 0 {
-			for cnt := range Take(searchMystery(&src), take) {
-				fmt.Printf("%d ", cnt)
-				os.Stdout.Sync()
+	if src.Cnt == 0 && masks > 0 {
+		src.Cnt = uint64(rand.Uint32()) << 32
+	}
+
+	if masks < 1 {
+		masks = 1
+	}
+
+	for range masks {
+		json.NewEncoder(os.Stdout).Encode(sourceToConfig(&src))
+
+		if mystery != "" {
+			var res iter.Seq[uint64]
+
+			switch mystery {
+			case "all":
+				res = searchMystery(&src)
+			case "encountered":
+				res = searchMysteryEncountered(&src)
+			}
+
+			if take > 0 {
+				for cnt := range Take(res, take) {
+					PrintfSync("%d ", cnt<<32>>32)
+				}
+			} else {
+				fmt.Printf("%d winning games", Count(res))
+			}
+		} else if gleich > 0 {
+			for res := range Take(searchGleich(&src, gleich), take) {
+				PrintfSync("%d+%d ", res.Cnt<<32>>32, res.NumColors)
 			}
 		} else {
-			cnt := 0
-			for range searchMystery(&src) {
-				cnt++
-			}
-			fmt.Printf("%d winning games\n", cnt)
+			fmt.Fprintf(os.Stderr, "must specify a gamemode\n")
+			os.Exit(1)
 		}
-	} else if gleich > 0 {
-		for range 10 {
-			start := time.Now()
 
-			src.Cnt = uint64(rand.Uint32()) << 32
-			for res := range Take(searchGleich(&src, gleich), take) {
-				fmt.Printf("%d/%d ", res.Cnt, res.NumColors)
-				os.Stdout.Sync()
-			}
-
-			duration := time.Since(start)
-			fmt.Printf("taken %s (%d procs)\n", duration, runtime.GOMAXPROCS(0))
-		}
-	} else {
-		fmt.Fprintf(os.Stderr, "must specify a gamemode\n")
-		os.Exit(1)
+		src.Cnt = uint64(rand.Uint32()) << 32
+		fmt.Print("\n\n")
 	}
 }
 
@@ -78,20 +90,41 @@ func searchMystery(src *srand.Source) iter.Seq[uint64] {
 		for inRange(src.Cnt+numSquares-1, limit) {
 			cnt := src.Cnt
 
-			for i := range numSquares - 1 {
-				remaining := numSquares - i - 1
-				if remaining == 1 {
-					if !yield(cnt) {
-						return
-					}
-				} else if intn(rng.Float64(), remaining+1) == remaining {
-					break
-				}
+			if playMystery(rng) && !yield(cnt) {
+				return
 			}
 
 			src.Cnt = cnt + 1
 		}
 	})
+}
+
+func searchMysteryEncountered(src *srand.Source) iter.Seq[uint64] {
+	return parallel(src, func(src *srand.Source, limit uint32, yield func(uint64) bool) {
+		rng := rand.New(src)
+
+		for inRange(src.Cnt+2*numSquares-1, limit) {
+			cnt := src.Cnt
+
+			// Build board
+			src.Cnt += numSquares
+
+			if playMystery(rng) && !yield(cnt) {
+				return
+			}
+		}
+	})
+}
+
+func playMystery(rng *rand.Rand) (won bool) {
+	for i := range numSquares - 1 {
+		remaining := numSquares - i - 1
+		if remaining > 1 && intn(rng.Float64(), remaining+1) == remaining {
+			return false
+		}
+	}
+
+	return true
 }
 
 type gleichResult struct {
@@ -190,6 +223,15 @@ func parallel[T any](src *srand.Source, task func(src *srand.Source, limit uint3
 	}
 }
 
+func sourceToConfig(src *srand.Source) map[string]any {
+	keya, keyb := uint32(src.Key>>32), uint32(src.Key)
+
+	return map[string]any{
+		"key":  []uint32{keya, keyb},
+		"mask": uint32(src.Cnt >> 32),
+	}
+}
+
 func Take[T any](seq iter.Seq[T], n int) iter.Seq[T] {
 	return func(yield func(T) bool) {
 		i := 0
@@ -200,4 +242,17 @@ func Take[T any](seq iter.Seq[T], n int) iter.Seq[T] {
 			i++
 		}
 	}
+}
+
+func Count[T any](seq iter.Seq[T]) int {
+	n := 0
+	for range seq {
+		n++
+	}
+	return n
+}
+
+func PrintfSync(f string, args ...any) {
+	fmt.Printf(f, args...)
+	os.Stdout.Sync()
 }
