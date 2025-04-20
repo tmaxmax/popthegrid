@@ -27,7 +27,7 @@ func main() {
 	f.IntVar(&take, "take", 100, "number of matching starting counters to output")
 	f.IntVar(&masks, "masks", 0, "cycle through multiple random counter masks (if provided cnt is 0)")
 
-	f.IntVar(&gleich, "gleich", 0, "search for trivial Gleich games (grid of given number of colours or less)")
+	f.IntVar(&gleich, "gleich", 0, "search for trivial Gleich games")
 	f.StringVar(&mystery, "mystery", "", "search for winning Mystery games ('all' for all possible games, 'encountered' for actual real wins only)")
 
 	if err := f.Parse(os.Args[1:]); err != nil {
@@ -67,8 +67,13 @@ func main() {
 				fmt.Printf("%d winning games", Count(res))
 			}
 		} else if gleich > 0 {
-			for res := range Take(searchGleich(&src, gleich), take) {
-				PrintfSync("%d+%d ", res.Cnt<<32>>32, res.NumColors)
+			results := searchGleich(&src, gleich)
+			if take > 0 {
+				results = Take(results, take)
+			}
+
+			for res := range results {
+				PrintfSync("%d/%d ", res.Cnt<<32>>32, res.N)
 			}
 		} else {
 			fmt.Fprintf(os.Stderr, "must specify a gamemode\n")
@@ -85,12 +90,10 @@ const numSquares = 48
 
 func searchMystery(src *srand.Source) iter.Seq[uint64] {
 	return parallel(src, func(src *srand.Source, limit uint32, yield func(uint64) bool) {
-		rng := rand.New(src)
-
 		for inRange(src.Cnt+numSquares-1, limit) {
 			cnt := src.Cnt
 
-			if playMystery(rng) && !yield(cnt) {
+			if playMystery(src) && !yield(cnt) {
 				return
 			}
 
@@ -101,25 +104,23 @@ func searchMystery(src *srand.Source) iter.Seq[uint64] {
 
 func searchMysteryEncountered(src *srand.Source) iter.Seq[uint64] {
 	return parallel(src, func(src *srand.Source, limit uint32, yield func(uint64) bool) {
-		rng := rand.New(src)
-
 		for inRange(src.Cnt+2*numSquares-1, limit) {
 			cnt := src.Cnt
 
 			// Build board
 			src.Cnt += numSquares
 
-			if playMystery(rng) && !yield(cnt) {
+			if playMystery(src) && !yield(cnt) {
 				return
 			}
 		}
 	})
 }
 
-func playMystery(rng *rand.Rand) (won bool) {
+func playMystery(src *srand.Source) (won bool) {
 	for i := range numSquares - 1 {
 		remaining := numSquares - i - 1
-		if remaining > 1 && intn(rng.Float64(), remaining+1) == remaining {
+		if remaining > 1 && intn(src.Float64(), remaining+1) == remaining {
 			return false
 		}
 	}
@@ -128,26 +129,39 @@ func playMystery(rng *rand.Rand) (won bool) {
 }
 
 type gleichResult struct {
-	Cnt       uint64
-	NumColors int
+	Cnt uint64
+	N   int
 }
 
-func searchGleich(src *srand.Source, maxColors int) iter.Seq[gleichResult] {
+func searchGleich(src *srand.Source, minZero int) iter.Seq[gleichResult] {
 	return parallel(src, func(src *srand.Source, limit uint32, yield func(gleichResult) bool) {
-		rng := rand.New(src)
+		startCnt := src.Cnt
 
-		lastColor := -1
-		res := gleichResult{NumColors: 1, Cnt: src.Cnt}
+		var hist [numColors]int
+		var grid [numSquares]int
 
 		for inRange(src.Cnt, limit) {
-			color := intn(rng.Float64(), numColors)
-			if color != lastColor {
-				res.NumColors++
-				if res.NumColors > maxColors {
-					res.Cnt = src.Cnt
-					res.NumColors = 1
+			color := intn(src.Float64(), numColors)
+			src.Cnt++
+
+			fullGrid := src.Cnt-startCnt > numSquares
+
+			offset := (src.Cnt - startCnt - 1) % numSquares
+			if fullGrid {
+				hist[grid[offset]-1]--
+			}
+
+			grid[offset] = color + 1
+			hist[color]++
+
+			n := 0
+			for _, c := range hist {
+				if c == 0 {
+					n++
 				}
-			} else if src.Cnt-res.Cnt+1 == numSquares && !yield(res) {
+			}
+
+			if fullGrid && n >= minZero && !yield(gleichResult{Cnt: src.Cnt - numSquares, N: n}) {
 				return
 			}
 		}
