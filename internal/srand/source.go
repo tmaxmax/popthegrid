@@ -24,12 +24,23 @@ func Uint64(cnt, key uint64) uint64 {
 	return t ^ ((x*x + y) >> 32)
 }
 
+func Float64(cnt, key uint64) float64 {
+	v := Uint64(cnt, key)
+	return float64(v<<11>>11) / (1 << 53)
+}
+
 type Source struct {
 	Cnt, Key uint64
 }
 
 func (s *Source) Uint64() uint64 {
 	v := Uint64(s.Cnt, s.Key)
+	s.Cnt++
+	return v
+}
+
+func (s *Source) Float64() float64 {
+	v := Float64(s.Cnt, s.Key)
 	s.Cnt++
 	return v
 }
