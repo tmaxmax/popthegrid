@@ -10,6 +10,8 @@ import (
 	"math/rand/v2"
 	"os"
 	"runtime"
+	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/tmaxmax/popthegrid/internal/srand"
@@ -17,9 +19,8 @@ import (
 
 func main() {
 	var src srand.Source
-	var mystery string
-	var gleich, take int
-	var masks int
+	var mystery, gleich string
+	var take, masks int
 
 	f := flag.NewFlagSet("findwin", flag.ContinueOnError)
 	f.Uint64Var(&src.Key, "key", srand.Key(0), "the Squares RNG key to use")
@@ -27,7 +28,7 @@ func main() {
 	f.IntVar(&take, "take", 100, "number of matching starting counters to output")
 	f.IntVar(&masks, "masks", 0, "cycle through multiple random counter masks (if provided cnt is 0)")
 
-	f.IntVar(&gleich, "gleich", 0, "search for trivial Gleich games")
+	f.StringVar(&gleich, "gleich", "", "search for trivial Gleich games")
 	f.StringVar(&mystery, "mystery", "", "search for winning Mystery games ('all' for all possible games, 'encountered' for actual real wins only)")
 
 	if err := f.Parse(os.Args[1:]); err != nil {
@@ -66,7 +67,7 @@ func main() {
 			} else {
 				fmt.Printf("%d winning games", Count(res))
 			}
-		} else if gleich > 0 {
+		} else if gleich != "" {
 			results := searchGleich(&src, gleich)
 			if take > 0 {
 				results = Take(results, take)
@@ -133,7 +134,55 @@ type gleichResult struct {
 	N   int
 }
 
-func searchGleich(src *srand.Source, minZero int) iter.Seq[gleichResult] {
+func searchGleich(src *srand.Source, config string) iter.Seq[gleichResult] {
+	mode, countInput, _ := strings.Cut(strings.ToUpper(config), "=")
+	count, _ := strconv.Atoi(countInput)
+	if count == 0 {
+		switch mode {
+		case "ZEROCOL":
+			count = 2
+		case "MINSEQ":
+			count = 15
+		}
+	}
+
+	var counter func(hist *[numColors]int, grid *[numSquares]int) int
+
+	switch mode {
+	case "ZEROCOL":
+		counter = func(hist *[5]int, _ *[48]int) int {
+			n := 0
+			for _, c := range hist {
+				if c == 0 {
+					n++
+				}
+			}
+
+			return n
+		}
+	case "MINSEQ":
+		counter = func(_ *[5]int, grid *[48]int) int {
+			var pc, l, maxl int
+			for _, c := range grid {
+				if c == pc {
+					l++
+					continue
+				}
+
+				if l > maxl {
+					maxl = l
+				}
+
+				pc = c
+				l = 1
+			}
+
+			return maxl
+		}
+	default:
+		panic(fmt.Errorf("unknown mode %q", mode))
+	}
+
 	return parallel(src, func(src *srand.Source, limit uint32, yield func(gleichResult) bool) {
 		startCnt := src.Cnt
 
@@ -142,7 +191,6 @@ func searchGleich(src *srand.Source, minZero int) iter.Seq[gleichResult] {
 
 		for inRange(src.Cnt, limit) {
 			color := intn(src.Float64(), numColors)
-			src.Cnt++
 
 			fullGrid := src.Cnt-startCnt > numSquares
 
@@ -154,15 +202,10 @@ func searchGleich(src *srand.Source, minZero int) iter.Seq[gleichResult] {
 			grid[offset] = color + 1
 			hist[color]++
 
-			n := 0
-			for _, c := range hist {
-				if c == 0 {
-					n++
+			if fullGrid {
+				if n := counter(&hist, &grid); n >= count && !yield(gleichResult{Cnt: src.Cnt - numSquares, N: n}) {
+					return
 				}
-			}
-
-			if fullGrid && n >= minZero && !yield(gleichResult{Cnt: src.Cnt - numSquares, N: n}) {
-				return
 			}
 		}
 	})
