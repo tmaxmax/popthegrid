@@ -2,8 +2,8 @@ package srand
 
 import (
 	_ "embed"
-	"encoding/binary"
 	"math/bits"
+	"math/rand/v2"
 )
 
 func Uint64(cnt, key uint64) uint64 {
@@ -45,13 +45,27 @@ func (s *Source) Float64() float64 {
 	return v
 }
 
-//go:embed keys.bin
-var data []byte
+func Key() uint64 {
+	key := rand.Uint64N(8)*2 + 1
+	seenFirst := uint16(1 << key)
 
-func NumKeys() int {
-	return len(data) / 8
-}
+	for pos, seen := 60, uint16(0); pos > 0; {
+		n := rand.Uint64()
+		for i := 0; i < 64; i += 4 {
+			digit := (n >> i) & 0xf
+			if digit != 0 && (seen&(1<<digit) == 0) {
+				seen |= (1 << digit)
+				key |= (digit << pos)
+				pos -= 4
+				if pos == 24 || pos == 28 {
+					seen = (1 << digit) | seenFirst
+				}
+				if pos == 0 {
+					break
+				}
+			}
+		}
+	}
 
-func Key(i int) uint64 {
-	return binary.LittleEndian.Uint64(data[8*i:])
+	return key
 }

@@ -12,7 +12,7 @@ type Rand struct {
 }
 
 func newRand() Rand {
-	hi, lo := split(srand.Key(rand.N(srand.NumKeys())))
+	hi, lo := split(srand.Key())
 
 	return Rand{
 		Mask: rand.Uint32(),

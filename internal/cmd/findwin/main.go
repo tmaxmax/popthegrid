@@ -23,7 +23,7 @@ func main() {
 	var take, masks int
 
 	f := flag.NewFlagSet("findwin", flag.ContinueOnError)
-	f.Uint64Var(&src.Key, "key", srand.Key(0), "the Squares RNG key to use")
+	f.Uint64Var(&src.Key, "key", srand.Key(), "the Squares RNG key to use")
 	f.Uint64Var(&src.Cnt, "cnt", 0, "the counter to start at")
 	f.IntVar(&take, "take", 100, "number of matching starting counters to output")
 	f.IntVar(&masks, "masks", 0, "cycle through multiple random counter masks (if provided cnt is 0)")
@@ -192,17 +192,13 @@ func searchGleich(src *srand.Source, config string) iter.Seq[gleichResult] {
 		for inRange(src.Cnt, limit) {
 			color := intn(src.Float64(), numColors)
 
-			fullGrid := src.Cnt-startCnt > numSquares
-
 			offset := (src.Cnt - startCnt - 1) % numSquares
-			if fullGrid {
-				hist[grid[offset]-1]--
-			}
-
 			grid[offset] = color + 1
 			hist[color]++
 
-			if fullGrid {
+			if fullGrid := src.Cnt-startCnt > numSquares; fullGrid {
+				hist[grid[offset]-1]--
+
 				if n := counter(&hist, &grid); n >= count && !yield(gleichResult{Cnt: src.Cnt - numSquares, N: n}) {
 					return
 				}
