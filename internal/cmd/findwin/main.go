@@ -21,12 +21,14 @@ func main() {
 	var src srand.Source
 	var mystery, gleich string
 	var take, masks int
+	var seqmasks bool
 
 	f := flag.NewFlagSet("findwin", flag.ContinueOnError)
 	f.Uint64Var(&src.Key, "key", srand.Key(), "the Squares RNG key to use")
 	f.Uint64Var(&src.Cnt, "cnt", 0, "the counter to start at")
 	f.IntVar(&take, "take", 100, "number of matching starting counters to output")
 	f.IntVar(&masks, "masks", 0, "cycle through multiple random counter masks (if provided cnt is 0)")
+	f.BoolVar(&seqmasks, "seqmasks", false, "pick masks sequentially (if masks > 0)")
 
 	f.StringVar(&gleich, "gleich", "", "search for trivial Gleich games")
 	f.StringVar(&mystery, "mystery", "", "search for winning Mystery games ('all' for all possible games, 'encountered' for actual real wins only)")
@@ -39,7 +41,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if src.Cnt == 0 && masks > 0 {
+	if src.Cnt == 0 && masks > 0 && !seqmasks {
 		src.Cnt = uint64(rand.Uint32()) << 32
 	}
 
@@ -81,7 +83,12 @@ func main() {
 			os.Exit(1)
 		}
 
-		src.Cnt = uint64(rand.Uint32()) << 32
+		if seqmasks {
+			src.Cnt = (src.Cnt>>32 + 1) << 32
+		} else {
+			src.Cnt = uint64(rand.Uint32()) << 32
+		}
+
 		fmt.Print("\n\n")
 	}
 }
@@ -192,13 +199,17 @@ func searchGleich(src *srand.Source, config string) iter.Seq[gleichResult] {
 		for inRange(src.Cnt, limit) {
 			color := intn(src.Float64(), numColors)
 
+			fullGrid := src.Cnt-startCnt > numSquares
+
 			offset := (src.Cnt - startCnt - 1) % numSquares
+			if fullGrid {
+				hist[grid[offset]-1]--
+			}
+
 			grid[offset] = color + 1
 			hist[color]++
 
-			if fullGrid := src.Cnt-startCnt > numSquares; fullGrid {
-				hist[grid[offset]-1]--
-
+			if fullGrid {
 				if n := counter(&hist, &grid); n >= count && !yield(gleichResult{Cnt: src.Cnt - numSquares, N: n}) {
 					return
 				}
