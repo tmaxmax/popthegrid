@@ -210,7 +210,7 @@ func searchGleich(src *srand.Source, config string) iter.Seq[gleichResult] {
 			hist[color]++
 
 			if fullGrid {
-				if n := counter(&hist, &grid); n >= count && !yield(gleichResult{Cnt: src.Cnt - numSquares, N: n}) {
+				if n := counter(&hist, &grid); n >= count && !yield(gleichResult{Cnt: src.Cnt - numSquares - 1, N: n}) {
 					return
 				}
 			}
