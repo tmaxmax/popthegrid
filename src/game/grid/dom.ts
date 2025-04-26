@@ -7,12 +7,9 @@ export class DOMGrid implements Grid {
   private readonly grid: GridComponent
   private readonly gridParent: Component
 
-  constructor(props: GridProps & { domParent: Component }) {
-    this.grid = new GridComponent({
-      squareCount: props.numTotalSquares,
-      colors: props.colors,
-    })
-    this.gridParent = props.domParent
+  constructor(domParent: Component, domElement: GridComponent) {
+    this.grid = domElement
+    this.gridParent = domParent
   }
 
   get activeSquares(): readonly Square[] {
@@ -51,11 +48,11 @@ export class DOMGrid implements Grid {
     throw new Error(`Square type incompatible with DOM grid`)
   }
 
-  onSquare(callback: (square: Square, grid: Grid) => unknown): void {
+  onSquare(callback: (square: Square, grid: Grid, ev: PointerEvent) => unknown): void {
     this.grid.addSquareEventListener('pointerdown', (ev, square) => {
       if ((ev.buttons || ev.which || ev.button) === 1) {
         ev.preventDefault()
-        callback(square, this)
+        callback(square, this, ev)
       }
     })
   }

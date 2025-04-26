@@ -16,7 +16,7 @@ export interface Grid {
   destroy(animation: Animation): Promise<void>
   removeSquare(square: Square): Promise<void>
 
-  onSquare(callback: (square: Square, grid: Grid) => unknown): void
+  onSquare(callback: (square: Square, grid: Grid, ev?: PointerEvent) => unknown): void
   toggleInteraction(enabled: boolean): void
 }
 

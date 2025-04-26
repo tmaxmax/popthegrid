@@ -18,7 +18,7 @@ import { getRecordDelta } from './menu/record.ts'
 import { getTheme, setTheme, defaultTheme, themes } from './theme.ts'
 import { contextKey, createContext, configureTitle, type Context } from './menu/context.ts'
 import { getName, listenToNameChanges } from '$share/name.ts'
-import { isDefined, wait } from '$util/index.ts'
+import { isDefined, trusted, wait } from '$util/index.ts'
 import { get, type Writable } from 'svelte/store'
 import { pause, reset, resume } from '$game/ops.ts'
 import { parse } from 'cookie'
@@ -27,6 +27,7 @@ import { mount } from 'svelte'
 import { fetchSession } from './session.ts'
 import { findCachedLink } from '$db/link.ts'
 import rand from '$rand'
+import { Grid, type GridResizeCallback } from '$components/Grid.ts'
 
 const randData = localStorage.getItem('rand')
 if (randData === null) {
@@ -55,14 +56,46 @@ assertNonNull(footer)
 
 let context: Context | undefined
 
+const grid = new Grid({
+  squareCount: 48,
+  colors: themes[theme].colors.squares.map((_, i) => `var(--color-square-${i + 1})`),
+})
+
+const viewport = window.visualViewport!
+const viewportHandler = trusted(() => {
+  console.log({
+    size: [viewport.width, viewport.height],
+    off: [viewport.offsetLeft, viewport.offsetTop],
+    scale: viewport.scale,
+  })
+})
+
+const gridPointerMoveListener = trusted((ev: PointerEvent) => {
+  const data: Record<string, any> = {
+    pos: ev.getCoalescedEvents().map((e) => [e.clientX, e.clientY, e.timeStamp]),
+    type: ev.pointerType,
+    primary: ev.isPrimary,
+    size: [ev.width, ev.height],
+  }
+
+  console.log(data)
+})
+
+const gridResizeListener: GridResizeCallback = (ev) => {
+  console.log({ ...ev, windowSize: [window.innerWidth, window.innerHeight] })
+}
+
+const screenOrientationListener = trusted((ev: ScreenOrientationEventMap['change']) => {
+  console.log(ev)
+})
+
+const hoverMedia = window.matchMedia('(any-hover: hover)')
+const pointerMedia = window.matchMedia('(any-pointer: coarse)')
+
 const gamemode = record?.gamemode || defaultGamemode
 const game = new Game({
   gamemode: gamemodes[gamemode].create(),
-  grid: new DOMGrid({
-    numTotalSquares: 48,
-    colors: themes[theme].colors.squares.map((_, i) => `var(--color-square-${i + 1})`),
-    domParent: gridParent,
-  }),
+  grid: new DOMGrid(gridParent, grid),
   onError(err) {
     console.error(err)
   },
@@ -79,6 +112,17 @@ const game = new Game({
   onGameStart({ attempt, when }) {
     if (when === 'before') {
       context!.attempts.updateOngoing(attempt)
+
+      grid.addGridEventListener('pointermove', gridPointerMoveListener)
+      grid.onResize(gridResizeListener)
+      console.log(navigator.maxTouchPoints, hoverMedia.matches, pointerMedia.matches)
+
+      screen.orientation.addEventListener('change', screenOrientationListener)
+      console.log(screen.orientation)
+
+      viewport.addEventListener('resize', viewportHandler)
+      viewport.addEventListener('scroll', viewportHandler)
+      console.log(viewport)
     }
   },
   onGameEnd({ attempt, when }) {
@@ -88,6 +132,12 @@ const game = new Game({
         context!.attempts.updateOngoing(undefined)
         attemptsChan.postMessage(attempt)
       })
+
+      grid.removeGridEventListener('pointermove', gridPointerMoveListener)
+      grid.onResize(null)
+      screen.orientation.removeEventListener('change', screenOrientationListener)
+      viewport.removeEventListener('resize', viewportHandler)
+      viewport.removeEventListener('scroll', viewportHandler)
     } else if (when === 'after') {
       let animation: Animation
       if (record) {
