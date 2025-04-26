@@ -4,6 +4,7 @@ import { startAttempt } from './attempt.ts'
 import type { Attempt, OngoingAttempt } from './attempt.ts'
 import { Gamemode, type GamemodeName } from './gamemode/index.ts'
 import type { Grid, Square, Animation } from './grid/index.ts'
+import type { GameEvent } from './state.ts'
 
 export interface OnGameData {
   when: CallbackWhen
@@ -57,13 +58,6 @@ export type Event =
       name: 'error'
       error: Error
     }
-
-type GameEvent =
-  | { type: 'prepare'; animation: Animation }
-  | { type: 'removeSquare'; square: Square }
-  | { type: 'forceEnd'; canRestart?: boolean }
-  | { type: 'pause'; token: string }
-  | { type: 'resume'; token: string }
 
 export class Game {
   private gen!: GameGenerator
