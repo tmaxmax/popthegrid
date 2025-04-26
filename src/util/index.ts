@@ -38,3 +38,11 @@ export class UnreachableError extends Error {
 export function wait(time: number): Promise<void> {
   return new Promise<void>((resolve) => setTimeout(resolve, time))
 }
+
+export function trusted<E extends Event = Event>(cb: (e: E) => void): (e: E) => void {
+  return (e) => {
+    if (e.isTrusted) {
+      cb(e)
+    }
+  }
+}
