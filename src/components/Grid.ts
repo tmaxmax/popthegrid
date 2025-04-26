@@ -14,6 +14,9 @@ export interface GridProperties {
   squareCount?: number
 }
 
+export type GridResizeData = { anchor: [number, number]; cols: number; sideLength: number; numSquares: number }
+export type GridResizeCallback = (ev: GridResizeData) => void
+
 const log = baseLog.extend('Grid')
 
 const generateSquares = (props: Required<GridProperties>) =>
@@ -39,26 +42,40 @@ const defaultProps: Required<GridProperties> = {
   squareCount: 102,
 }
 
+type SquareData = { sideLength: number; cols: number; offset: number }
+
 export class Grid extends Component<HTMLDivElement> {
   private readonly properties: Required<GridProperties>
   private squares: Square[] = []
   private readonly resizeObserver: ResizeObserver
+  private resizeListener?: GridResizeCallback
 
   constructor(properties: GridProperties) {
     super({ tag: 'div', classList: ['grid'] })
     this.properties = { ...defaultProps, ...properties }
     log('Grid properties: %O', this.properties)
     this.resizeObserver = new ResizeObserver(() => {
-      this.setSquaresPosition()
+      const data = this.squareData()
+      this.setSquaresPosition(data)
+      this.callResize(data)
     })
   }
 
-  private async setSquaresPosition(start = 0, end = this.squares.length) {
-    const size = this.squareData.sideLength
-    const colsUnrounded = this.width / size
-    const cols = colsUnrounded | 0
-    const offset = (this.width - cols * size) / 2
+  public onResize(cb: GridResizeCallback | null) {
+    if (cb == null) {
+      this.resizeListener = undefined
+    } else {
+      this.resizeListener = cb
+      this.callResize(this.squareData())
+    }
+  }
 
+  private callResize({ sideLength, offset, cols }: SquareData) {
+    const { top, left } = this.rect
+    this.resizeListener?.({ anchor: [left + offset, top], cols, sideLength, numSquares: this.squares.length })
+  }
+
+  private async setSquaresPosition({ sideLength: size, offset, cols }: SquareData, start = 0, end = this.squares.length) {
     this.setStyle('--offset', `${offset}px`)
     this.setStyle('--size', `${size}px`)
 
@@ -184,7 +201,7 @@ export class Grid extends Component<HTMLDivElement> {
     return parseInt(this.getComputedStyle('height'))
   }
 
-  private get squareData() {
+  private squareData() {
     const n = this.properties.squareCount
     const x = this.width
     const y = this.height
@@ -208,8 +225,10 @@ export class Grid extends Component<HTMLDivElement> {
     }
 
     const sideLength = Math.max(sx, sy)
+    const cols = (x / sideLength) | 0
+    const offset = (this.width - cols * sideLength) / 2
 
-    return { sideLength }
+    return { sideLength, cols, offset }
   }
 }
 
