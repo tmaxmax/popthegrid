@@ -114,7 +114,23 @@ export class Grid extends Component<HTMLDivElement> {
       throw new Error('Square does not exist in grid')
     }
     log('Square %d removed', i)
-    await Promise.all([this.squares.splice(i, 1)[0].destroy('long'), this.setSquaresPosition(i)])
+    await Promise.all([this.squares.splice(i, 1)[0].destroy('long'), this.setSquaresPosition(this.squareData(), i)])
+  }
+
+  addGridEventListener<E extends keyof HTMLElementEventMap>(
+    event: E,
+    callback: (ev: HTMLElementEventMap[E]) => void,
+    options?: AddEventListenerOptions
+  ) {
+    this.addEventListener(event, callback, options)
+  }
+
+  removeGridEventListener<E extends keyof HTMLElementEventMap>(
+    event: E,
+    callback: (ev: HTMLElementEventMap[E]) => void,
+    options?: AddEventListenerOptions
+  ): void {
+    this.removeEventListener(event, callback, options)
   }
 
   addSquareEventListener<E extends keyof HTMLElementEventMap>(
