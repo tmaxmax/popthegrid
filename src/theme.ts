@@ -77,6 +77,19 @@ export const themes = {
       squares: ['#C4CEA1', '#D9E0A3', '#FDF2B0', '#F3D17C', '#CF9963'],
     },
   },
+  iris: {
+    display: 'Iris',
+    description: 'Like her dress. Trust me on this one.',
+    colors: {
+      background: '#FFE7D1',
+      heading: '#110903',
+      body: '#4C3529',
+      assurance: '#1EC258',
+      warning: '#ED750C',
+      danger: '#E13F09',
+      squares: ['#E91C3E', '#FF7729', '#88D8DD', '#FEE271', '#FEF0EC'],
+    },
+  },
 } satisfies Record<string, Theme>
 
 export const defaultTheme = 'candy' satisfies ThemeName

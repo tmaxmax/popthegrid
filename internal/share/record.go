@@ -48,7 +48,7 @@ type Theme string
 
 func (t Theme) Validate() error {
 	switch t {
-	case ThemeBlood, ThemeCandy, ThemeNoir, ThemeCozy:
+	case ThemeBlood, ThemeCandy, ThemeNoir, ThemeCozy, ThemeIris:
 		return nil
 	default:
 		return fmt.Errorf("invalid theme %q", t)
@@ -64,6 +64,7 @@ const (
 	ThemeBlood Theme = "blood"
 	ThemeNoir  Theme = "noir"
 	ThemeCozy  Theme = "cozy"
+	ThemeIris  Theme = "iris"
 )
 
 type RecordData struct {
