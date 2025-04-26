@@ -205,6 +205,10 @@ export class Component<T extends KnownHTMLElement = HTMLElement> {
     await this.eventsRace(events, { stopPropagation: 'immediate', signal })
   }
 
+  protected get rect(): DOMRect {
+    return this.element.getBoundingClientRect()
+  }
+
   protected get text(): string {
     return this.element.textContent || ''
   }
