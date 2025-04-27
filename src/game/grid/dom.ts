@@ -1,7 +1,7 @@
 import { Component } from '$components/internal/Component.ts'
 import { Grid as GridComponent } from '$components/Grid.ts'
 import { Square as SquareComponent } from '$components/Square.ts'
-import type { Animation, Grid, GridProps, Square } from './index.ts'
+import type { Animation, Grid, Square } from './index.ts'
 
 export class DOMGrid implements Grid {
   private readonly grid: GridComponent
@@ -12,7 +12,7 @@ export class DOMGrid implements Grid {
     this.gridParent = domParent
   }
 
-  get activeSquares(): readonly Square[] {
+  get activeSquares(): Square[] {
     return this.grid.activeSquares
   }
 
@@ -20,20 +20,16 @@ export class DOMGrid implements Grid {
     return this.grid.numTotalSquares
   }
 
-  set numTotalSquares(num: number) {
-    this.grid.numTotalSquares = num
-  }
-
   get colors(): readonly string[] {
     return this.grid.colors
   }
 
-  set colors(cols: readonly string[]) {
-    this.grid.colors = cols
+  setColors(colors: string[], squaresColorSequence: number[]) {
+    this.grid.setColors(colors, squaresColorSequence)
   }
 
-  create(animation: Animation): Promise<void> {
-    return this.grid.create(this.gridParent, animation)
+  create(animation: Animation, squaresColorSequence: number[]): Promise<void> {
+    return this.grid.create(this.gridParent, animation, squaresColorSequence)
   }
 
   destroy(animation: Animation): Promise<void> {

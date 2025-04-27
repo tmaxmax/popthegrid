@@ -7,12 +7,13 @@ export interface Square {
 export type Animation = 'none' | 'short' | 'long'
 
 export interface Grid {
-  readonly activeSquares: readonly Square[]
+  readonly activeSquares: Square[]
+  readonly numTotalSquares: number
 
-  numTotalSquares: number
   colors: readonly string[]
+  setColors(colors: readonly string[], squaresColorSequence: number[]): void
 
-  create(animation: Animation): Promise<void>
+  create(animation: Animation, squaresColorSequence: number[]): Promise<void>
   destroy(animation: Animation): Promise<void>
   removeSquare(square: Square): Promise<void>
 
@@ -21,6 +22,5 @@ export interface Grid {
 }
 
 export interface GridProps {
-  numTotalSquares: number
   colors: string[]
 }

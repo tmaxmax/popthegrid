@@ -254,7 +254,7 @@ class Initial extends State {
 
   executeCallback({ onGameInit, onGameEnd }: Callbacks, data: OnGameData): void {
     if (this.name === 'initial') {
-      onGameInit?.({ gamemode: this.props.gamemode.name(), ...data })
+      onGameInit?.({ gamemode: this.props.gamemode.properties.name, ...data })
     } else {
       onGameEnd?.({ attempt: this.attempt!, ...data })
     }
@@ -281,6 +281,7 @@ class Initial extends State {
 
 class Ready extends State {
   private squareWasRemoved = false
+  private hasCriticalSquares = false
 
   constructor(props: BaseProps, private readonly animation: Animation) {
     super('ready', props)
@@ -308,14 +309,14 @@ class Ready extends State {
 
   private onRemoveSquare(square: Square): State {
     this.squareWasRemoved = true
-    const attempt = startAttempt({ gamemode: this.props.gamemode.name(), numSquares: this.props.grid.numTotalSquares })
+    const attempt = startAttempt({ gamemode: this.props.gamemode.properties.name, numSquares: this.props.grid.numTotalSquares })
     const { grid, gamemode } = this.props
 
-    const done = grid.removeSquare(square)
-    if (gamemode.shouldDestroy(grid, square)) {
+    const progress = gamemode.progress(grid, square)
+    if (progress.state === 'lose') {
       return new Initial(this.props, { attempt, kind: 'lose' })
-    } else if (grid.activeSquares.length === 0) {
-      return new Initial(this.props, { attempt, kind: 'win', lastOp: done })
+    } else if (progress.state === 'win') {
+      return new Initial(this.props, { attempt, kind: 'win', lastOp: progress.done })
     }
 
     return new Ongoing(this.props, attempt)
@@ -328,16 +329,21 @@ class Ready extends State {
     }
 
     this.props.gamemode = gamemode
+    if (gamemode.properties.criticalSquares && !this.hasCriticalSquares && this.props.grid.activeSquares.length > 0) {
+      this.hasCriticalSquares = true
+      this.props.grid.setColors(this.props.grid.colors, gamemode.initialSquares(this.props.grid.colors.length))
+    }
 
     return 'now'
   }
 
   executeCallback({ onGameReady }: Callbacks, data: OnGameData) {
-    onGameReady?.({ gamemode: this.props.gamemode.name(), ...data })
+    onGameReady?.({ gamemode: this.props.gamemode.properties.name, ...data })
   }
 
   transition() {
-    return this.props.grid.create(this.animation)
+    this.hasCriticalSquares = this.props.gamemode.properties.criticalSquares
+    return this.props.grid.create(this.animation, this.props.gamemode.initialSquares(this.props.grid.colors.length))
   }
 }
 
@@ -378,11 +384,11 @@ class Ongoing extends State {
   private onRemoveSquare(square: Square): State | void {
     const { grid, gamemode } = this.props
 
-    const done = grid.removeSquare(square)
-    if (gamemode.shouldDestroy(grid, square)) {
+    const progress = gamemode.progress(grid, square)
+    if (progress.state === 'lose') {
       return new Initial(this.props, { attempt: this.attempt, kind: 'lose' })
-    } else if (grid.activeSquares.length === 0) {
-      return new Initial(this.props, { attempt: this.attempt, kind: 'win', lastOp: done })
+    } else if (progress.state === 'win') {
+      return new Initial(this.props, { attempt: this.attempt, kind: 'win', lastOp: progress.done })
     }
 
     return

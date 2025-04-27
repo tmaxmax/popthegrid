@@ -1,15 +1,22 @@
-import type { Grid } from '$game/grid/index.ts'
+import type { Grid, Square } from '$game/grid/index.ts'
 import { intn } from '$util/index.ts'
 import rand from '$rand'
-import { Gamemode } from './index.ts'
+import { Gamemode, type Progress } from './index.ts'
 
 export class RandomCount extends Gamemode {
-  name() {
-    return 'random' as const
+  properties = {
+    name: 'random',
+    criticalSquares: false,
+  } as const
+
+  initialSquares(numColors: number): number[] {
+    return Array.from({ length: 48 }, () => intn(Math.random(), numColors))
   }
 
-  shouldDestroy(grid: Grid): boolean {
+  progress(grid: Grid, squareToRemove: Square): Progress {
+    const done = grid.removeSquare(squareToRemove)
     const count = grid.activeSquares.length
-    return count > 1 && count === intn(rand.next(), count + 1)
+    const lose = count > 1 && count === intn(rand.next(), count + 1)
+    return { done, state: lose ? 'lose' : count > 0 ? 'continue' : 'win' }
   }
 }

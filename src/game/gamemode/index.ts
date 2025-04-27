@@ -4,11 +4,20 @@ import type { RandomCount } from './randomCount.ts'
 import type { RandomTimer } from './randomTimer.ts'
 import type { SameSquare } from './sameSquare.ts'
 
-export type GamemodeName = ReturnType<(RandomCount | RandomTimer | SameSquare | Passthrough)['name']>
+export type GamemodeName = Properties['name']
+
+export type Progress = {
+  done: Promise<void>
+  state: 'win' | 'lose' | 'continue'
+}
+
+export type Properties = (RandomCount | RandomTimer | SameSquare | Passthrough)['properties']
 
 export abstract class Gamemode {
-  abstract shouldDestroy(grid: Grid, destroyedSquare: Square): boolean
-  abstract name(): GamemodeName
+  abstract progress(grid: Grid, squareToRemove: Square): Progress
+  abstract initialSquares(numColors: number): number[]
+
+  abstract readonly properties: Properties
 
   reset(): void | Promise<void> {
     return

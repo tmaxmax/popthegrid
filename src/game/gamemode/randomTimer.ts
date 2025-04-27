@@ -1,7 +1,8 @@
 import interval, { type Interval } from '$util/time/interval.ts'
 import { intn } from '$util/index.ts'
-import { Gamemode } from './index.ts'
+import { Gamemode, type Progress, type Properties } from './index.ts'
 import rand from '$rand'
+import type { Grid, Square } from '$game/grid/index.ts'
 
 export interface RandomTimerProps {
   minSeconds: number
@@ -20,11 +21,19 @@ export class RandomTimer extends Gamemode {
     this.numIterations = minSeconds + intn(rand.next(), maxSeconds - minSeconds + 1)
   }
 
-  name() {
-    return 'random-timer' as const
+  properties = {
+    name: 'random-timer',
+    criticalSquares: false,
+  } as const
+
+  initialSquares(numColors: number): number[] {
+    return Array.from({ length: 48 }, () => intn(Math.random(), numColors))
   }
 
-  shouldDestroy(): boolean {
+  progress(grid: Grid, squareToRemove: Square): Progress {
+    const done = grid.removeSquare(squareToRemove)
+    const count = grid.activeSquares.length
+
     if (!this.hasPoppedFirstSquare) {
       this.controller = new AbortController()
       this.interval = interval({
@@ -37,7 +46,7 @@ export class RandomTimer extends Gamemode {
       this.hasPoppedFirstSquare = true
     }
 
-    return this.done
+    return { done, state: this.done ? 'lose' : count > 0 ? 'continue' : 'win' }
   }
 
   pause() {

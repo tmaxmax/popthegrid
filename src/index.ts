@@ -58,7 +58,6 @@ assertNonNull(footer)
 let context: Context | undefined
 
 const grid = new Grid({
-  squareCount: 48,
   colors: themes[theme].colors.squares.map((_, i) => `var(--color-square-${i + 1})`),
 })
 

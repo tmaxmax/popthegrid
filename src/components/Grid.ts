@@ -4,29 +4,18 @@ import { Component } from './internal/Component.ts'
 import { Square } from './Square.ts'
 import { type Animation } from '$game/grid/index.ts'
 import baseLog from '$util/log.ts'
-import { isDefined, intn, wait } from '$util/index.ts'
+import { isDefined, wait } from '$util/index.ts'
 import { map as mapAsync } from '$util/async.ts'
-import rand from '$rand'
 
 export interface GridProperties {
-  colors?: string[]
   animationDelay?: number
-  squareCount?: number
+  colors: string[]
 }
 
 export type GridResizeData = { anchor: [number, number]; cols: number; sideLength: number; numSquares: number }
 export type GridResizeCallback = (ev: GridResizeData) => void
 
 const log = baseLog.extend('Grid')
-
-const generateSquares = (props: Required<GridProperties>) =>
-  Array.from(
-    { length: props.squareCount },
-    () =>
-      new Square({
-        color: props.colors[intn(rand.next(), props.colors.length)],
-      })
-  )
 
 const getDelay = (base: number, current: number, total: number): number => {
   const exp = Math.floor(total / 2)
@@ -37,15 +26,15 @@ const getDelay = (base: number, current: number, total: number): number => {
 }
 
 const defaultProps: Required<GridProperties> = {
-  colors: ['#000'],
   animationDelay: 50,
-  squareCount: 102,
+  colors: [],
 }
 
 type SquareData = { sideLength: number; cols: number; offset: number }
 
 export class Grid extends Component<HTMLDivElement> {
   private readonly properties: Required<GridProperties>
+  private initialNumSquares = 0
   private squares: Square[] = []
   private readonly resizeObserver: ResizeObserver
   private resizeListener?: GridResizeCallback
@@ -87,25 +76,23 @@ export class Grid extends Component<HTMLDivElement> {
     })
   }
 
-  get colors(): readonly string[] {
-    return this.properties.colors
-  }
-
-  set colors(colors: readonly string[]) {
-    this.properties.colors = [...colors]
-    this.squares.forEach((square) => (square.color = colors[intn(rand.next(), colors.length)]))
-  }
-
-  get activeSquares(): readonly Square[] {
+  get activeSquares(): Square[] {
     return this.squares
   }
 
   get numTotalSquares(): number {
-    return this.properties.squareCount
+    return this.initialNumSquares
   }
 
-  set numTotalSquares(num: number) {
-    this.properties.squareCount = num
+  get colors(): readonly string[] {
+    return this.properties.colors
+  }
+
+  setColors(colors: string[], seq: number[]) {
+    this.properties.colors = colors
+    for (let i = 0; i < this.squares.length; i++) {
+      this.squares[i].color = colors[seq[i]]
+    }
   }
 
   async removeSquare(square: Square): Promise<void> {
@@ -157,7 +144,7 @@ export class Grid extends Component<HTMLDivElement> {
     this.addEventListener(event, cb, options)
   }
 
-  async create(parent: Component, animate: Animation): Promise<void> {
+  async create(parent: Component, animate: Animation, squaresColorSequence: number[]): Promise<void> {
     if (this.activeSquares.length > 0) {
       return
     }
@@ -165,7 +152,10 @@ export class Grid extends Component<HTMLDivElement> {
     this.appendTo(parent)
     this.resizeObserver.observe(this.element)
     this.addClass('grid--no-interaction')
-    await this.appendSquares(generateSquares(this.properties), animate)
+    await this.appendSquares(
+      squaresColorSequence.map((i) => new Square({ color: this.properties.colors[i] })),
+      animate
+    )
     this.removeClass('grid--no-interaction')
   }
 
@@ -185,6 +175,7 @@ export class Grid extends Component<HTMLDivElement> {
     }
     this.removeClass('grid--no-interaction')
     this.remove()
+    this.initialNumSquares = 0
   }
 
   toggleInteraction(enabled: boolean) {
@@ -199,6 +190,9 @@ export class Grid extends Component<HTMLDivElement> {
     let promise: Promise<void> | undefined
     let i = this.squares.length
     this.squares.push(...squares)
+    if (this.squares.length > this.initialNumSquares) {
+      this.initialNumSquares = this.squares.length
+    }
     for (; i < this.squares.length; i++) {
       const square = this.squares[i]
       promise = square.create(this as unknown as Component, animate)
@@ -218,7 +212,7 @@ export class Grid extends Component<HTMLDivElement> {
   }
 
   private squareData() {
-    const n = this.properties.squareCount
+    const n = this.initialNumSquares
     const x = this.width
     const y = this.height
 
