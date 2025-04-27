@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func RunServer(ctx context.Context, s *http.Server) error {
+func RunServer(ctx context.Context, s *http.Server, l net.Listener) error {
 	shutdownError := make(chan error)
 
 	go func() {
@@ -20,7 +20,14 @@ func RunServer(ctx context.Context, s *http.Server) error {
 		shutdownError <- s.Shutdown(sctx)
 	}()
 
-	if err := s.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+	var err error
+	if l != nil {
+		err = s.Serve(l)
+	} else {
+		err = s.ListenAndServe()
+	}
+
+	if err != nil && !errors.Is(err, http.ErrServerClosed) && !errors.Is(err, net.ErrClosed) {
 		return err
 	}
 

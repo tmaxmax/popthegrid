@@ -2,6 +2,8 @@ import { defineConfig } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import path from 'path'
 
+const url = new URL(process.env.URL!)
+
 // https://vite.dev/config/
 export default defineConfig({
   resolve: {
@@ -24,7 +26,11 @@ export default defineConfig({
   },
   server: {
     cors: {
-      origin: process.env.URL,
+      origin: url.toString(),
+    },
+    allowedHosts: [url.host],
+    hmr: {
+      path: 'vite',
     },
   },
   plugins: [svelte()],

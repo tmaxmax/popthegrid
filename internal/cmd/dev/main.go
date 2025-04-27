@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"os"
 	"os/signal"
 	"time"
@@ -15,6 +17,8 @@ import (
 	"github.com/tmaxmax/popthegrid/internal/cmd/internal"
 	"github.com/tmaxmax/popthegrid/internal/handler"
 	"github.com/tmaxmax/popthegrid/internal/repo/sqlite"
+	"golang.ngrok.com/ngrok"
+	"golang.ngrok.com/ngrok/config"
 )
 
 func main() {
@@ -41,7 +45,7 @@ func run() error {
 		FS:           dist,
 		IsDev:        true,
 		ViteEntry:    env.Entrypoint,
-		ViteURL:      fmt.Sprintf("http://%s:5173", internal.LocalIP()),
+		ViteURL:      env.URL,
 		ViteTemplate: vite.SvelteTs,
 	})
 	if err != nil {
@@ -66,13 +70,33 @@ func run() error {
 		},
 		SessionSecret: env.HMACSecret,
 		SessionExpiry: env.SessionExpiry,
+		RegisterVite: func(m *http.ServeMux) {
+			viteLocalhostURL, _ := url.Parse("http://localhost:5173")
+			proxy := httputil.NewSingleHostReverseProxy(viteLocalhostURL)
+
+			m.Handle("GET /vite", proxy)
+			m.Handle("/@vite/", proxy)
+			m.Handle("/src/", proxy)
+			m.Handle("/node_modules/", proxy)
+		},
 	})
 
+	l, err := ngrok.Listen(
+		ctx,
+		config.HTTPEndpoint(config.WithURL(env.URL)),
+		ngrok.WithAuthtokenFromEnv(),
+		ngrok.WithRegion("eu"),
+	)
+	if err != nil {
+		return fmt.Errorf("create ngrok tunnel: %w", err)
+	}
+
 	s := &http.Server{
-		Addr:              "0.0.0.0:" + env.Port,
 		Handler:           h,
 		ReadHeaderTimeout: time.Second * 10,
 	}
 
-	return internal.RunServer(ctx, s)
+	fmt.Println("Open at", env.URL)
+
+	return internal.RunServer(ctx, s, l)
 }

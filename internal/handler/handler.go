@@ -68,6 +68,7 @@ type Config struct {
 	Logger           httplog.Options
 	SessionSecret    []byte
 	SessionExpiry    time.Duration
+	RegisterVite     func(*http.ServeMux)
 }
 
 func New(c Config) http.Handler {
@@ -101,7 +102,7 @@ func New(c Config) http.Handler {
 		storageKey: c.RecordStorageKey,
 		index:      index,
 	})
-	m.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+	m.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
 		renderIndex(w, http.StatusOK, index, defaultIndex())
 	})
 
@@ -112,10 +113,11 @@ func New(c Config) http.Handler {
 			return ok
 		},
 		ID: func(r *http.Request) ([]byte, error) {
+			header := "X-Real-Ip"
 			if c.CORS.Debug {
-				return netip.MustParseAddrPort(r.RemoteAddr).Addr().MarshalBinary()
+				header = "X-Forwarded-For"
 			}
-			return netip.MustParseAddr(r.Header.Get("X-Real-Ip")).MarshalBinary()
+			return netip.MustParseAddr(r.Header.Get(header)).MarshalBinary()
 		},
 	})
 	go pow.Start(context.TODO())
@@ -128,6 +130,10 @@ func New(c Config) http.Handler {
 	m.Handle("POST /session", pow.WithChallenge(sess))
 
 	m.Handle("POST /share", shareHandler{records: c.Repository})
+
+	if c.RegisterVite != nil {
+		c.RegisterVite(m)
+	}
 
 	logger := httplog.NewLogger("popthegrid", c.Logger)
 	if c.CORS.Logger == nil {

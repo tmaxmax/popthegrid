@@ -74,5 +74,5 @@ func run() error {
 		ReadTimeout: time.Second * 10,
 	}
 
-	return internal.RunServer(ctx, s)
+	return internal.RunServer(ctx, s, nil)
 }
