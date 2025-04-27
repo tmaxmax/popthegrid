@@ -131,7 +131,7 @@ const game = new Game({
       viewport.removeEventListener('resize', viewportHandler)
       viewport.removeEventListener('scroll', viewportHandler)
 
-      console.log(tracer.flush())
+      console.log({ attempt, trace: tracer.flush() })
     } else if (when === 'after') {
       let animation: Animation
       if (record) {

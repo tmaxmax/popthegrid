@@ -6,6 +6,7 @@ import { Gamemode, type GamemodeName } from './gamemode/index.ts'
 import type { Grid, Square, Animation } from './grid/index.ts'
 import type { GameEvent } from './state.ts'
 import type { Tracer } from './trace.ts'
+import rand, { type RandState } from '$rand'
 
 export interface OnGameData {
   when: CallbackWhen
@@ -282,6 +283,7 @@ class Initial extends State {
 class Ready extends State {
   private squareWasRemoved = false
   private hasCriticalSquares = false
+  private randState?: RandState
 
   constructor(props: BaseProps, private readonly animation: Animation) {
     super('ready', props)
@@ -309,7 +311,15 @@ class Ready extends State {
 
   private onRemoveSquare(square: Square): State {
     this.squareWasRemoved = true
-    const attempt = startAttempt({ gamemode: this.props.gamemode.properties.name, numSquares: this.props.grid.numTotalSquares })
+    if (!this.randState) {
+      this.randState = rand.state()
+    }
+
+    const attempt = startAttempt({
+      gamemode: this.props.gamemode.properties.name,
+      numSquares: this.props.grid.numTotalSquares,
+      randState: this.randState,
+    })
     const { grid, gamemode } = this.props
 
     const progress = gamemode.progress(grid, square)
@@ -331,6 +341,7 @@ class Ready extends State {
     this.props.gamemode = gamemode
     if (gamemode.properties.criticalSquares && !this.hasCriticalSquares && this.props.grid.activeSquares.length > 0) {
       this.hasCriticalSquares = true
+      this.randState = rand.state()
       this.props.grid.setColors(this.props.grid.colors, gamemode.initialSquares(this.props.grid.colors.length))
     }
 
@@ -343,6 +354,10 @@ class Ready extends State {
 
   transition() {
     this.hasCriticalSquares = this.props.gamemode.properties.criticalSquares
+    if (this.hasCriticalSquares) {
+      this.randState = rand.state()
+    }
+
     return this.props.grid.create(this.animation, this.props.gamemode.initialSquares(this.props.grid.colors.length))
   }
 }

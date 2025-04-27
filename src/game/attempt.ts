@@ -1,3 +1,4 @@
+import type { RandState } from '$rand'
 import Stopwatch from '$util/time/stopwatch.ts'
 import type { GamemodeName } from './gamemode/index.ts'
 
@@ -11,6 +12,7 @@ export interface OngoingAttempt {
   readonly gamemode: GamemodeName
   readonly elapsed: number
   readonly paused: boolean
+  readonly randState: RandState
 }
 
 export interface Attempt {
@@ -21,14 +23,17 @@ export interface Attempt {
   isWin: boolean
   /** Can be undefined because the previous database version didn't save it. */
   numSquares?: number
+  /** Can be undefined because it must explicitly be loaded */
+  randState?: RandState
 }
 
 export interface StartAttemptProps {
   gamemode: GamemodeName
   numSquares: number
+  randState: RandState
 }
 
-export function startAttempt({ gamemode, numSquares }: StartAttemptProps): OngoingAttempt {
+export function startAttempt({ gamemode, numSquares, randState }: StartAttemptProps): OngoingAttempt {
   const startedAt = new Date()
   const stopwatch = new Stopwatch()
   let ended = false
@@ -49,6 +54,7 @@ export function startAttempt({ gamemode, numSquares }: StartAttemptProps): Ongoi
         duration: this.elapsed,
         isWin,
         numSquares,
+        randState,
       }
     },
     pause() {
@@ -59,6 +65,7 @@ export function startAttempt({ gamemode, numSquares }: StartAttemptProps): Ongoi
     },
     gamemode,
     numSquares,
+    randState,
     startedAt,
     get elapsed() {
       return stopwatch.elapsed
