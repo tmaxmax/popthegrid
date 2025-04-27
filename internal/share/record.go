@@ -11,7 +11,7 @@ type Gamemode string
 
 func (g Gamemode) Validate() error {
 	switch g {
-	case GamemodeRandom, GamemodeRandomTimer, GamemodeSameSquare, GamemodePassthrough:
+	case GamemodeRandom, GamemodeSameSquare, GamemodePassthrough:
 		return nil
 	default:
 		return fmt.Errorf("invalid gamemode %q", g)
@@ -26,8 +26,6 @@ func (g Gamemode) Description() string {
 	switch g {
 	case GamemodeRandom:
 		return "win more than me."
-	case GamemodeRandomTimer:
-		return "beat me on time."
 	case GamemodeSameSquare:
 		return "destroy faster the same squares."
 	case GamemodePassthrough:
@@ -39,7 +37,6 @@ func (g Gamemode) Description() string {
 
 const (
 	GamemodeRandom      Gamemode = "random"
-	GamemodeRandomTimer Gamemode = "random-timer"
 	GamemodeSameSquare  Gamemode = "same-square"
 	GamemodePassthrough Gamemode = "passthrough"
 )
@@ -106,8 +103,6 @@ func (r *Record) Description() string {
 	case GamemodeRandom:
 		numWins := r.Data.NumWins
 		return fmt.Sprintf("%s can you win more? They won %d %s.", root, numWins, makePlural("time", numWins))
-	case GamemodeRandomTimer:
-		return fmt.Sprintf("%s be quicker! They won in %s.", root, formatDuration(r.Data.FastestWinDuration))
 	case GamemodeSameSquare:
 		return fmt.Sprintf("%s zerstöre schneller die gleichen Karos! They did it in %s.", root, formatDuration(r.Data.FastestWinDuration))
 	case GamemodePassthrough:
