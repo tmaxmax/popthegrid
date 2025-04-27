@@ -5,6 +5,7 @@ import type { Attempt, OngoingAttempt } from './attempt.ts'
 import { Gamemode, type GamemodeName } from './gamemode/index.ts'
 import type { Grid, Square, Animation } from './grid/index.ts'
 import type { GameEvent } from './state.ts'
+import type { Tracer } from './trace.ts'
 
 export interface OnGameData {
   when: CallbackWhen
@@ -30,6 +31,7 @@ export type OnGameOverData = OnGameData
 export interface GameProps {
   grid: Grid
   gamemode: Gamemode
+  tracer: Tracer
   onError(err: unknown): unknown
   onGameInit?(data: OnGameInitData): unknown
   onGameReady?(data: OnGameReadyData): unknown
@@ -63,13 +65,20 @@ export class Game {
   private gen!: GameGenerator
   private state!: State
   private dispatchedEvents: Writable<Event>
+  private tracer: Tracer
 
   constructor(private readonly props: GameProps) {
-    const { grid } = this.props
+    const { grid, tracer } = this.props
 
-    grid.onSquare((square) => {
+    this.tracer = tracer
+
+    grid.onSquare((square, _, pev) => {
       try {
-        this.sendEvent({ type: 'removeSquare', square })
+        const gev = { type: 'removeSquare', square } as const
+        if (pev) {
+          this.tracer.gameRemoveSquare(gev, pev)
+        }
+        this.sendEvent(gev)
       } catch (err) {
         this.props.onError(err)
       }
@@ -146,17 +155,23 @@ export class Game {
   }
 
   private sendEvent(ev: GameEvent): void | Promise<void> {
+    if (ev.type !== 'removeSquare') {
+      this.tracer.game(ev)
+    }
+
     const { value, done } = this.gen.next(ev)
     if (!done) {
       return
     } else if (!isDefined(value)) {
       const x = {} as never
       const error = new UnreachableError(x, 'Unexpected undefined value on state generator return.')
+      this.tracer.clear()
       this.dispatchedEvents.set({ name: 'error', error })
       throw error
     }
 
     if (value instanceof Error) {
+      this.tracer.clear()
       this.dispatchedEvents.set({ name: 'error', error: value })
       throw value
     }

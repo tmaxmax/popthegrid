@@ -27,7 +27,8 @@ import { mount } from 'svelte'
 import { fetchSession } from './session.ts'
 import { findCachedLink } from '$db/link.ts'
 import rand from '$rand'
-import { Grid, type GridResizeCallback } from '$components/Grid.ts'
+import { Grid, type GridResizeData } from '$components/Grid.ts'
+import { Tracer } from '$game/trace.ts'
 
 const randData = localStorage.getItem('rand')
 if (randData === null) {
@@ -61,41 +62,26 @@ const grid = new Grid({
   colors: themes[theme].colors.squares.map((_, i) => `var(--color-square-${i + 1})`),
 })
 
-const viewport = window.visualViewport!
-const viewportHandler = trusted(() => {
-  console.log({
-    size: [viewport.width, viewport.height],
-    off: [viewport.offsetLeft, viewport.offsetTop],
-    scale: viewport.scale,
-  })
-})
+const tracer = new Tracer(() => performance.now())
 
-const gridPointerMoveListener = trusted((ev: PointerEvent) => {
-  const data: Record<string, any> = {
-    pos: ev.getCoalescedEvents().map((e) => [e.clientX, e.clientY, e.timeStamp]),
-    type: ev.pointerType,
-    primary: ev.isPrimary,
-    size: [ev.width, ev.height],
-  }
-
-  console.log(data)
-})
-
-const gridResizeListener: GridResizeCallback = (ev) => {
-  console.log({ ...ev, windowSize: [window.innerWidth, window.innerHeight] })
+const metadataMatchMedia = {
+  primaryHover: window.matchMedia('(hover: hover)'),
+  primaryCoarse: window.matchMedia('(pointer: coarse)'),
+  hover: window.matchMedia('(any-hover: hover)'),
+  coarse: window.matchMedia('(any-pointer: coarse)'),
 }
 
-const screenOrientationListener = trusted((ev: ScreenOrientationEventMap['change']) => {
-  console.log(ev)
-})
-
-const hoverMedia = window.matchMedia('(any-hover: hover)')
-const pointerMedia = window.matchMedia('(any-pointer: coarse)')
+const viewport = window.visualViewport!
+const viewportHandler = trusted(() => tracer.viewport(viewport))
+const gridPointerMoveListener = trusted((ev: PointerEvent) => tracer.pointerMove(ev))
+const gridResizeListener = (ev: GridResizeData) => tracer.gridResize(ev, window)
+const screenOrientationListener = trusted(() => tracer.orientationChange(screen.orientation))
 
 const gamemode = record?.gamemode || defaultGamemode
 const game = new Game({
   gamemode: gamemodes[gamemode].create(),
   grid: new DOMGrid(gridParent, grid),
+  tracer,
   onError(err) {
     console.error(err)
   },
@@ -108,21 +94,26 @@ const game = new Game({
     if (when === 'before' && (from === 'win' || from === 'lose')) {
       context!.gamemode.set(gamemode)
     }
+
+    if (when === 'after') {
+      tracer.enabled = true
+    }
   },
   onGameStart({ attempt, when }) {
     if (when === 'before') {
       context!.attempts.updateOngoing(attempt)
 
+      tracer.metadata(navigator, metadataMatchMedia)
+
       grid.addGridEventListener('pointermove', gridPointerMoveListener)
       grid.onResize(gridResizeListener)
-      console.log(navigator.maxTouchPoints, hoverMedia.matches, pointerMedia.matches)
 
+      tracer.orientationChange(screen.orientation)
       screen.orientation.addEventListener('change', screenOrientationListener)
-      console.log(screen.orientation)
 
+      tracer.viewport(viewport)
       viewport.addEventListener('resize', viewportHandler)
       viewport.addEventListener('scroll', viewportHandler)
-      console.log(viewport)
     }
   },
   onGameEnd({ attempt, when }) {
@@ -133,11 +124,15 @@ const game = new Game({
         attemptsChan.postMessage(attempt)
       })
 
+      tracer.enabled = false
+
       grid.removeGridEventListener('pointermove', gridPointerMoveListener)
       grid.onResize(null)
       screen.orientation.removeEventListener('change', screenOrientationListener)
       viewport.removeEventListener('resize', viewportHandler)
       viewport.removeEventListener('scroll', viewportHandler)
+
+      console.log(tracer.flush())
     } else if (when === 'after') {
       let animation: Animation
       if (record) {
