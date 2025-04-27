@@ -17,7 +17,7 @@ const display: Record<Exclude<keyof Statistics, 'when'>, string> = {
 
 const shareable: Record<GamemodeName | 'total', Array<keyof Statistics>> = {
   random: ['numWins'],
-  'random-timer': ['fastestWinDuration'],
+  'odd-one-out': ['fastestWinDuration'],
   'same-square': ['fastestWinDuration'],
   total: ['numWins', 'numAttempts'],
   passthrough: ['fastestWinDuration'],
@@ -117,8 +117,8 @@ export async function getShareContent(
     case 'random':
       text = 'Can you win more than me at Pop the grid?'
       break
-    case 'random-timer':
-      text = 'Can you Pop the grid quicker than me?'
+    case 'odd-one-out':
+      text = 'How fast can you spot the odd one out?'
       break
     case 'same-square':
       text = 'Destroy the same squares! Can you do it quicker?'

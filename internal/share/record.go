@@ -11,7 +11,7 @@ type Gamemode string
 
 func (g Gamemode) Validate() error {
 	switch g {
-	case GamemodeRandom, GamemodeSameSquare, GamemodePassthrough:
+	case GamemodeRandom, GamemodeSameSquare, GamemodePassthrough, GamemodeOddOneOut:
 		return nil
 	default:
 		return fmt.Errorf("invalid gamemode %q", g)
@@ -30,6 +30,8 @@ func (g Gamemode) Description() string {
 		return "destroy faster the same squares."
 	case GamemodePassthrough:
 		return "be faster than me."
+	case GamemodeOddOneOut:
+		return "spot the odd one out faster."
 	default:
 		panic(fmt.Errorf("unknown gamemode %q", g))
 	}
@@ -39,6 +41,7 @@ const (
 	GamemodeRandom      Gamemode = "random"
 	GamemodeSameSquare  Gamemode = "same-square"
 	GamemodePassthrough Gamemode = "passthrough"
+	GamemodeOddOneOut   Gamemode = "odd-one-out"
 )
 
 type Theme string
@@ -67,7 +70,7 @@ const (
 type RecordData struct {
 	// random gamemode.
 	NumWins int `json:"numWins,omitempty"`
-	// In milliseconds; random-timer, same-square, passthrough gamemodes.
+	// In milliseconds; odd-one-out, same-square, passthrough gamemodes.
 	FastestWinDuration float64 `json:"fastestWinDuration,omitempty"`
 }
 
@@ -107,6 +110,8 @@ func (r *Record) Description() string {
 		return fmt.Sprintf("%s zerstöre schneller die gleichen Karos! They did it in %s.", root, formatDuration(r.Data.FastestWinDuration))
 	case GamemodePassthrough:
 		return fmt.Sprintf("%s do you have the FFITW? Beat %s to win!", root, formatDuration(r.Data.FastestWinDuration))
+	case GamemodeOddOneOut:
+		return fmt.Sprintf("%s can you spot the odd square quicker? Finish in under %s to win!", root, formatDuration(r.Data.FastestWinDuration))
 	default:
 		panic(fmt.Errorf("unknown gamemode %q", r.Gamemode))
 	}

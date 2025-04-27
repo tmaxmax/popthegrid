@@ -282,8 +282,7 @@ class Initial extends State {
 
 class Ready extends State {
   private squareWasRemoved = false
-  private hasCriticalSquares = false
-  private randState?: RandState
+  private randState = rand.state()
 
   constructor(props: BaseProps, private readonly animation: Animation) {
     super('ready', props)
@@ -311,8 +310,10 @@ class Ready extends State {
 
   private onRemoveSquare(square: Square): State {
     this.squareWasRemoved = true
-    if (!this.randState) {
-      this.randState = rand.state()
+
+    const { grid, gamemode } = this.props
+    if (!gamemode.properties.criticalSquares) {
+      rand.set(this.randState)
     }
 
     const attempt = startAttempt({
@@ -320,7 +321,6 @@ class Ready extends State {
       numSquares: this.props.grid.numTotalSquares,
       randState: this.randState,
     })
-    const { grid, gamemode } = this.props
 
     const progress = gamemode.progress(grid, square)
     if (progress.state === 'lose') {
@@ -339,9 +339,8 @@ class Ready extends State {
     }
 
     this.props.gamemode = gamemode
-    if (gamemode.properties.criticalSquares && !this.hasCriticalSquares && this.props.grid.activeSquares.length > 0) {
-      this.hasCriticalSquares = true
-      this.randState = rand.state()
+    if (gamemode.properties.criticalSquares) {
+      rand.set(this.randState)
       this.props.grid.setColors(this.props.grid.colors, gamemode.initialSquares(this.props.grid.colors.length))
     }
 
@@ -353,9 +352,8 @@ class Ready extends State {
   }
 
   transition() {
-    this.hasCriticalSquares = this.props.gamemode.properties.criticalSquares
-    if (this.hasCriticalSquares) {
-      this.randState = rand.state()
+    if (this.props.gamemode.properties.criticalSquares) {
+      rand.set(this.randState)
     }
 
     return this.props.grid.create(this.animation, this.props.gamemode.initialSquares(this.props.grid.colors.length))

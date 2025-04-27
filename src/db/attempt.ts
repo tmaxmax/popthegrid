@@ -2,6 +2,7 @@ import type { Attempt } from '$game/attempt.ts'
 import { isDefined } from '$util/index'
 import { fromRequest } from '$util/indexedDB/index.ts'
 import { transact } from '$util/indexedDB/transact.ts'
+import { gamemodes } from '../gamemode'
 
 export const ATTEMPTS_STORE = 'attempts'
 
@@ -55,9 +56,11 @@ export function retrieveAttempts(db: IDBDatabase): Promise<InsertedAttempt[]> {
   return transact(db, {
     stores: ATTEMPTS_STORE,
     mode: 'readonly',
-    operation(tx) {
+    async operation(tx) {
       const req = tx.objectStore(ATTEMPTS_STORE).getAll()
-      return fromRequest<InsertedAttempt[]>(req)
+      const attempts = await fromRequest<InsertedAttempt[]>(req)
+      // The database might contain games from removed gamemodes.
+      return attempts.filter((a) => a.gamemode in gamemodes)
     },
   })
 }

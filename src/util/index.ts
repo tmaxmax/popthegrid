@@ -14,6 +14,10 @@ export function intn(f: number, limit: number): number {
   return Math.floor(f * limit)
 }
 
+export function pick<T>(f: number, arr: T[]): T {
+  return arr[intn(f, arr.length)]
+}
+
 export function randString(length: number): string {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 

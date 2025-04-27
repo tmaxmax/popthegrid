@@ -29,6 +29,7 @@ import { findCachedLink } from '$db/link.ts'
 import rand from '$rand'
 import { Grid, type GridResizeData } from '$components/Grid.ts'
 import { Tracer } from '$game/trace.ts'
+import log from '$util/log.ts'
 
 const randData = localStorage.getItem('rand')
 if (randData === null) {
@@ -131,7 +132,7 @@ const game = new Game({
       viewport.removeEventListener('resize', viewportHandler)
       viewport.removeEventListener('scroll', viewportHandler)
 
-      console.log({ attempt, trace: tracer.flush() })
+      log({ trace: tracer.flush(), attempt })
     } else if (when === 'after') {
       let animation: Animation
       if (record) {
