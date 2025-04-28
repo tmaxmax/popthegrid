@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/binary"
+	"encoding/json"
 	"math/rand/v2"
 	"net/http"
 	"time"
@@ -18,8 +19,13 @@ import (
 const cookieName = "session"
 
 type Handler struct {
-	Secret []byte
-	Expiry time.Duration
+	Secret, RandSecret []byte
+	Expiry             time.Duration
+}
+
+type randPayload struct {
+	Signature string `json:"randSignature"`
+	State     Rand   `json:"randState"`
 }
 
 func (s Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -27,9 +33,19 @@ func (s Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	payload, exp, ok := getInternal(r.Context())
 	if !ok || exp {
+		var givenRand randPayload
+		var validGivenRand bool
+		if err := json.NewDecoder(r.Body).Decode(&givenRand); err == nil {
+			validGivenRand = givenRand.State.Match(givenRand.Signature, s.RandSecret)
+		}
+
 		payload.ID = uuid.Must(uuid.NewV4())
-		payload.Rand = newRand()
-		resp["rand"] = payload.Rand
+		if validGivenRand {
+			payload.Rand = givenRand.State
+		} else {
+			payload.Rand = NewRand()
+			resp["rand"] = payload.Rand
+		}
 	}
 
 	payload.Exp = time.Now().Add(s.Expiry)

@@ -10,12 +10,13 @@ import (
 	"strconv"
 
 	"github.com/go-chi/httplog/v2"
+	"github.com/tmaxmax/popthegrid/internal/handler/session"
 	"github.com/tmaxmax/popthegrid/internal/share"
 )
 
 type codeRenderer struct {
 	records    RecordsRepository
-	index      *template.Template
+	renderer   renderer
 	storageKey string
 }
 
@@ -24,7 +25,7 @@ func (c codeRenderer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	code := share.Code(r.PathValue("code"))
 	if err := code.Validate(); err != nil {
-		c.error(w, code, http.StatusNotFound)
+		c.error(w, r, code, http.StatusNotFound)
 		return
 	}
 
@@ -40,7 +41,7 @@ func (c codeRenderer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			statusCode = http.StatusInternalServerError
 		}
 
-		c.error(w, code, statusCode)
+		c.error(w, r, code, statusCode)
 		return
 	}
 
@@ -52,7 +53,7 @@ func (c codeRenderer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	data.Objective = data.Description
 
 	b, _ := json.Marshal(record)
-	data.Script = template.JS(fmt.Sprintf("sessionStorage.setItem('%s', '%s')", c.storageKey, b))
+	data.SessionStorage[template.JSStr(c.storageKey)] = template.JSStr(b)
 
 	img := &data.OG.Image
 	img.Path = fmt.Sprintf("/static/og/%s-%s.jpg", record.Gamemode, record.Theme)
@@ -63,12 +64,12 @@ func (c codeRenderer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	data.Robots = "noindex"
 
-	renderIndex(w, http.StatusOK, c.index, data)
+	c.renderer.renderIndex(w, r, http.StatusOK, data)
 }
 
-func (c codeRenderer) error(w http.ResponseWriter, code share.Code, statusCode int) {
+func (c codeRenderer) error(w http.ResponseWriter, r *http.Request, code share.Code, statusCode int) {
 	http.SetCookie(w, c.cookie(code, statusCode))
-	renderIndex(w, statusCode, c.index, defaultIndex())
+	c.renderer.renderIndex(w, r, statusCode, defaultIndex())
 }
 
 func (codeRenderer) cookie(code share.Code, statusCode int) *http.Cookie {
@@ -105,8 +106,8 @@ type indexData struct {
 			Alt    string
 		}
 	}
-	Robots string
-	Script template.JS
+	Robots         string
+	SessionStorage map[template.JSStr]template.JSStr
 }
 
 func defaultIndex() indexData {
@@ -115,16 +116,42 @@ func defaultIndex() indexData {
 	data.Description = "Pop all the squares in the grid. Will you make it?"
 	data.Objective = "Objective: pop all the squares in the grid. Will you make it?"
 	data.OG.URL = "https://popthegrid.com"
+	data.SessionStorage = map[template.JSStr]template.JSStr{}
 
 	return data
 }
 
-func renderIndex(w http.ResponseWriter, statusCode int, index *template.Template, data indexData) {
+type renderer struct {
+	randKey []byte
+	index   *template.Template
+}
+
+func (r renderer) renderIndex(w http.ResponseWriter, req *http.Request, statusCode int, data indexData) {
+	var randSignature string
+	var randState session.Rand
+
+	if sess, ok := session.Get(req.Context()); ok {
+		randState = sess.Rand
+	} else {
+		randState = session.NewRand()
+		randSignature = randState.Signature(r.randKey)
+	}
+
+	data.SessionStorage["rand"] = jsonStr(randState)
+	if len(randSignature) > 0 {
+		data.SessionStorage["randSignature"] = template.JSStr(randSignature)
+	}
+
 	w.Header().Set("Cross-Origin-Opener-Policy", "same-origin")
 	w.Header().Set("Cross-Origin-Embedder-Policy", "require-corp")
 	w.WriteHeader(statusCode)
 
-	if err := index.Execute(w, data); err != nil {
+	if err := r.index.Execute(w, data); err != nil {
 		panic(err)
 	}
+}
+
+func jsonStr(v any) template.JSStr {
+	b, _ := json.Marshal(v)
+	return template.JSStr(b)
 }

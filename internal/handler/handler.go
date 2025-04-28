@@ -97,13 +97,18 @@ func New(c Config) http.Handler {
 		}).
 		Parse(indexHTML))
 
+	rnd := renderer{
+		randKey: c.SessionSecret,
+		index:   index,
+	}
+
 	m.Handle("GET /{code}", codeRenderer{
 		records:    c.Repository,
 		storageKey: c.RecordStorageKey,
-		index:      index,
+		renderer:   rnd,
 	})
 	m.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
-		renderIndex(w, http.StatusOK, index, defaultIndex())
+		rnd.renderIndex(w, r, http.StatusOK, defaultIndex())
 	})
 
 	pow := altcha.NewHandler(altcha.HandlerConfig{
@@ -123,8 +128,9 @@ func New(c Config) http.Handler {
 	go pow.Start(context.TODO())
 
 	sess := session.Handler{
-		Secret: c.SessionSecret,
-		Expiry: c.SessionExpiry,
+		Secret:     c.SessionSecret,
+		RandSecret: c.SessionSecret,
+		Expiry:     c.SessionExpiry,
 	}
 
 	m.Handle("POST /session", pow.WithChallenge(sess))

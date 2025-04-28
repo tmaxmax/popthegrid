@@ -4,15 +4,56 @@ import type { RandConfig } from './rand.ts'
 import rand from '$rand'
 
 type Response = { challenge: null; rand?: RandConfig } | Challenge
+type GivenRand = { randSignature: string; randState: RandConfig }
 
-export async function fetchSession() {
+const randSessionKey = 'rand'
+const randSignatureSessionKey = 'randSignature'
+const randOffsetLocalKey = 'randOffset'
+
+export function initRand(): GivenRand | undefined {
+  const state: RandConfig = JSON.parse(sessionStorage.getItem(randSessionKey)!)
+  const signature = sessionStorage.getItem(randSignatureSessionKey)
+  // signature is provided => new session => new random function => offset must be reset
+  const off = parseInt((signature && localStorage.getItem(randOffsetLocalKey)) || '') || 0
+
+  rand.set({ ...state, off })
+
+  localStorage.setItem(randOffsetLocalKey, off.toString())
+
+  document.addEventListener('visibilitychange', (ev) => {
+    if (ev.isTrusted && document.visibilityState === 'hidden') {
+      localStorage.setItem(randOffsetLocalKey, rand.state().off.toString())
+    }
+  })
+
+  if (signature) {
+    return { randSignature: signature, randState: state }
+  }
+}
+
+function setRand(state: RandConfig) {
+  const curr = rand.state()
+  if (curr.mask === state.mask && curr.key[0] === state.key[0] && curr.key[1] === state.key[1]) {
+    // Random function will be the same if the session ID expired
+    // but the browsing session was not closed AND a random function was provided on open.
+    return
+  }
+
+  localStorage.setItem(randOffsetLocalKey, '0')
+  rand.set({ ...state, off: 0 })
+}
+
+export async function fetchSession(given?: GivenRand) {
   const log = baseLog.extend('Session')
 
   log('Refreshing session')
 
+  const jsonGiven = given && JSON.stringify(given)
+
   let res = await fetch('/session', {
     method: 'POST',
     credentials: 'same-origin',
+    body: jsonGiven,
   })
   if (!res.ok) {
     throw new Error('failed to get session', { cause: await res.text() })
@@ -22,7 +63,7 @@ export async function fetchSession() {
   if (body.challenge == null) {
     if (body.rand) {
       log('Setting random', body.rand)
-      rand.set(body.rand)
+      setRand(body.rand)
     }
 
     return
@@ -52,6 +93,7 @@ export async function fetchSession() {
       'X-Pow-Challenge': btoa(JSON.stringify(payload)),
     },
     credentials: 'same-origin',
+    body: jsonGiven,
   })
   if (!res.ok) {
     throw new Error('failed to refresh session', { cause: await res.text() })
@@ -60,6 +102,6 @@ export async function fetchSession() {
   body = await res.json()
   if ('rand' in body && body.rand) {
     log('Setting random', body.rand)
-    rand.set(body.rand)
+    setRand(body.rand)
   }
 }

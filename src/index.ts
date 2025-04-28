@@ -24,19 +24,13 @@ import { pause, reset, resume } from '$game/ops.ts'
 import { parse } from 'cookie'
 import type { Animation } from '$game/grid/index.ts'
 import { mount } from 'svelte'
-import { fetchSession } from './session.ts'
+import { fetchSession, initRand } from './session.ts'
 import { findCachedLink } from '$db/link.ts'
-import rand from '$rand'
 import { Grid, type GridResizeData } from '$components/Grid.ts'
 import { Tracer } from '$game/trace.ts'
 import log from '$util/log.ts'
 
-const randData = localStorage.getItem('rand')
-if (randData === null) {
-  rand.set({ key: [0xea3742c7, 0x6bf95d47], mask: 0 })
-} else {
-  rand.set(JSON.parse(randData))
-}
+const givenRand = initRand()
 
 const record = getSharedRecord()
 const theme = record?.theme || getTheme() || defaultTheme
@@ -266,12 +260,12 @@ const configureSession = async (store: Context['sessionStatus'], isTimeout: bool
     }
 
     store.update(() => 'pending')
-    await fetchSession()
+    await fetchSession(givenRand)
     store.update(() => 'valid')
 
     let intervalID = setInterval(async () => {
       try {
-        await fetchSession()
+        await fetchSession(givenRand)
       } catch (err) {
         console.error(err)
         clearInterval(intervalID)
@@ -339,10 +333,6 @@ const main = async () => {
     } else {
       resume(game, token)
       token = undefined
-    }
-
-    if (document.visibilityState === 'hidden' && get(context!.sessionStatus) === 'valid') {
-      localStorage.setItem('rand', JSON.stringify(rand.state()))
     }
   })
 

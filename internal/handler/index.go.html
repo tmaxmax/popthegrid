@@ -39,9 +39,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" />
     {{if .Robots }}
     <meta name="robots" content="{{ .Robots }}" />
-    {{end}} {{ Tags }} {{if .Script}}
+    {{end}} {{ Tags }} {{if len .SessionStorage}}
     <script>
-      {{ .Script }}
+      {{range $key, $value := .SessionStorage}}
+        sessionStorage.setItem('{{$key}}', '{{$value}}');
+      {{end}}
     </script>
     {{end}}
   </head>
