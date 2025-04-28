@@ -9,8 +9,9 @@ import (
 	"path/filepath"
 
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/sqlite"
+	msqlite "github.com/golang-migrate/migrate/v4/database/sqlite"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
+	"github.com/tmaxmax/popthegrid/internal/repo/sqlite"
 	_ "modernc.org/sqlite"
 )
 
@@ -45,7 +46,7 @@ func CreateDB(ctx context.Context, path string, migrations fs.FS) (*sql.DB, erro
 		return nil, fmt.Errorf("open: %w", err)
 	}
 
-	md, err := sqlite.WithInstance(db, &sqlite.Config{})
+	md, err := msqlite.WithInstance(db, &msqlite.Config{})
 	if err != nil {
 		return nil, fmt.Errorf("open migration driver: %w", err)
 	}
@@ -63,6 +64,20 @@ func CreateDB(ctx context.Context, path string, migrations fs.FS) (*sql.DB, erro
 
 	cancel := context.AfterFunc(ctx, func() { m.GracefulStop <- true })
 	defer cancel()
+
+	version, dirty, err := m.Version()
+	if err == nil && !dirty {
+		switch version {
+		case 1:
+			if err := m.Steps(1); err != nil {
+				return nil, fmt.Errorf("migrate to version 2: %w", err)
+			}
+
+			if err := sqlite.FromV1ToV2(ctx, db); err != nil {
+				return nil, fmt.Errorf("v1 to v2 migration script: %w", err)
+			}
+		}
+	}
 
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		return nil, fmt.Errorf("migrate up: %w", err)

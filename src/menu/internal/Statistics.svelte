@@ -48,6 +48,7 @@
           fastestWinDuration: last!.duration,
         },
         when: last!.startedAt,
+        attemptID: last!.serverID,
       },
       location: window.location,
     };

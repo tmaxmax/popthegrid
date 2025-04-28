@@ -1,4 +1,4 @@
-import { findCachedLink, type CodeInfo, cacheLink } from '$db/link.ts'
+import { findCachedLink, cacheLink } from '$db/link.ts'
 
 import { entries } from '$util/objects.ts'
 import type { Code } from '$share/code.ts'
@@ -7,7 +7,7 @@ import type { Statistics, Counts } from '$game/statistics.ts'
 import type { GamemodeName } from '$game/gamemode/index.ts'
 import { UnreachableError } from '$util/index.ts'
 
-const display: Record<Exclude<keyof Statistics, 'when'>, string> = {
+const display: Record<Exclude<keyof Statistics, 'when' | 'attemptID'>, string> = {
   fastestWinDuration: 'fastest win',
   gamemode: 'gamemode',
   numAttempts: 'attempt',
@@ -54,15 +54,35 @@ class ResponseError extends Error {
   }
 }
 
+type AttemptShareRecord = {
+  name?: string
+  data: Record<string, unknown>
+  theme: ThemeName
+  attemptID: string
+}
+
+type GameShareRecord = {
+  name?: string
+  data: Record<string, unknown>
+  gamemode: GamemodeName
+  theme: ThemeName
+  when: Date
+}
+
+type InfoShareRecord = {
+  name?: string
+  data: Record<string, unknown>
+  theme: ThemeName
+  when: Date
+}
+
+/** Keep in sync with Go's share.Record */
+type ShareRecord = AttemptShareRecord | GameShareRecord
+
+type ShareRecordInput = InfoShareRecord | (GameShareRecord & { attemptID?: string })
+
 export interface ShareContentParams {
-  /** Keep in sync with Go's share.Record */
-  record: {
-    gamemode?: GamemodeName
-    theme: ThemeName
-    name?: string
-    data: Record<string, unknown>
-    when: Date
-  }
+  record: ShareRecordInput
   location: Location
 }
 
@@ -79,7 +99,7 @@ export async function getShareContent(
   { record, location: { protocol, host } }: ShareContentParams,
   validSession: boolean
 ): Promise<ShareData> {
-  if (!recordCanBeCodeInfo(record)) {
+  if (!('gamemode' in record)) {
     const [[key, value]] = entries(record.data)
 
     return {
@@ -90,16 +110,22 @@ export async function getShareContent(
   }
 
   let code = await findCachedLink(db, record)
-
   if (!code) {
     if (!validSession) {
       throw new ResponseError({ status: 401, title: 'Unauthorized', reason: 'You are offline or something went wrong in the background.' })
     }
 
+    let share: ShareRecord
+    if (record.attemptID) {
+      share = { attemptID: record.attemptID, name: record.name, data: record.data, theme: record.theme }
+    } else {
+      share = record
+    }
+
     const res = await fetch(`/share`, {
       method: 'POST',
       credentials: 'same-origin',
-      body: JSON.stringify(record),
+      body: JSON.stringify(share),
     })
 
     if (res.status !== 200) {
@@ -113,7 +139,7 @@ export async function getShareContent(
   }
 
   let text: string
-  switch (record.gamemode!) {
+  switch (record.gamemode) {
     case 'random':
       text = 'Can you win more than me at Pop the grid?'
       break
@@ -135,8 +161,4 @@ export async function getShareContent(
     url: `${protocol}//${host}/${code}`,
     text,
   }
-}
-
-function recordCanBeCodeInfo(r: Omit<ShareContentParams['record'], 'data'>): r is CodeInfo {
-  return 'gamemode' in r && !!r.gamemode
 }

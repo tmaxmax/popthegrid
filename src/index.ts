@@ -27,7 +27,7 @@ import { mount } from 'svelte'
 import { fetchSession, initRand } from './session.ts'
 import { findCachedLink } from '$db/link.ts'
 import { Grid, type GridResizeData } from '$components/Grid.ts'
-import { Tracer } from '$game/trace.ts'
+import { Tracer, type Trace } from '$game/trace.ts'
 import type { Attempt } from '$game/attempt.ts'
 
 const givenRand = initRand()
@@ -112,12 +112,6 @@ const game = new Game({
   },
   onGameEnd({ attempt, when }) {
     if (when === 'before') {
-      insertAttempt(db, attempt).then((attempt) => {
-        context!.attempts.update(attempt)
-        context!.attempts.updateOngoing(undefined)
-        attemptsChan.postMessage(attempt)
-      })
-
       tracer.enabled = false
 
       grid.removeGridEventListener('pointermove', gridPointerMoveListener)
@@ -126,7 +120,7 @@ const game = new Game({
       viewport.removeEventListener('resize', viewportHandler)
       viewport.removeEventListener('scroll', viewportHandler)
 
-      log({ trace: tracer.flush(), attempt })
+      handleAttempt(attempt, tracer.flush())
     } else if (when === 'after') {
       let animation: Animation
       if (record) {
@@ -146,6 +140,32 @@ const attemptsChan = new BroadcastChannel('attempts')
 attemptsChan.addEventListener('message', (ev: MessageEvent<Attempt>) => {
   context?.attempts.update(ev.data)
 })
+
+const submitAttempt = async (attempt: Attempt, trace: Trace): Promise<string> => {
+  const resp = await fetch('/submit', {
+    method: 'POST',
+    body: JSON.stringify({ attempt, trace }),
+    credentials: 'include',
+  })
+  if (!resp.ok) {
+    throw new Error(resp.statusText, { cause: await resp.text() })
+  }
+
+  const { id }: { id: string } = await resp.json()
+
+  return id
+}
+
+const handleAttempt = async (attempt: Attempt, trace: Trace) => {
+  try {
+    attempt.serverID = await submitAttempt(attempt, trace)
+  } finally {
+    context!.attempts.update(attempt)
+    context!.attempts.updateOngoing(undefined)
+    attemptsChan.postMessage(attempt)
+    insertAttempt(db, attempt).catch(console.error)
+  }
+}
 
 const getRecordClearRedirect = () => {
   const element = document.createElement('span')

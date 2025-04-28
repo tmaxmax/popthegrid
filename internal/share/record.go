@@ -5,66 +5,9 @@ import (
 	"fmt"
 	"strings"
 	"time"
-)
 
-type Gamemode string
-
-func (g Gamemode) Validate() error {
-	switch g {
-	case GamemodeRandom, GamemodeSameSquare, GamemodePassthrough, GamemodeOddOneOut:
-		return nil
-	default:
-		return fmt.Errorf("invalid gamemode %q", g)
-	}
-}
-
-func (g *Gamemode) UnmarshalJSON(data []byte) error {
-	return unmarshalEnum(data, g)
-}
-
-func (g Gamemode) Description() string {
-	switch g {
-	case GamemodeRandom:
-		return "win more than me."
-	case GamemodeSameSquare:
-		return "destroy faster the same squares."
-	case GamemodePassthrough:
-		return "be faster than me."
-	case GamemodeOddOneOut:
-		return "spot the odd one out faster."
-	default:
-		panic(fmt.Errorf("unknown gamemode %q", g))
-	}
-}
-
-const (
-	GamemodeRandom      Gamemode = "random"
-	GamemodeSameSquare  Gamemode = "same-square"
-	GamemodePassthrough Gamemode = "passthrough"
-	GamemodeOddOneOut   Gamemode = "odd-one-out"
-)
-
-type Theme string
-
-func (t Theme) Validate() error {
-	switch t {
-	case ThemeBlood, ThemeCandy, ThemeNoir, ThemeCozy, ThemeIris:
-		return nil
-	default:
-		return fmt.Errorf("invalid theme %q", t)
-	}
-}
-
-func (t *Theme) UnmarshalJSON(data []byte) error {
-	return unmarshalEnum(data, t)
-}
-
-const (
-	ThemeCandy Theme = "candy"
-	ThemeBlood Theme = "blood"
-	ThemeNoir  Theme = "noir"
-	ThemeCozy  Theme = "cozy"
-	ThemeIris  Theme = "iris"
+	"github.com/gofrs/uuid"
+	"github.com/tmaxmax/popthegrid/internal/attempt"
 )
 
 type RecordData struct {
@@ -75,20 +18,29 @@ type RecordData struct {
 }
 
 type Record struct {
-	Gamemode Gamemode   `json:"gamemode"`
-	Theme    Theme      `json:"theme"`
-	Name     string     `json:"name,omitempty"`
-	When     time.Time  `json:"when"`
-	Data     RecordData `json:"data"`
+	Gamemode  attempt.Gamemode `json:"gamemode"`
+	Theme     attempt.Theme    `json:"theme"`
+	Name      string           `json:"name,omitempty"`
+	When      time.Time        `json:"when"`
+	Data      RecordData       `json:"data"`
+	AttemptID uuid.NullUUID    `json:"attemptID,omitzero"`
 }
 
 func (r *Record) Validate() error {
-	if r.When.IsZero() {
-		return errors.New("record time must be provided")
-	}
-
 	if r.Data == (RecordData{}) {
 		return errors.New("data must be provided")
+	}
+
+	hasInfo := r.Gamemode != "" && !r.When.IsZero()
+
+	if r.AttemptID.Valid && hasInfo {
+		return errors.New("can't provide both attempt ID and record info")
+	} else if !r.AttemptID.Valid && !hasInfo {
+		return errors.New("record info incomplete or not provided")
+	}
+
+	if err := r.Theme.Validate(); err != nil {
+		return fmt.Errorf("invalid theme: %w", err)
 	}
 
 	return nil
@@ -103,14 +55,14 @@ func (r *Record) Description() string {
 	root := fmt.Sprintf("You're in %s world:", makePossessive(name))
 
 	switch r.Gamemode {
-	case GamemodeRandom:
+	case attempt.GamemodeRandom:
 		numWins := r.Data.NumWins
 		return fmt.Sprintf("%s can you win more? They won %d %s.", root, numWins, makePlural("time", numWins))
-	case GamemodeSameSquare:
+	case attempt.GamemodeSameSquare:
 		return fmt.Sprintf("%s zerstöre schneller die gleichen Karos! They did it in %s.", root, formatDuration(r.Data.FastestWinDuration))
-	case GamemodePassthrough:
+	case attempt.GamemodePassthrough:
 		return fmt.Sprintf("%s do you have the FFITW? Beat %s to win!", root, formatDuration(r.Data.FastestWinDuration))
-	case GamemodeOddOneOut:
+	case attempt.GamemodeOddOneOut:
 		return fmt.Sprintf("%s can you spot the odd square quicker? Finish in under %s to win!", root, formatDuration(r.Data.FastestWinDuration))
 	default:
 		panic(fmt.Errorf("unknown gamemode %q", r.Gamemode))

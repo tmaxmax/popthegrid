@@ -1,7 +1,7 @@
 import { createConfigurator } from '$util/indexedDB/schema.ts'
 import type { Schema, Migration } from '$util/indexedDB/schema.ts'
 import { ATTEMPTS_STORE } from './attempt.ts'
-import { LINKS_INDEX, LINKS_STORE } from './link.ts'
+import { LINKS_INDEX, LINKS_INDEX_ATTEMPT_ID, LINKS_STORE } from './link.ts'
 
 const migrations: Migration[] = [
   (db) => {
@@ -29,6 +29,11 @@ const migrations: Migration[] = [
     })
 
     store.createIndex(LINKS_INDEX, ['name', 'gamemode', 'when', 'theme'], { unique: true })
+  },
+  (_, tx) => {
+    const store = tx.objectStore(LINKS_STORE)
+
+    store.createIndex(LINKS_INDEX_ATTEMPT_ID, ['name', 'theme', 'attemptID'], { unique: true })
   },
 ]
 

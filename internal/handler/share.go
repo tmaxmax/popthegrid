@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/httplog/v2"
@@ -30,8 +31,28 @@ func (s shareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	code, err := s.records.Save(r.Context(), record)
 	if err != nil {
-		l.ErrorContext(r.Context(), "save record", "err", err, "record", record)
-		problem.Of(http.StatusInternalServerError).Append(problem.Detail("something went wrong")).WriteTo(w)
+		statusCode := http.StatusInternalServerError
+		var opts []problem.Option
+
+		if rerr := (RepositoryError{}); errors.As(err, &rerr) {
+			switch rerr.Kind {
+			case ErrorNotFound:
+				statusCode = http.StatusNotFound
+			case ErrorAlreadySubmitted, ErrorNotWin:
+				statusCode = http.StatusBadRequest
+			default:
+			}
+
+			opts = append(opts, problem.Detail(string(rerr.Kind)))
+		}
+
+		if statusCode == http.StatusInternalServerError {
+			l.ErrorContext(r.Context(), "save record", "err", err, "record", record)
+		}
+
+		opts = append(opts, problem.WrapSilent(err))
+		problem.Of(statusCode).Append(opts...).WriteTo(w)
+
 		return
 	}
 
@@ -56,7 +77,8 @@ func (s shareHandler) unmarshalPost(w http.ResponseWriter, r *http.Request) (sha
 	}
 
 	if err := input.Validate(); err != nil {
-		problem.Of(http.StatusBadRequest).Append(problem.Detail("invalid input")).WriteTo(w)
+		l.WarnContext(r.Context(), "validation error", "err", err)
+		problem.Of(http.StatusBadRequest).Append(problem.Detail("invalid input"), problem.Wrap(err)).WriteTo(w)
 		return share.Record{}, false
 	}
 

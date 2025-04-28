@@ -11,6 +11,7 @@ export interface Counts {
 export interface Statistics extends Counts {
   gamemode: GamemodeName
   fastestWinDuration?: number
+  attemptID?: string
 }
 
 const EMPTY_COUNTS: Counts = {
@@ -46,6 +47,7 @@ export const addAttemptToStatistics = (acc: Accumulator, curr: Attempt): Accumul
       if (!accg.fastestWinDuration || accg.fastestWinDuration > curr.duration) {
         accg.fastestWinDuration = curr.duration
         accg.when = curr.startedAt
+        accg.attemptID = curr.serverID
       }
     }
   } else {

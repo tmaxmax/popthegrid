@@ -15,8 +15,10 @@ type RecordsRepository interface {
 type ErrorKind string
 
 const (
-	ErrorNotFound ErrorKind = "not found"
-	ErrorInternal ErrorKind = "internal"
+	ErrorNotFound         ErrorKind = "not found"
+	ErrorInternal         ErrorKind = "internal"
+	ErrorAlreadySubmitted ErrorKind = "already submitted"
+	ErrorNotWin           ErrorKind = "attempt is not a win"
 )
 
 type RepositoryError struct {

@@ -25,6 +25,8 @@ export interface Attempt {
   numSquares?: number
   /** Can be undefined because it must explicitly be loaded */
   randState?: RandState
+  /** Not set for old attempts or for attempts which couldn't be uploaded */
+  serverID?: string
 }
 
 export interface StartAttemptProps {

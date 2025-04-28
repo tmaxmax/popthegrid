@@ -56,6 +56,7 @@ func (f FS) readdir(paths []string) ([]string, error) {
 type Repository interface {
 	RecordsRepository
 	PingRepository
+	AttemptsRepository
 }
 
 type Config struct {
@@ -136,6 +137,8 @@ func New(c Config) http.Handler {
 	m.Handle("POST /session", pow.WithChallenge(sess))
 
 	m.Handle("POST /share", shareHandler{records: c.Repository})
+
+	m.Handle("POST /submit", submitHandler{atts: c.Repository})
 
 	if c.RegisterVite != nil {
 		c.RegisterVite(m)

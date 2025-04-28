@@ -28,6 +28,7 @@
             [key]: statistics[key],
           },
           when: statistics.when,
+          attemptID: 'gamemode' in statistics ? statistics.attemptID : undefined,
         },
         location: window.location,
       };

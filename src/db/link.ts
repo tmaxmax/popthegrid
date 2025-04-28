@@ -6,41 +6,51 @@ import { transact } from '$util/indexedDB/transact.ts'
 
 export const LINKS_STORE = 'links'
 export const LINKS_INDEX = 'data'
+export const LINKS_INDEX_ATTEMPT_ID = 'attemptID'
 
-export interface CodeInfo {
+export type CodeInfo = {
   name?: string
   gamemode: GamemodeName
   when: Date
   theme: ThemeName
+  attemptID?: string
 }
 
-export function findCachedLink(db: IDBDatabase, { name, gamemode, when, theme }: CodeInfo): Promise<Code | undefined> {
+export function findCachedLink(db: IDBDatabase, info: CodeInfo): Promise<Code | undefined> {
   return transact(db, {
-    stores: 'links',
+    stores: LINKS_STORE,
     async operation(tx) {
-      const req = tx
-        .objectStore(LINKS_STORE)
-        .index(LINKS_INDEX)
-        .get([name || '', gamemode, when, theme])
-      const link = await fromRequest<Link | undefined>(req)
+      const links = tx.objectStore(LINKS_STORE)
+
+      let req: IDBRequest<Link | undefined>
+      if (info.attemptID) {
+        req = links.index(LINKS_INDEX_ATTEMPT_ID).get([info.name || '', info.theme, info.attemptID])
+      } else {
+        req = links.index(LINKS_INDEX).get([info.name || '', info.gamemode, info.when, info.theme])
+      }
+
+      const link = await fromRequest(req)
       if (link) {
         return link.code
       }
+
       return undefined
     },
     mode: 'readonly',
   })
 }
 
-export interface Link extends CodeInfo {
+export type Link = CodeInfo & {
   code: Code
 }
 
-export function cacheLink(db: IDBDatabase, { code, name, gamemode, when, theme }: Link): Promise<boolean> {
+export function cacheLink(db: IDBDatabase, link: Link): Promise<boolean> {
   return transact(db, {
     stores: 'links',
     async operation(tx) {
-      const req = tx.objectStore(LINKS_STORE).add({ code, name: name || '', gamemode, when, theme })
+      link.name ||= ''
+
+      const req = tx.objectStore(LINKS_STORE).add(link)
       try {
         await fromRequest(req)
         return true
