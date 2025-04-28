@@ -3,7 +3,7 @@ package share
 import (
 	"errors"
 	"fmt"
-	"math/rand"
+	"math/rand/v2"
 	"strings"
 )
 
@@ -31,13 +31,13 @@ const (
 	letterIdxMax  = 63 / letterIdxBits
 )
 
-func NewCode(src rand.Source) Code {
+func NewCode() Code {
 	var sb strings.Builder
 	sb.Grow(codeLength)
 
-	for i, cache, remain := codeLength-1, src.Int63(), letterIdxMax; i >= 0; {
+	for i, cache, remain := codeLength-1, rand.Int64(), letterIdxMax; i >= 0; {
 		if remain == 0 {
-			cache, remain = src.Int63(), letterIdxMax
+			cache, remain = rand.Int64(), letterIdxMax
 		}
 		if idx := int(cache & letterIdxMask); idx < len(chars) {
 			sb.WriteByte(chars[idx])

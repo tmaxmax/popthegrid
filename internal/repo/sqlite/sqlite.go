@@ -35,9 +35,8 @@ func (r *Repository) Get(ctx context.Context, code share.Code) (share.Record, er
 }
 
 func (r *Repository) Save(ctx context.Context, record share.Record) (share.Code, error) {
-	src := rand.NewSource(time.Now().UnixNano())
 	for range 10 {
-		code := share.NewCode(src)
+		code := share.NewCode()
 
 		ok, err := r.trySaveWithCode(ctx, record, code)
 		if ok {
