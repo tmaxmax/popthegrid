@@ -9,7 +9,7 @@ import schema from '$db/schema.ts'
 import { assertNonNull } from '$util/assert.ts'
 import { Game } from '$game/index.ts'
 import { DOMGrid } from '$game/grid/dom.ts'
-import { insertAttempt, retrieveAttempts, type InsertedAttempt } from '$db/attempt.ts'
+import { insertAttempt, retrieveAttempts } from '$db/attempt.ts'
 import { Redirect } from '$components/Redirect.ts'
 import { defaultGamemode, gamemodes } from './gamemode.ts'
 import { clearSharedRecord, getSharedRecord } from '$share/record.ts'
@@ -28,7 +28,7 @@ import { fetchSession, initRand } from './session.ts'
 import { findCachedLink } from '$db/link.ts'
 import { Grid, type GridResizeData } from '$components/Grid.ts'
 import { Tracer } from '$game/trace.ts'
-import log from '$util/log.ts'
+import type { Attempt } from '$game/attempt.ts'
 
 const givenRand = initRand()
 
@@ -143,7 +143,7 @@ const game = new Game({
 })
 
 const attemptsChan = new BroadcastChannel('attempts')
-attemptsChan.addEventListener('message', (ev: MessageEvent<InsertedAttempt>) => {
+attemptsChan.addEventListener('message', (ev: MessageEvent<Attempt>) => {
   context?.attempts.update(ev.data)
 })
 

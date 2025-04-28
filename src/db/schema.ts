@@ -1,6 +1,6 @@
 import { createConfigurator } from '$util/indexedDB/schema.ts'
 import type { Schema, Migration } from '$util/indexedDB/schema.ts'
-import { ATTEMPTS_STORE, RAND_KEYS_INDEX, RAND_KEYS_STORE } from './attempt.ts'
+import { ATTEMPTS_STORE } from './attempt.ts'
 import { LINKS_INDEX, LINKS_STORE } from './link.ts'
 
 const migrations: Migration[] = [
@@ -29,14 +29,6 @@ const migrations: Migration[] = [
     })
 
     store.createIndex(LINKS_INDEX, ['name', 'gamemode', 'when', 'theme'], { unique: true })
-  },
-  (db) => {
-    const store = db.createObjectStore(RAND_KEYS_STORE, {
-      keyPath: 'id',
-      autoIncrement: true,
-    })
-
-    store.createIndex(RAND_KEYS_INDEX, 'key', { unique: true })
   },
 ]
 

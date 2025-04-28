@@ -1,4 +1,3 @@
-import type { InsertedAttempt } from '$db/attempt.ts'
 import type { GamemodeName } from '$game/gamemode/index.ts'
 import { addAttemptToStatistics, type Accumulator } from '$game/statistics.ts'
 import type { ThemeName } from '$theme'
@@ -7,7 +6,7 @@ import { getContext as svelteGetContext } from 'svelte'
 import type { Game } from '$game/index.ts'
 import type { GameRecord } from '$share/record.ts'
 import { getName } from '$share/name.ts'
-import type { OngoingAttempt } from '$game/attempt.ts'
+import type { Attempt, OngoingAttempt } from '$game/attempt.ts'
 
 export interface Context {
   name: Writable<string | undefined>
@@ -23,19 +22,19 @@ export interface Context {
 
 export interface Attempts {
   statistics: Accumulator
-  last?: InsertedAttempt
+  last?: Attempt
   ongoing?: OngoingAttempt
 }
 
 interface AttemptsStore extends Readable<Attempts> {
-  update(attempt: InsertedAttempt): void
+  update(attempt: Attempt): void
   updateOngoing(attempt?: OngoingAttempt): void
 }
 
 export interface ContextInput {
   name?: string
   record?: GameRecord
-  attemptsLoader(): Promise<InsertedAttempt[]>
+  attemptsLoader(): Promise<Attempt[]>
   game: Game
   gamemode: GamemodeName
   theme: ThemeName
@@ -77,7 +76,7 @@ export function configureTitle(name: Writable<string | undefined>, element: Elem
   return name.subscribe(set)
 }
 
-function createAttemptsStore(loader: () => Promise<InsertedAttempt[]>): AttemptsStore {
+function createAttemptsStore(loader: () => Promise<Attempt[]>): AttemptsStore {
   let hasSubscribed = false
 
   const { subscribe, update } = writable<Attempts>({ statistics: [] }, (set) => {
