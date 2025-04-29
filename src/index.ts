@@ -27,7 +27,7 @@ import { mount } from 'svelte'
 import { fetchSession, initRand } from './session.ts'
 import { findCachedLink } from '$db/link.ts'
 import { Grid, type GridResizeData } from '$components/Grid.ts'
-import { Tracer, type Trace } from '$game/trace.ts'
+import { Tracer, type PointerEvents, type Trace } from '$game/trace.ts'
 import type { Attempt } from '$game/attempt.ts'
 
 const givenRand = initRand()
@@ -127,7 +127,9 @@ const game = new Game({
       viewport.removeEventListener('resize', viewportHandler)
       viewport.removeEventListener('scroll', viewportHandler)
 
-      handleAttempt(attempt, tracer.flush())
+      const { trace, pointerEvents } = tracer.flush()
+
+      handleAttempt(attempt, trace, pointerEvents)
     } else if (when === 'after') {
       let animation: Animation
       if (record) {
@@ -148,11 +150,16 @@ attemptsChan.addEventListener('message', (ev: MessageEvent<Attempt>) => {
   context?.attempts.update(ev.data)
 })
 
-const submitAttempt = async (attempt: Attempt, trace: Trace): Promise<string> => {
+const submitAttempt = async (attempt: Attempt, trace: Trace, pointerEvents: PointerEvents): Promise<string> => {
+  const body = new FormData()
+  body.set('attempt', JSON.stringify(attempt))
+  body.set('trace', JSON.stringify(trace))
+  body.set('pointer-events', new Blob([pointerEvents]))
+
   const resp = await fetch('/submit', {
     method: 'POST',
-    body: JSON.stringify({ attempt, trace }),
-    credentials: 'include',
+    body,
+    credentials: 'same-origin',
   })
   if (!resp.ok) {
     throw new Error(resp.statusText, { cause: await resp.text() })
@@ -163,9 +170,9 @@ const submitAttempt = async (attempt: Attempt, trace: Trace): Promise<string> =>
   return id
 }
 
-const handleAttempt = async (attempt: Attempt, trace: Trace) => {
+const handleAttempt = async (attempt: Attempt, trace: Trace, pointerEvents: PointerEvents) => {
   try {
-    attempt.serverID = await submitAttempt(attempt, trace)
+    attempt.serverID = await submitAttempt(attempt, trace, pointerEvents)
   } finally {
     context!.attempts.update(attempt)
     context!.attempts.updateOngoing(undefined)

@@ -156,7 +156,7 @@ func New(c Config) http.Handler {
 		httplog.Handler(logger, staticPaths),
 		middleware.Recoverer,
 		cors.New(c.CORS).Handler,
-	).Handler(http.MaxBytesHandler(m, 1<<14))
+	).Handler(http.MaxBytesHandler(m, 1<<16))
 }
 
 type corsLogger struct {

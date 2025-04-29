@@ -70,6 +70,10 @@ type PointerTrace = [
   number // time
 ]
 
+// Little endian binary representation of pointer events array.
+// Stream: [pointer index b0, pointer x b1, pointer y b3, delta b5-8]
+export type PointerEvents = Uint8Array
+
 type RemoveSquareTrace = RemoveSquareEvent & { pointerEventIndex: number; time: number }
 
 export type Trace = {
@@ -83,7 +87,6 @@ export type Trace = {
     | ThemeInput
   )[]
   pointers: Pointer[]
-  pointerEvents: PointerTrace[] // pointer index, x, y, timestamp
   firstPointerEventTime: number
   timeOrigin: number
 }
@@ -271,9 +274,30 @@ export class Tracer {
       }
     }
 
-    this.clear()
-    trace.pointerEvents = ptraces
+    const pevs = new Uint8Array(ptraces.length * 9)
+    for (let i = 0; i < ptraces.length; i++) {
+      const ptrace = ptraces[i]
+      let j = 9 * i
 
-    return trace
+      pevs[j++] = ptrace[0]
+
+      const x = ptrace[1]
+      pevs[j++] = x
+      pevs[j++] = x >>> 8
+
+      const y = ptrace[2]
+      pevs[j++] = y
+      pevs[j++] = y >>> 8
+
+      const delta = ptrace[3]
+      pevs[j++] = delta
+      pevs[j++] = delta >>> 8
+      pevs[j++] = delta >>> 16
+      pevs[j++] = delta >>> 24
+    }
+
+    this.clear()
+
+    return { trace, pointerEvents: pevs } as const
   }
 }

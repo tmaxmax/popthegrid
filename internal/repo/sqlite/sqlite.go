@@ -13,6 +13,7 @@ import (
 	"github.com/tmaxmax/popthegrid/internal/attempt"
 	"github.com/tmaxmax/popthegrid/internal/handler"
 	"github.com/tmaxmax/popthegrid/internal/share"
+	"github.com/tmaxmax/popthegrid/internal/trace"
 	"modernc.org/sqlite"
 	sqlite3 "modernc.org/sqlite/lib"
 )
@@ -110,14 +111,14 @@ func (r *Repository) trySaveWithCode(ctx context.Context, record share.Record, c
 	return false, createError(handler.ErrorInternal, err)
 }
 
-func (r *Repository) Submit(ctx context.Context, att attempt.Attempt, trace json.RawMessage) (uuid.UUID, error) {
+func (r *Repository) Submit(ctx context.Context, att *attempt.Attempt, tr *trace.Trace) (uuid.UUID, error) {
 	id, err := uuid.NewV4()
 	if err != nil {
 		return uuid.Nil, fmt.Errorf("gen id: %w", err)
 	}
 
 	const query = `insert into attempts (id, gamemode, started_at, kind, num_squares, duration_ms, rand_state, trace, created_at) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
-	_, err = r.DB.ExecContext(ctx, query, id, att.Gamemode, att.StartedAt, att.Kind, att.NumSquares, att.DurationMs, randState(att.RandState), trace, time.Now())
+	_, err = r.DB.ExecContext(ctx, query, id, att.Gamemode, att.StartedAt, att.Kind, att.NumSquares, att.DurationMs, randState(att.RandState), tr, time.Now())
 	if err != nil {
 		// TODO: handle particular error cases (ID conflict).
 		return uuid.Nil, fmt.Errorf("insert: %w", err)
