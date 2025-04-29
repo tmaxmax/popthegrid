@@ -92,19 +92,22 @@ export type Trace = {
   )[]
   pointers: Pointer[]
   pointerEvents: PointerTrace[] // pointer index, x, y, timestamp
+  timeOrigin: number
 }
 
 const typesToDeduplicate: Input['type'][] = ['gridResize', 'orientationChange', 'viewport', 'theme']
 
 export class Tracer {
   #inputs: Input[]
-  #now: () => number
   #enabled: boolean
 
-  constructor(now: () => number) {
+  constructor() {
     this.#inputs = []
-    this.#now = now
     this.#enabled = false
+  }
+
+  #now() {
+    return performance.now()
   }
 
   #push(i: Input) {
@@ -203,6 +206,7 @@ export class Tracer {
       events: [],
       pointerEvents: [],
       pointers: [],
+      timeOrigin: performance.timeOrigin,
     } as unknown as Trace
     const pids: string[] = []
 

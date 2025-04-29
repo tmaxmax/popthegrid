@@ -56,7 +56,7 @@ const grid = new Grid({
   colors: themes[theme].colors.squares.map((_, i) => `var(--color-square-${i + 1})`),
 })
 
-const tracer = new Tracer(() => performance.now())
+const tracer = new Tracer()
 
 const metadataMatchMedia = {
   primaryHover: window.matchMedia('(hover: hover)'),
