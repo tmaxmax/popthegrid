@@ -1,7 +1,7 @@
 js_import main from validate_hmac.js;
 
-limit_req_zone $binary_remote_addr zone=share_ip:10m rate=1r/s;
-limit_req_zone $cookie_session zone=share_session:50m rate=10r/m;
+limit_req_zone $binary_remote_addr zone=share_ip:10m rate=3r/s;
+limit_req_zone $cookie_session zone=share_session:50m rate=30r/m;
 
 server {
 	server_name popthegrid.com;
@@ -25,11 +25,11 @@ server {
 		proxy_set_header Host $host;
 	}
 
-	location /share {
+	location ~ ^/(share|submit) {
 		auth_request /validate-hmac;
 
-		limit_req zone=share_session burst=2 nodelay;
-		limit_req zone=share_ip burst=10 nodelay;
+		limit_req zone=share_session burst=5 delay=2;
+		limit_req zone=share_ip burst=20 delay=10;
 		limit_req_status 503;
 		limit_req_log_level warn;
 
