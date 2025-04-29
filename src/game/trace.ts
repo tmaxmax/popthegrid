@@ -48,23 +48,16 @@ type Pointer = {
   type: string
   primary: boolean
   size: [number, number]
-  tilt: [number, number]
-  pressure: { normal: number; tangential: number }
-  angle: { altitude: number; azimuth: number; twist: number }
   move: boolean
 }
 
-const pointerID = (p: Pointer) =>
-  `${p.type}-${p.primary}-${p.size[0]}x${p.size[1]}-${p.tilt[0]}x${p.tilt[1]}-${p.pressure.normal}x${p.pressure.tangential}-${p.angle.altitude}x${p.angle.azimuth}x${p.angle.twist}`
+const pointerID = (p: Pointer) => `${p.type}-${p.primary}-${p.size[0]}x${p.size[1]}-${p.move}`
 
 const pointerFromInput = ({ data, time }: { data: PointerEvent; time: number }): [Pointer, PointerTrace] => [
   {
     type: data.pointerType,
     primary: data.isPrimary,
     size: [data.width || 0, data.height || 0],
-    tilt: [data.tiltX || 0, data.tiltY || 0],
-    pressure: { normal: data.pressure || 0, tangential: data.tangentialPressure || 0 },
-    angle: { altitude: data.altitudeAngle || 0, azimuth: data.azimuthAngle || 0, twist: data.twist || 0 },
     move: data.type == 'pointermove',
   },
   [-1, data.clientX, data.clientY, time],
@@ -85,13 +78,13 @@ export type Trace = {
     | Exclude<GameEvent, RemoveSquareEvent>
     | RemoveSquareTrace
     | ViewportInput
-    | { pointerEventIndex: number; type: 'pointerMove'; time: number }
     | OrientationChangeInput
     | GridResizeInput
     | ThemeInput
   )[]
   pointers: Pointer[]
   pointerEvents: PointerTrace[] // pointer index, x, y, timestamp
+  firstPointerEventTime: number
   timeOrigin: number
 }
 
@@ -204,11 +197,13 @@ export class Tracer {
   flush() {
     const trace = {
       events: [],
-      pointerEvents: [],
       pointers: [],
       timeOrigin: performance.timeOrigin,
     } as unknown as Trace
     const pids: string[] = []
+    const ptraces: PointerTrace[] = []
+
+    let lastPointerTraceTime: number | undefined
 
     for (const input of this.#inputs) {
       switch (input.type) {
@@ -225,15 +220,32 @@ export class Tracer {
           }
 
           pointerTrace[0] = pointerIndex
+          // A 65535x65535 viewport should be big enough for most intents.
+          pointerTrace[1] = Math.min(Math.round(pointerTrace[1]), 65535) >>> 0
+          pointerTrace[2] = Math.min(Math.round(pointerTrace[2]), 65535) >>> 0
 
-          const pointerEventIndex = trace.pointerEvents.length
-          trace.pointerEvents.push(pointerTrace)
+          const time = pointerTrace[3]
+          if (lastPointerTraceTime) {
+            // performance.now has in isolated contexts a resolution of 5 microseconds.
+            // By multiplying by 200 we get the smallest integer which can represent
+            // all possible performance.now outputs.
+            pointerTrace[3] = ((time - lastPointerTraceTime) * 200) >>> 0
+          } else {
+            trace.firstPointerEventTime = time
+            pointerTrace[3] = 0
+          }
 
           if (input.type === 'removeSquare') {
             delete (input as any).data
             const t = input as any as RemoveSquareTrace
-            t.pointerEventIndex = pointerEventIndex
+            t.pointerEventIndex = ptraces.length
+            ptraces.push(pointerTrace)
             trace.events.push(t)
+            lastPointerTraceTime = time
+          } else if (!lastPointerTraceTime || pointerTrace[3] >= 16 * 200) {
+            // A smooth 60fps replay requires a new event every ~16ms; drop everything in between to reduce size.
+            ptraces.push(pointerTrace)
+            lastPointerTraceTime = time
           }
 
           break
@@ -260,6 +272,7 @@ export class Tracer {
     }
 
     this.clear()
+    trace.pointerEvents = ptraces
 
     return trace
   }
