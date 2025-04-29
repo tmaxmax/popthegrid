@@ -48,6 +48,7 @@ server {
 	location ~* .(?:css|js) {
 		proxy_pass http://localhost:3000;
 		proxy_set_header X-Request-Id "";
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
 		expires max;
 		add_header Cache-Control "public";
