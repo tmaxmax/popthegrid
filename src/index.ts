@@ -19,7 +19,7 @@ import { getTheme, setTheme, defaultTheme, themes } from './theme.ts'
 import { contextKey, createContext, configureTitle, type Context } from './menu/context.ts'
 import { getName, listenToNameChanges } from '$share/name.ts'
 import { isDefined, trusted, wait } from '$util/index.ts'
-import { get, type Writable } from 'svelte/store'
+import { get, type Unsubscriber, type Writable } from 'svelte/store'
 import { pause, reset, resume } from '$game/ops.ts'
 import { parse } from 'cookie'
 import type { Animation } from '$game/grid/index.ts'
@@ -71,6 +71,8 @@ const gridPointerMoveListener = trusted((ev: PointerEvent) => tracer.pointerMove
 const gridResizeListener = (ev: GridResizeData) => tracer.gridResize(ev, window)
 const screenOrientationListener = trusted(() => tracer.orientationChange(screen.orientation))
 
+let themeUnsubscriber: Unsubscriber | undefined
+
 const gamemode = record?.gamemode || defaultGamemode
 const game = new Game({
   gamemode: gamemodes[gamemode].create(),
@@ -94,6 +96,8 @@ const game = new Game({
 
       tracer.metadata(navigator, metadataMatchMedia)
 
+      themeUnsubscriber = context!.theme.subscribe((name) => tracer.theme(name))
+
       grid.onResize(gridResizeListener)
 
       tracer.orientationChange(screen.orientation)
@@ -114,6 +118,8 @@ const game = new Game({
   onGameEnd({ attempt, when }) {
     if (when === 'before') {
       tracer.enabled = false
+
+      themeUnsubscriber?.()
 
       grid.removeGridEventListener('pointermove', gridPointerMoveListener)
       grid.onResize(null)

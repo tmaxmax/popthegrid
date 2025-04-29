@@ -1,7 +1,8 @@
 import type { GameEvent, RemoveSquareEvent } from './state.ts'
 import type { GridResizeData } from '$components/Grid.ts'
+import type { ThemeName } from '$theme'
 
-type Input = GameInput | GridResizeInput | OrientationChangeInput | PointerMoveInput | MetadataInput | ViewportInput
+type Input = GameInput | GridResizeInput | OrientationChangeInput | PointerMoveInput | MetadataInput | ViewportInput | ThemeInput
 
 type OrientationChangeData = { type: string; angle: number }
 
@@ -23,6 +24,7 @@ type OrientationChangeInput = { data: OrientationChangeData; type: 'orientationC
 type PointerMoveInput = { data: PointerEvent; type: 'pointerMove'; time: number }
 type ViewportInput = { data: ViewportData; type: 'viewport'; time: number }
 type MetadataInput = { data: Metadata; type: 'metadata'; time: number }
+type ThemeInput = { name: ThemeName; type: 'theme'; time: number }
 
 type MetadataMatchMedia = {
   hover: MediaQueryList
@@ -86,12 +88,13 @@ export type Trace = {
     | { pointerEventIndex: number; type: 'pointerMove'; time: number }
     | OrientationChangeInput
     | GridResizeInput
+    | ThemeInput
   )[]
   pointers: Pointer[]
   pointerEvents: PointerTrace[] // pointer index, x, y, timestamp
 }
 
-const typesToDeduplicate: Input['type'][] = ['gridResize', 'orientationChange', 'viewport']
+const typesToDeduplicate: Input['type'][] = ['gridResize', 'orientationChange', 'viewport', 'theme']
 
 export class Tracer {
   #inputs: Input[]
@@ -156,6 +159,14 @@ export class Tracer {
       type: 'gridResize',
       data,
       windowSize: [window.innerWidth, window.innerHeight],
+    })
+  }
+
+  theme(name: ThemeName) {
+    this.#push({
+      time: this.#now(),
+      type: 'theme',
+      name,
     })
   }
 
