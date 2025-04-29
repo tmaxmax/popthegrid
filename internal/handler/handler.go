@@ -16,6 +16,7 @@ import (
 	"github.com/rs/cors"
 	"github.com/tmaxmax/popthegrid/internal/crypto/altcha"
 	"github.com/tmaxmax/popthegrid/internal/handler/session"
+	"github.com/tmaxmax/popthegrid/internal/httpx"
 )
 
 type FS struct {
@@ -119,11 +120,7 @@ func New(c Config) http.Handler {
 			return ok
 		},
 		ID: func(r *http.Request) ([]byte, error) {
-			header := "X-Real-Ip"
-			if c.CORS.Debug {
-				header = "X-Forwarded-For"
-			}
-			return netip.MustParseAddr(r.Header.Get(header)).MarshalBinary()
+			return netip.MustParseAddr(r.RemoteAddr).MarshalBinary()
 		},
 	})
 	go pow.Start(context.TODO())
@@ -152,7 +149,7 @@ func New(c Config) http.Handler {
 	return chi.Chain(
 		sess.Middleware,
 		middleware.RequestID,
-		middleware.RealIP,
+		httpx.TrustedXForwardedFor,
 		httplog.Handler(logger, staticPaths),
 		middleware.Recoverer,
 		cors.New(c.CORS).Handler,

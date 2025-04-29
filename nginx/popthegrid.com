@@ -10,7 +10,6 @@ server {
 	location / {
 		proxy_pass http://localhost:3000;
 		proxy_set_header X-Request-Id "";
-		proxy_set_header X-Real-Ip $remote_addr;
 		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 		proxy_set_header Host $host;
 	}
@@ -22,8 +21,6 @@ server {
 
 		proxy_pass http://localhost:3000;
 		proxy_set_header X-Request-Id "";
-		proxy_set_header X-Ip-RateLimited $limit_req_status;
-		proxy_set_header X-Real-Ip $remote_addr;
 		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 		proxy_set_header Host $host;
 	}
@@ -38,8 +35,6 @@ server {
 
 		proxy_pass http://localhost:3000;
 		proxy_set_header X-Request-Id "";
-		proxy_set_header X-Ip-RateLimited $limit_req_status;
-		proxy_set_header X-Real-Ip $remote_addr;
 		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 		proxy_set_header Host $host;
 	}
