@@ -74,6 +74,7 @@ type InfoShareRecord = {
   data: Record<string, unknown>
   theme: ThemeName
   when: Date
+  gamemode?: undefined
 }
 
 /** Keep in sync with Go's share.Record */
@@ -99,7 +100,7 @@ export async function getShareContent(
   { record, location: { protocol, host } }: ShareContentParams,
   validSession: boolean
 ): Promise<ShareData> {
-  if (!('gamemode' in record)) {
+  if (!('gamemode' in record) || !record.gamemode) {
     const [[key, value]] = entries(record.data)
 
     return {
@@ -153,7 +154,7 @@ export async function getShareContent(
       text = 'Do you have the fastest fingers in the world? Or at least faster than mine?'
       break
     default:
-      throw new UnreachableError(record.gamemode, 'unimplemented gamemode')
+      throw new UnreachableError(record, 'unimplemented gamemode')
   }
 
   return {
