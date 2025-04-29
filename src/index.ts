@@ -91,15 +91,9 @@ const game = new Game({
 
     if (when === 'after') {
       tracer.enabled = true
-    }
-  },
-  onGameStart({ attempt, when }) {
-    if (when === 'before') {
-      context!.attempts.updateOngoing(attempt)
 
       tracer.metadata(navigator, metadataMatchMedia)
 
-      grid.addGridEventListener('pointermove', gridPointerMoveListener)
       grid.onResize(gridResizeListener)
 
       tracer.orientationChange(screen.orientation)
@@ -108,6 +102,13 @@ const game = new Game({
       tracer.viewport(viewport)
       viewport.addEventListener('resize', viewportHandler)
       viewport.addEventListener('scroll', viewportHandler)
+    }
+  },
+  onGameStart({ attempt, when }) {
+    if (when === 'before') {
+      context!.attempts.updateOngoing(attempt)
+
+      grid.addGridEventListener('pointermove', gridPointerMoveListener)
     }
   },
   onGameEnd({ attempt, when }) {
