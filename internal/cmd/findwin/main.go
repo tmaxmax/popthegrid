@@ -141,14 +141,19 @@ type gleichResult struct {
 	N   int
 }
 
+const (
+	gleichMissingColors             = "NOCOLORS"
+	gleichMinSequenceIdenticalColor = "MINSEQ"
+)
+
 func searchGleich(src *srand.Source, config string) iter.Seq[gleichResult] {
 	mode, countInput, _ := strings.Cut(strings.ToUpper(config), "=")
 	count, _ := strconv.Atoi(countInput)
 	if count == 0 {
 		switch mode {
-		case "ZEROCOL":
+		case gleichMissingColors:
 			count = 2
-		case "MINSEQ":
+		case gleichMinSequenceIdenticalColor:
 			count = 15
 		}
 	}
@@ -156,8 +161,8 @@ func searchGleich(src *srand.Source, config string) iter.Seq[gleichResult] {
 	var counter func(hist *[numColors]int, grid *[numSquares]int) int
 
 	switch mode {
-	case "ZEROCOL":
-		counter = func(hist *[5]int, _ *[48]int) int {
+	case gleichMissingColors:
+		counter = func(hist *[numColors]int, _ *[numSquares]int) int {
 			n := 0
 			for _, c := range hist {
 				if c == 0 {
@@ -167,8 +172,8 @@ func searchGleich(src *srand.Source, config string) iter.Seq[gleichResult] {
 
 			return n
 		}
-	case "MINSEQ":
-		counter = func(_ *[5]int, grid *[48]int) int {
+	case gleichMinSequenceIdenticalColor:
+		counter = func(_ *[numColors]int, grid *[numSquares]int) int {
 			var pc, l, maxl int
 			for _, c := range grid {
 				if c == pc {
@@ -199,10 +204,13 @@ func searchGleich(src *srand.Source, config string) iter.Seq[gleichResult] {
 		for inRange(src.Cnt, limit) {
 			color := intn(src.Float64(), numColors)
 
+			// The diff computes number of colors; no +1 because Cnt already incremented above.
 			fullGrid := src.Cnt-startCnt > numSquares
 
+			// The diff computes color index; -1 because Cnt already incremented above.
 			offset := (src.Cnt - startCnt - 1) % numSquares
 			if fullGrid {
+				// "Advance" grid forward, remove first square from last 48 squares window.
 				hist[grid[offset]-1]--
 			}
 
@@ -226,6 +234,10 @@ func inRange(cnt uint64, limit uint32) bool {
 	return cnt <= ((cnt>>32)<<32)|uint64(limit)
 }
 
+// parallel distributes workload over GOMAXPROCS goroutines by evenly splitting
+// the integer domain of the key across workers.
+// Note that the current implementation does not test games which span across
+// split boundaries (e.g. a grid with 24 squares before the split point and 24 afterwards).
 func parallel[T any](src *srand.Source, task func(src *srand.Source, limit uint32, yield func(T) bool)) iter.Seq[T] {
 	procs := runtime.GOMAXPROCS(0)
 	if procs == 1 {
@@ -236,9 +248,9 @@ func parallel[T any](src *srand.Source, task func(src *srand.Source, limit uint3
 
 	return func(yield func(T) bool) {
 		offset := uint64(uint32(src.Cnt))
-		domain := math.MaxUint32 + 1 - offset
-		workload := domain / uint64(procs)
-		rest := int(domain % uint64(procs))
+		domainSize := math.MaxUint32 + 1 - offset
+		workload := domainSize / uint64(procs)
+		rest := int(domainSize % uint64(procs))
 
 		var wg sync.WaitGroup
 		wg.Add(procs)
@@ -256,6 +268,9 @@ func parallel[T any](src *srand.Source, task func(src *srand.Source, limit uint3
 		}()
 
 		for i := range procs {
+			// The remainder rest from the workload split is evenly spread across
+			// the first rest threads. These two variabled are used to add a +1
+			// to the ranges of each worker accordingly.
 			comp, compPrev := 0, 0
 			if i < rest {
 				comp = 1

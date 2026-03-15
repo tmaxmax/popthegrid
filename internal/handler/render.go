@@ -142,6 +142,7 @@ func (r renderer) renderIndex(w http.ResponseWriter, req *http.Request, statusCo
 		data.SessionStorage["randSignature"] = template.JSStr(randSignature)
 	}
 
+	// These headers are required for ensuring an isolated context.
 	w.Header().Set("Cross-Origin-Opener-Policy", "same-origin")
 	w.Header().Set("Cross-Origin-Embedder-Policy", "require-corp")
 	w.WriteHeader(statusCode)

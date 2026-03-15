@@ -24,11 +24,9 @@ const EMPTY_COUNTS: Counts = {
 export type Accumulator = [] | [Counts, ...Statistics[]]
 
 export const addAttemptToStatistics = (acc: Accumulator, curr: Attempt): Accumulator => {
-  if (acc.length === 0) {
+  if (isEmptyArray(acc)) {
     acc = [{ ...EMPTY_COUNTS }]
   }
-
-  assertAccumulator(acc)
 
   let accg = acc.find(isStatistics(curr.gamemode))
   if (!accg) {
@@ -55,7 +53,7 @@ export const addAttemptToStatistics = (acc: Accumulator, curr: Attempt): Accumul
     accg.numLosses++
   }
 
-  if (acc[0].when.getTime() < curr.startedAt.getDate()) {
+  if (acc[0].when.getTime() < curr.startedAt.getTime()) {
     acc[0].when = curr.startedAt
   }
 
@@ -68,7 +66,6 @@ const isStatistics =
     return 'gamemode' in s && s.gamemode === gamemode
   }
 
-function assertAccumulator(acc: Accumulator): asserts acc is Exclude<Accumulator, []> {
-  void acc
-  return
+function isEmptyArray<T>(arr: readonly T[]): arr is [] {
+  return arr.length === 0
 }

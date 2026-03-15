@@ -67,11 +67,16 @@ type PointerTrace = [
   number, // pointer index
   number, // x
   number, // y
-  number // time
+  number, // time
 ]
 
 // Little endian binary representation of pointer events array.
-// Stream: [pointer index b0, pointer x b1, pointer y b3, delta b5-8]
+// Byte format: PI PX PX PY PY D D D D (8 bytes per entry)
+//  PI = pointer index (0-255)
+//  PX = pointer X viewport position (0-65535)
+//  PY = pointer Y viewport position (0-65535)
+//  D  = time delta from previous pointer event or from first pointer event time (0-2^32-1)
+//       one unit is 5us, the precision of performance.now in isolated contexts
 export type PointerEvents = Uint8Array
 
 type RemoveSquareTrace = RemoveSquareEvent & { pointerEventIndex: number; time: number }

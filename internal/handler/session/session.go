@@ -33,6 +33,14 @@ func (s Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	payload, exp, ok := getInternal(r.Context())
 	if !ok || exp {
+		// Recall that when rendering the index page a random function
+		// is added even if there is no session so that the user can
+		// start playing immediatedly. Furthermore, the user should keep
+		// the same random function across its entire session, so that
+		// the random function does not change mid-game.
+		// The following code preserves the random function of the user
+		// when it had no session or the session expired,
+		// provided that the server has signed it.
 		var givenRand randPayload
 		var validGivenRand bool
 		if err := json.NewDecoder(r.Body).Decode(&givenRand); err == nil {

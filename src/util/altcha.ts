@@ -31,13 +31,13 @@ function ab2hex(ab: ArrayBuffer): string {
 async function hashChallenge(salt: string, num: number, algorithm: string): Promise<string> {
   if (typeof crypto === 'undefined' || !('subtle' in crypto) || !('digest' in crypto.subtle)) {
     throw new Error(
-      'Web Crypto is not available. Secure context is required (https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts).'
+      'Web Crypto is not available. Secure context is required (https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts).',
     )
   }
   return ab2hex(await crypto.subtle.digest(algorithm.toUpperCase(), encoder.encode(salt + num)))
 }
 
-export interface Challenge {
+export type Challenge = {
   algorithm: string
   challenge: string
   maxNumber: number
@@ -45,13 +45,12 @@ export interface Challenge {
   signature: string
 }
 
-export interface Solution {
+export type Solution = {
   number: number
   took: number
-  worker?: boolean
 }
 
-export interface Payload {
+export type Payload = {
   algorithm: string
   challenge: string
   number: number
