@@ -9,8 +9,8 @@ const rand = new WebAssembly.Instance(
       0x20, 0x05, 0x7e, 0x7c, 0x42, 0x20, 0x8a, 0x22, 0x05, 0x20, 0x05, 0x7e, 0x7c, 0x22, 0x05, 0x42, 0x20, 0x8a, 0x21, 0x06, 0x20, 0x04,
       0x20, 0x06, 0x20, 0x06, 0x7e, 0x7c, 0x42, 0x20, 0x88, 0x20, 0x05, 0x85, 0x42, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f, 0x83,
       0xba, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xa0, 0x3c, 0xa2, 0x0b,
-    ])
-  )
+    ]),
+  ),
 ).exports.rand as (cntMul: number, cnt: number, keya: number, keyb: number) => number
 
 export type RandConfig = {
@@ -25,10 +25,10 @@ export type RandState = RandConfig & {
 const max = Number((1n << 32n) - 1n)
 const valid = (n: number) => n >= 0 && n <= max
 
-class Rand {
-  #state?: RandState
+export class Rand {
+  #state: RandState
 
-  set({ key, mask, off }: RandConfig & { off?: number }) {
+  constructor({ key, mask, off }: RandConfig & { off?: number }) {
     if (off == null) {
       off = 0
     }
@@ -38,15 +38,9 @@ class Rand {
     }
 
     this.#state = { key, mask, off: off >>> 0 }
-
-    return this
   }
 
   get() {
-    if (this.#state == null) {
-      throw new Error('used uninitialised Rand object')
-    }
-
     return rand(this.#state.mask, this.#state.off, this.#state.key[0], this.#state.key[1])
   }
 
@@ -56,25 +50,35 @@ class Rand {
     return v
   }
 
-  rewind(off: number) {
-    if (this.#state == null) {
-      throw new Error('used uninitialised Rand object')
-    }
-
-    if (!valid(off)) {
-      throw new Error('tried to rewind to invalid offset')
-    }
-
-    this.#state.off = off >>> 0
-  }
-
   state(): Readonly<RandState> {
-    if (this.#state == null) {
-      throw new Error('used uninitialised Rand object')
-    }
-
     return Object.freeze({ ...this.#state })
   }
 }
 
-export default new Rand()
+export type SessionRand = {
+  config: RandConfig
+  signature?: string
+  exp?: number
+}
+
+export function getSessionRand(): SessionRand {
+  const data = sessionStorage.getItem('rand')
+  try {
+    if (data) {
+      const rand: Required<SessionRand> = JSON.parse(data)
+      if (rand.exp > Date.now()) {
+        return rand
+      }
+    }
+  } catch (err) {
+    console.error(err)
+  }
+  // Give a fallback unsigned fixed rand so if something goes very wrong
+  // one can still play something.
+  return {
+    config: {
+      key: [0xea3742c7, 0x6bf95d47],
+      mask: 0xdeadbeef,
+    },
+  }
+}

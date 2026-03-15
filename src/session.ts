@@ -1,107 +1,211 @@
-import baseLog from '$util/log.ts'
 import { solveChallenge, type Challenge, type Payload } from '$util/altcha.ts'
-import type { RandConfig } from './rand.ts'
-import rand from '$rand'
+import { wait } from '$util/index.ts'
+import baseLog from '$util/log'
+import type { Context } from './menu/context'
 
-type Response = { challenge: null; rand?: RandConfig } | Challenge
-type GivenRand = { randSignature: string; randState: RandConfig }
+const log = baseLog.extend('Session')
+const sessionStorageKey = 'session'
+const sessionLock = 'session'
 
-const randSessionKey = 'rand'
-const randSignatureSessionKey = 'randSignature'
-const randOffsetLocalKey = 'randOffset'
+export function configureSession(uiStatus: Context['sessionStatus']) {
+  let abort = new AbortController()
 
-export function initRand(): GivenRand | undefined {
-  const state: RandConfig = JSON.parse(sessionStorage.getItem(randSessionKey)!)
-  const signature = sessionStorage.getItem(randSignatureSessionKey)
-  // signature is provided => new session => new random function => offset must be reset
-  const off = parseInt((signature && localStorage.getItem(randOffsetLocalKey)) || '') || 0
+  const loop = async (signal: AbortSignal, initialWait?: number) => {
+    try {
+      if (initialWait) {
+        await wait(initialWait, signal)
+      }
 
-  rand.set({ ...state, off })
+      while (!signal.aborted) {
+        log('refreshing')
+        uiStatus.update(() => 'pending')
+        const s = await fetchSession(signal)
+        if (s.error) {
+          throw s.error
+        }
+        uiStatus.update(() => 'valid')
+        log('successfully refreshed')
 
-  localStorage.setItem(randOffsetLocalKey, off.toString())
-
-  document.addEventListener('visibilitychange', (ev) => {
-    if (ev.isTrusted && document.visibilityState === 'hidden') {
-      localStorage.setItem(randOffsetLocalKey, rand.state().off.toString())
+        await wait(s.fetchNext, signal)
+      }
+    } catch (err) {
+      log('error', { abort: signal.reason, err })
+      // The loop stops completely on error. Since fetchSession retries
+      // when called on an error this means that the user must explicitly
+      // refresh the page to retry. The errors here shouldn't be the kind
+      // to occur in production anyway, they are in most cases bugs.
+      if (!signal.aborted) {
+        console.error(err)
+      }
     }
+
+    uiStatus.update(() => (signal.aborted ? signal.reason : 'error'))
+  }
+
+  window.addEventListener('online', () => {
+    log('back online')
+    abort = new AbortController()
+    loop(abort.signal)
   })
 
-  if (signature) {
-    return { randSignature: signature, randState: state }
+  window.addEventListener('offline', () => abort.abort('offline'))
+
+  window.addEventListener('storage', (ev) => {
+    if (ev.key !== sessionStorageKey) {
+      return
+    }
+
+    // A new value should always exist. The entry is always overwritten, never removed.
+    const s: SessionFetch = JSON.parse(ev.newValue!) as SessionFetch
+
+    log('other tab refreshed session', s)
+
+    if (s.error) {
+      abort.abort('error')
+      return
+    }
+
+    abort.abort('valid')
+    abort = new AbortController()
+    loop(abort.signal, s.fetchNext)
+  })
+
+  log('first start', { online: navigator.onLine })
+
+  if (navigator.onLine) {
+    loop(abort.signal)
+  } else {
+    uiStatus.update(() => 'offline')
   }
 }
 
-function setRand(state: RandConfig) {
-  const curr = rand.state()
-  if (curr.mask === state.mask && curr.key[0] === state.key[0] && curr.key[1] === state.key[1]) {
-    // Random function will be the same if the session ID expired
-    // but the browsing session was not closed AND a random function was provided on open.
-    return
-  }
-
-  localStorage.setItem(randOffsetLocalKey, '0')
-  rand.set({ ...state, off: 0 })
+type SessionExpiry = {
+  fetchNext: number
+  fetchedAt: number
 }
 
-export async function fetchSession(given?: GivenRand) {
-  const log = baseLog.extend('Session')
+type SessionResponse = { challenge: true; data: Challenge } | { challenge?: false; data: SessionExpiry }
 
-  log('Refreshing session')
+type SessionFetch = SessionExpiry & {
+  error?: unknown
+}
 
-  const jsonGiven = given && JSON.stringify(given)
+async function fetchSession(signal: AbortSignal): Promise<SessionFetch> {
+  return await navigator.locks.request(sessionLock, { mode: 'exclusive' }, async () => {
+    const previousFetch = localStorage.getItem(sessionStorageKey)
+    if (previousFetch) {
+      try {
+        const prev: SessionFetch = JSON.parse(previousFetch)
+        if (prev.error) {
+          throw prev.error
+        }
 
-  let res = await fetch('/session', {
-    method: 'POST',
-    credentials: 'same-origin',
-    body: jsonGiven,
-  })
-  if (!res.ok) {
-    throw new Error('failed to get session', { cause: await res.text() })
-  }
+        const fetchNext = prev.fetchedAt + prev.fetchNext
+        const now = Date.now()
 
-  let body: Response = await res.json()
-  if (body.challenge == null) {
-    if (body.rand) {
-      log('Setting random', body.rand)
-      setRand(body.rand)
+        if (fetchNext > now) {
+          return { fetchNext: fetchNext - now, fetchedAt: prev.fetchedAt }
+        }
+      } catch (err) {
+        // Either invalid JSON for some reason or previous fetch had error.
+        // Log and behave as if there was no entry.
+        console.error(err)
+      }
     }
 
-    return
-  }
+    try {
+      const { challenge, data }: SessionResponse = await fetchWithBackoff(
+        new Request('/session', {
+          method: 'POST',
+          credentials: 'same-origin',
+          signal,
+        }),
+      ).then((res) => res.json())
 
-  log('Solving challenge')
+      if (!challenge) {
+        localStorage.setItem(sessionStorageKey, JSON.stringify(data))
 
-  const solution = await solveChallenge(body)
-  if (solution === null) {
-    throw new Error('failed to get solution')
-  }
+        return data
+      }
 
-  const payload: Payload = {
-    algorithm: body.algorithm,
-    challenge: body.challenge,
-    number: solution.number,
-    salt: body.salt,
-    signature: body.signature,
-    took: solution.took,
-  }
+      const solution = await solveChallenge(data, signal)
+      if (!solution) {
+        throw new Error("couldn't solve challenge")
+      }
 
-  log('Refreshing session')
+      delete (data as any).maxNumber
 
-  res = await fetch('/session', {
-    method: 'POST',
-    headers: {
-      'X-Pow-Challenge': btoa(JSON.stringify(payload)),
-    },
-    credentials: 'same-origin',
-    body: jsonGiven,
+      const payload: Payload = { ...data, ...solution }
+      const res: SessionResponse = await fetchWithBackoff(
+        new Request('/session', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'X-Pow-Challenge': btoa(JSON.stringify(payload)),
+          },
+          signal,
+        }),
+      ).then((res) => res.json())
+
+      if (res.challenge) {
+        throw new Error('incorrectly solved challenge')
+      }
+
+      localStorage.setItem(sessionStorageKey, JSON.stringify(res.data))
+
+      return res.data
+    } catch (err) {
+      const payload: SessionFetch = {
+        fetchedAt: Date.now(),
+        fetchNext: 0,
+        error: err instanceof Error ? { message: err.message, cause: err.cause } : err,
+      }
+
+      // Keep previous localStorage entry if offline.
+      // When going back online fetchSession will see
+      // a stale localStorage entry and retry fetching.
+      // If we would write the offline error then no tab
+      // could retry when going back online.
+      if (!signal.aborted) {
+        localStorage.setItem(sessionStorageKey, JSON.stringify(payload))
+      }
+
+      return payload
+    }
   })
-  if (!res.ok) {
-    throw new Error('failed to refresh session', { cause: await res.text() })
+}
+
+async function fetchWithBackoff(req: Request) {
+  let lastErr: unknown
+  let res: Response | undefined
+
+  for (const backoffTime of [0, 2000, 4000, 8000]) {
+    if (backoffTime) {
+      await wait(backoffTime, req.signal)
+    }
+
+    try {
+      res = await fetch(req)
+      if (res.ok) {
+        return res
+      }
+
+      if (res.status < 500 && res.status !== 429) {
+        break
+      }
+    } catch (err) {
+      if (req.signal.aborted) {
+        throw err
+      }
+
+      lastErr = err
+    }
   }
 
-  body = await res.json()
-  if ('rand' in body && body.rand) {
-    log('Setting random', body.rand)
-    setRand(body.rand)
+  if (res) {
+    const cause = await res.json()
+    throw new Error(res.statusText, { cause })
   }
+
+  throw lastErr
 }

@@ -17,7 +17,7 @@ export interface Context {
   nextGamemode: Writable<GamemodeName>
   theme: Writable<ThemeName>
   database: IDBDatabase
-  sessionStatus: Writable<'valid' | 'pending' | 'error'>
+  sessionStatus: Writable<'valid' | 'pending' | 'error' | 'offline'>
 }
 
 export interface Attempts {

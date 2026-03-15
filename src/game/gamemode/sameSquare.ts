@@ -1,5 +1,5 @@
 import type { Grid, Square } from '$game/grid/index.ts'
-import rand from '$rand'
+import type { Rand } from '$rand'
 import { intn } from '$util/index.ts'
 import { Gamemode, type Progress } from './index.ts'
 
@@ -8,10 +8,11 @@ export class SameSquare extends Gamemode {
 
   properties = {
     name: 'same-square',
+    // Square colors must be generated from an authenticated and reproducible RNG sequence.
     criticalSquares: true,
   } as const
 
-  initialSquares(numColors: number): number[] {
+  initialSquares(numColors: number, rand: Rand): number[] {
     return Array.from({ length: 48 }, () => intn(rand.next(), numColors))
   }
 

@@ -96,7 +96,7 @@ func (h *Handler) WithChallenge(next http.Handler) http.Handler {
 				return
 			}
 
-			httpx.JSON(w, h.create(id, r.URL.Path))
+			httpx.JSON(w, map[string]any{"challenge": true, "data": h.create(id, r.URL.Path)})
 			return
 		}
 

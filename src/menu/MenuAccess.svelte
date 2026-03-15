@@ -56,8 +56,6 @@
   const event = game.events;
   const eventOutput = createEventStore(event, { short: true });
 
-  const { onMenuOpen }: { onMenuOpen(): unknown } = $props();
-
   let disabled = $state(false);
 
   const handler = async () => {
@@ -73,11 +71,6 @@
         mount(Menu, {
           target,
           context: new Map([[contextKey, context]]),
-          props: {
-            onOpen() {
-              onMenuOpen();
-            },
-          },
         }),
       allowClose: true,
       animateClose: true,

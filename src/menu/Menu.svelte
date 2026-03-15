@@ -9,12 +9,8 @@
   import Statistics from './internal/Statistics.svelte';
   import PasteCode from './internal/PasteCode.svelte';
 
-  const { onOpen }: { onOpen(): void } = $props();
-
   const { game, record } = getContext();
   const events = createEventStore(game.events);
-
-  $effect(onOpen);
 </script>
 
 <section>

@@ -3,6 +3,7 @@ import type { Passthrough } from './passthrough.ts'
 import type { RandomCount } from './randomCount.ts'
 import type { SameSquare } from './sameSquare.ts'
 import type { OddOneOut } from './oddOneOut.ts'
+import type { Rand } from '$rand'
 
 export type GamemodeName = Properties['name']
 
@@ -14,8 +15,8 @@ export type Progress = {
 export type Properties = (RandomCount | SameSquare | Passthrough | OddOneOut)['properties']
 
 export abstract class Gamemode {
-  abstract progress(grid: Grid, squareToRemove: Square): Progress
-  abstract initialSquares(numColors: number): number[]
+  abstract progress(grid: Grid, squareToRemove: Square, rand: Rand): Progress
+  abstract initialSquares(numColors: number, rand: Rand): number[]
 
   abstract readonly properties: Properties
 

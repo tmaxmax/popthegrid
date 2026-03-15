@@ -1,122 +1,71 @@
 package session
 
 import (
-	"context"
+	"bytes"
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/binary"
-	"encoding/json"
-	"math/rand/v2"
+	"encoding/gob"
 	"net/http"
+	"strings"
 	"time"
 
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gofrs/uuid"
 	"github.com/tmaxmax/popthegrid/internal/crypto/macval"
-	"github.com/tmaxmax/popthegrid/internal/httpx"
 )
 
-const cookieName = "session"
-
-type Handler struct {
-	Secret, RandSecret []byte
-	Expiry             time.Duration
+type Session struct {
+	ID        uuid.UUID
+	CreatedAt time.Time
+	Expiry    time.Duration
 }
 
-type randPayload struct {
-	Signature string `json:"randSignature"`
-	State     Rand   `json:"randState"`
+type expiryMs struct {
+	FetchedAt int64 `json:"fetchedAt"`
+	FetchNext int64 `json:"fetchNext"`
 }
 
-func (s Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	resp := map[string]any{"challenge": nil}
+var idReplacer = strings.NewReplacer("-", "", "_", "")
 
-	payload, exp, ok := getInternal(r.Context())
-	if !ok || exp {
-		// Recall that when rendering the index page a random function
-		// is added even if there is no session so that the user can
-		// start playing immediatedly. Furthermore, the user should keep
-		// the same random function across its entire session, so that
-		// the random function does not change mid-game.
-		// The following code preserves the random function of the user
-		// when it had no session or the session expired,
-		// provided that the server has signed it.
-		var givenRand randPayload
-		var validGivenRand bool
-		if err := json.NewDecoder(r.Body).Decode(&givenRand); err == nil {
-			validGivenRand = givenRand.State.Match(givenRand.Signature, s.RandSecret)
-		}
+func (s Session) id() string {
+	v := base64.RawURLEncoding.EncodeToString(s.ID[:])
+	return idReplacer.Replace(v)
+}
 
-		payload.ID = uuid.Must(uuid.NewV4())
-		if validGivenRand {
-			payload.Rand = givenRand.State
-		} else {
-			payload.Rand = NewRand()
-			resp["rand"] = payload.Rand
-		}
+func (s Session) cookie(secret []byte) *http.Cookie {
+	val, _ := macval.To(s, macval.Options{Algorithm: sha256.New, Key: secret})
+
+	return &http.Cookie{
+		Name:     cookieName,
+		Value:    val,
+		MaxAge:   int(s.Expiry.Seconds()),
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
 	}
-
-	payload.Exp = time.Now().Add(s.Expiry)
-
-	http.SetCookie(w, payload.cookie(s.Secret))
-	w.WriteHeader(http.StatusOK)
-	httpx.JSON(w, resp)
 }
 
-func (s Handler) retrieve(r *http.Request, now time.Time) (Payload, bool, error) {
-	c, err := r.Cookie(cookieName)
-	if err == http.ErrNoCookie {
-		return Payload{}, false, nil
+func (s Session) expiry() expiryMs {
+	return expiryMs{
+		FetchedAt: s.CreatedAt.UnixMilli(),
+		FetchNext: max(s.Expiry-2*time.Minute, s.Expiry/2).Milliseconds(),
 	}
-
-	var payload Payload
-	if err := macval.From(c.Value, macval.Options{Algorithm: sha256.New, Key: s.Secret}, &payload); err != nil {
-		return Payload{}, false, err
-	}
-
-	return payload, payload.Exp.Before(now), nil
 }
 
-type contextKey struct{}
+type binarySession Session
 
-type contextPayload struct {
-	Payload
-	expired bool
+func (s Session) MarshalBinary() ([]byte, error) {
+	var b byteWriter
+	err := gob.NewEncoder(&b).Encode(binarySession(s))
+	return b, err
 }
 
-func (s Handler) Middleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		payload, expired, err := s.retrieve(r, time.Now())
-		if err != nil || payload.Exp.IsZero() {
-			var id [8]byte
-			binary.LittleEndian.PutUint64(id[:], rand.Uint64())
-
-			r.Header.Set(middleware.RequestIDHeader, "anon/"+idReplacer.Replace(base64.RawURLEncoding.EncodeToString(id[:])))
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		id := "sess/" + payload.id()
-		if expired {
-			id += "+exp"
-		}
-
-		r.Header.Set(middleware.RequestIDHeader, id)
-
-		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), contextKey{}, contextPayload{Payload: payload, expired: expired})))
-	})
+func (s *Session) UnmarshalBinary(data []byte) error {
+	return gob.NewDecoder(bytes.NewReader(data)).Decode((*binarySession)(s))
 }
 
-func Get(ctx context.Context) (Payload, bool) {
-	p, exp, ok := getInternal(ctx)
-	if !ok || exp {
-		return Payload{}, false
-	}
+type byteWriter []byte
 
-	return p, true
-}
-
-func getInternal(ctx context.Context) (Payload, bool, bool) {
-	p, ok := ctx.Value(contextKey{}).(contextPayload)
-	return p.Payload, p.expired, ok
+func (b *byteWriter) Write(s []byte) (int, error) {
+	*b = append(*b, s...)
+	return len(s), nil
 }

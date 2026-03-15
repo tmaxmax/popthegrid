@@ -101,6 +101,7 @@ func New(c Config) http.Handler {
 
 	rnd := renderer{
 		randKey: c.SessionSecret,
+		randExp: time.Hour * 24 * 7,
 		index:   index,
 	}
 
@@ -116,8 +117,7 @@ func New(c Config) http.Handler {
 	pow := altcha.NewHandler(altcha.HandlerConfig{
 		HMACKey: c.SessionSecret,
 		Exempt: func(r *http.Request) bool {
-			_, ok := session.Get(r.Context())
-			return ok
+			return false
 		},
 		ID: func(r *http.Request) ([]byte, error) {
 			return netip.MustParseAddr(r.RemoteAddr).MarshalBinary()
@@ -126,16 +126,15 @@ func New(c Config) http.Handler {
 	go pow.Start(context.TODO())
 
 	sess := session.Handler{
-		Secret:     c.SessionSecret,
-		RandSecret: c.SessionSecret,
-		Expiry:     c.SessionExpiry,
+		Secret: c.SessionSecret,
+		Expiry: c.SessionExpiry,
 	}
 
 	m.Handle("POST /session", pow.WithChallenge(sess))
 
 	m.Handle("POST /share", shareHandler{records: c.Repository})
 
-	m.Handle("POST /submit", submitHandler{atts: c.Repository})
+	m.Handle("POST /submit", submitHandler{atts: c.Repository, randKey: c.SessionSecret})
 
 	if c.RegisterVite != nil {
 		c.RegisterVite(m)

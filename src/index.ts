@@ -24,13 +24,14 @@ import { pause, reset, resume } from '$game/ops.ts'
 import { parse } from 'cookie'
 import type { Animation } from '$game/grid/index.ts'
 import { mount } from 'svelte'
-import { fetchSession, initRand } from './session.ts'
+import { configureSession } from './session.ts'
 import { findCachedLink } from '$db/link.ts'
 import { Grid, type GridResizeData } from '$components/Grid.ts'
 import { Tracer, type PointerEvents, type Trace } from '$game/trace.ts'
 import type { Attempt } from '$game/attempt.ts'
+import { getSessionRand } from '$rand'
 
-const givenRand = initRand()
+const sessionRand = getSessionRand()
 
 const record = getSharedRecord()
 const theme = record?.theme || getTheme() || defaultTheme
@@ -77,6 +78,7 @@ const gamemode = record?.gamemode || defaultGamemode
 const game = new Game({
   gamemode: gamemodes[gamemode].create(),
   grid: new DOMGrid(gridParent, grid),
+  rand: { ...sessionRand.config, off: 0 },
   tracer,
   onError(err) {
     console.error(err)
@@ -155,6 +157,10 @@ const submitAttempt = async (attempt: Attempt, trace: Trace, pointerEvents: Poin
   body.set('attempt', JSON.stringify(attempt))
   body.set('trace', JSON.stringify(trace))
   body.set('pointer-events', new Blob([pointerEvents]))
+
+  if (sessionRand.exp && sessionRand.signature) {
+    body.set('rand', JSON.stringify({ exp: sessionRand.exp, signature: sessionRand.signature }))
+  }
 
   const resp = await fetch('/submit', {
     method: 'POST',
@@ -267,51 +273,6 @@ const configureGameReset = () => {
   })
 }
 
-let sessionBackoffTimeoutID: number | undefined
-let sessionBackoffDuration = 2000
-const maxSessionBackoffDuration = 16000
-
-const configureSession = async (store: Context['sessionStatus'], isTimeout: boolean = false) => {
-  const backoff = () => {
-    if (sessionBackoffDuration > maxSessionBackoffDuration) {
-      store.update(() => 'error')
-      return
-    }
-
-    store.update(() => 'pending')
-    sessionBackoffTimeoutID = window.setTimeout(() => configureSession(store, true), sessionBackoffDuration)
-    sessionBackoffDuration *= 2
-  }
-
-  try {
-    if (get(store) !== 'error' && sessionBackoffTimeoutID == null) {
-      return
-    }
-
-    clearTimeout(sessionBackoffTimeoutID)
-    if (!isTimeout) {
-      sessionBackoffDuration = 2000
-    }
-
-    store.update(() => 'pending')
-    await fetchSession(givenRand)
-    store.update(() => 'valid')
-
-    let intervalID = setInterval(async () => {
-      try {
-        await fetchSession(givenRand)
-      } catch (err) {
-        console.error(err)
-        clearInterval(intervalID)
-        backoff()
-      }
-    }, import.meta.env.VITE_SESSION_EXPIRY * 50 * 1000)
-  } catch (err) {
-    console.error(err)
-    backoff()
-  }
-}
-
 const main = async () => {
   if (navigator.storage && navigator.storage.persist) {
     await navigator.storage.persist()
@@ -343,9 +304,6 @@ const main = async () => {
   mount(MenuAccess, {
     target: footer,
     context: new Map([[contextKey, context]]),
-    props: {
-      onMenuOpen: () => configureSession(context!.sessionStatus),
-    },
   })
 
   configureSession(context.sessionStatus)

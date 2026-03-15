@@ -1,4 +1,4 @@
-package session
+package sessionrand
 
 import (
 	"crypto/hmac"
@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"math/rand/v2"
+	"time"
 
 	"github.com/tmaxmax/popthegrid/internal/srand"
 )
@@ -33,10 +34,23 @@ func (r Rand) Source(off uint32) *srand.Source {
 	}
 }
 
-func (r Rand) signature(key []byte) []byte {
+type Signature struct {
+	ExpMs     int64  `json:"exp"`
+	Signature string `json:"signature"`
+}
+
+func Sign(r Rand, exp time.Time, key []byte) Signature {
+	ms := exp.UnixMilli()
+	return Signature{
+		ExpMs:     ms,
+		Signature: base64.StdEncoding.EncodeToString(sign(r, ms, key)),
+	}
+}
+
+func sign(r Rand, ms int64, key []byte) []byte {
 	h := hmac.New(sha256.New, key)
 
-	var buf [4]byte
+	var buf [8]byte
 
 	binary.LittleEndian.PutUint32(buf[:], r.Mask)
 	h.Write(buf[:])
@@ -45,16 +59,15 @@ func (r Rand) signature(key []byte) []byte {
 	binary.LittleEndian.PutUint32(buf[:], r.Key[1])
 	h.Write(buf[:])
 
+	binary.LittleEndian.PutUint64(buf[:], uint64(ms))
+	h.Write(buf[:])
+
 	return h.Sum(nil)
 }
 
-func (r Rand) Signature(key []byte) string {
-	return base64.StdEncoding.EncodeToString(r.signature(key))
-}
-
-func (r Rand) Match(signature string, key []byte) bool {
-	dec, err := base64.StdEncoding.DecodeString(signature)
-	return err == nil && hmac.Equal(dec, r.signature(key))
+func Verify(r Rand, s Signature, key []byte, now time.Time) bool {
+	dec, err := base64.StdEncoding.DecodeString(s.Signature)
+	return err == nil && hmac.Equal(dec, sign(r, s.ExpMs, key)) && time.UnixMilli(s.ExpMs).After(now)
 }
 
 func split(n uint64) (hi, lo uint32) {

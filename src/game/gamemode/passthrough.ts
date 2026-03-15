@@ -3,6 +3,12 @@ import { intn } from '$util/index.ts'
 import { Gamemode, type Progress } from './index.ts'
 
 export class Passthrough extends Gamemode {
+  properties = {
+    name: 'passthrough',
+    // Squares are colored for aesthetics only.
+    criticalSquares: false,
+  } as const
+
   initialSquares(numColors: number): number[] {
     return Array.from({ length: 48 }, () => intn(Math.random(), numColors))
   }
@@ -12,9 +18,4 @@ export class Passthrough extends Gamemode {
     const count = grid.activeSquares.length
     return { done, state: count > 0 ? 'continue' : 'win' }
   }
-
-  properties = {
-    name: 'passthrough',
-    criticalSquares: false,
-  } as const
 }

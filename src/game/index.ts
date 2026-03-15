@@ -6,7 +6,7 @@ import { Gamemode, type GamemodeName } from './gamemode/index.ts'
 import type { Grid, Square, Animation } from './grid/index.ts'
 import type { GameEvent } from './state.ts'
 import type { Tracer } from './trace.ts'
-import rand, { type RandState } from '$rand'
+import { Rand, type RandState } from '$rand'
 
 export interface OnGameData {
   when: CallbackWhen
@@ -33,6 +33,7 @@ export interface GameProps {
   grid: Grid
   gamemode: Gamemode
   tracer: Tracer
+  rand: RandState
   onError(err: unknown): unknown
   onGameInit?(data: OnGameInitData): unknown
   onGameReady?(data: OnGameReadyData): unknown
@@ -42,8 +43,8 @@ export interface GameProps {
   onGamePause?(data: OnGameData): unknown
 }
 
-type BaseProps = Pick<GameProps, 'grid' | 'gamemode'> & { nextGamemode?: Gamemode }
-type Callbacks = Omit<GameProps, 'grid' | 'gamemode' | 'onError'>
+type BaseProps = Pick<GameProps, 'grid' | 'gamemode' | 'rand'> & { nextGamemode?: Gamemode }
+type Callbacks = Omit<GameProps, 'grid' | 'gamemode' | 'rand' | 'onError'>
 
 export type GamemodeSetWhen = 'now' | 'next-game'
 
@@ -63,7 +64,6 @@ export type Event =
     }
 
 export class Game {
-  private gen!: GameGenerator
   private state!: State
   private dispatchedEvents: Writable<Event>
   private tracer: Tracer
@@ -122,79 +122,56 @@ export class Game {
 
   private setState(state: State): void | Promise<void> {
     const from = this.state?.name
+    const to = state.name
 
-    this.state = state
+    this.dispatchedEvents.set({ name: 'transitionstart', from, to })
+    state.executeCallback(this.props, { when: 'before', from })
 
-    this.dispatchedEvents.set({
-      name: 'transitionstart',
-      from: from,
-      to: this.state.name,
-    })
-
-    this.state.executeCallback(this.props, { when: 'before', from })
-
-    const done = this.state.transition()
-    const setNewState = () => {
-      const newGen = this.state.run()
-      newGen.next()
-      this.gen = newGen
-
-      this.dispatchedEvents.set({
-        name: 'transitionend',
-        from: from,
-        to: this.state.name,
-      })
-
+    const done = state.transition()
+    const endTransition = () => {
+      // Set state on Game only after transition so no events
+      // can be sent to this new state before it finishes configuring.
+      // Set it before dispatching events to Svelte interface
+      // and to the Game object event listeners themselves so they
+      // can use this new state after it is configured.
+      this.state = state
+      this.dispatchedEvents.set({ name: 'transitionend', from, to })
       this.state.executeCallback(this.props, { when: 'after', from })
     }
 
     if (done) {
-      return done.then(setNewState)
+      return done.then(endTransition)
     }
 
-    setNewState()
+    endTransition()
   }
 
   private sendEvent(ev: GameEvent): void | Promise<void> {
     if (ev.type !== 'removeSquare') {
+      // The removeSquare events is traced differently in the grid.onSquare handler.
       this.tracer.game(ev)
     }
 
-    const { value, done } = this.gen.next(ev)
-    if (!done) {
+    const res = this.state.processEvent(ev)
+    if (!res) {
       return
-    } else if (!isDefined(value)) {
-      const x = {} as never
-      const error = new UnreachableError(x, 'Unexpected undefined value on state generator return.')
-      this.tracer.clear()
-      this.dispatchedEvents.set({ name: 'error', error })
-      throw error
     }
 
-    if (value instanceof Error) {
+    if (res instanceof Error) {
       this.tracer.clear()
-      this.dispatchedEvents.set({ name: 'error', error: value })
-      throw value
+      this.dispatchedEvents.set({ name: 'error', error: res })
+      throw res
     }
 
-    return this.setState(value)
+    return this.setState(res)
   }
 }
 
-type GameGenerator = Generator<void, State | Error, GameEvent>
-
 abstract class State {
-  constructor(public readonly name: StateName, protected props: BaseProps) {}
-
-  *run(): GameGenerator {
-    let nextYield = this.processEvent(yield)
-
-    while (!nextYield) {
-      nextYield = this.processEvent(yield nextYield)
-    }
-
-    return nextYield
-  }
+  constructor(
+    public readonly name: StateName,
+    protected props: BaseProps,
+  ) {}
 
   properties(): BaseProps {
     return { ...this.props }
@@ -203,35 +180,46 @@ abstract class State {
   abstract setGamemode(gamemode: Gamemode): GamemodeSetWhen
   abstract executeCallback(cbs: Callbacks, data: OnGameData): void
   abstract transition(): void | Promise<void>
-  protected abstract processEvent(event: GameEvent): void | State | Error
+  abstract processEvent(event: GameEvent): void | State | Error
 }
 
 interface EndProps {
   attempt: OngoingAttempt
   kind: 'win' | 'lose'
   lastOp?: Promise<void>
+  rand: RandState
 }
 
 class Initial extends State {
   private readonly attempt?: Attempt
   private readonly lastOp?: Promise<void>
+  private readonly rand: RandState
 
   constructor(props: BaseProps, end?: EndProps) {
     super(end?.kind || 'initial', props)
+    // Initial also implements the Win and Lose states.
+    // If this is the end of the game, we want to not play
+    // the usual grid destroy animation and let instead
+    // whatever happens at the end of the game play.
     if (end) {
       this.attempt = end.attempt.end(end.kind === 'win')
       this.lastOp = end.lastOp
+      this.rand = end.rand
+    } else {
+      this.rand = props.rand
     }
+    // If the player switched gamemodes mid-play set it now,
+    // since the previous game is over.
     if (this.props.nextGamemode) {
       this.props.gamemode = this.props.nextGamemode
       this.props.nextGamemode = undefined
     }
   }
 
-  protected processEvent(event: GameEvent): void | State | Error {
+  processEvent(event: GameEvent): void | State | Error {
     switch (event.type) {
       case 'prepare':
-        return new Ready(this.props, event.animation)
+        return new Ready(this.props, event.animation, this.rand)
       case 'forceEnd':
         if (event.canRestart) {
           return
@@ -281,14 +269,17 @@ class Initial extends State {
 }
 
 class Ready extends State {
-  private squareWasRemoved = false
-  private randState = rand.state()
+  private rand?: Rand
 
-  constructor(props: BaseProps, private readonly animation: Animation) {
+  constructor(
+    props: BaseProps,
+    private readonly animation: Animation,
+    private readonly randState: RandState,
+  ) {
     super('ready', props)
   }
 
-  protected processEvent(event: GameEvent): void | State | Error {
+  processEvent(event: GameEvent): void | State | Error {
     switch (event.type) {
       case 'prepare':
         return new Error('Game is ready, already prepared.')
@@ -309,39 +300,37 @@ class Ready extends State {
   }
 
   private onRemoveSquare(square: Square): State {
-    this.squareWasRemoved = true
-
+    // must exist since it was set in transition and onRemoveSquare
+    // can't execute before transitione ends.
+    const rand = this.rand!
     const { grid, gamemode } = this.props
-    if (!gamemode.properties.criticalSquares) {
-      rand.set(this.randState)
-    }
-
     const attempt = startAttempt({
-      gamemode: this.props.gamemode.properties.name,
-      numSquares: this.props.grid.numTotalSquares,
+      gamemode: gamemode.properties.name,
+      numSquares: grid.numTotalSquares,
       randState: this.randState,
     })
 
-    const progress = gamemode.progress(grid, square)
+    const progress = gamemode.progress(grid, square, rand)
+    // In case first destroyed square already decided the fate of the game.
     if (progress.state === 'lose') {
-      return new Initial(this.props, { attempt, kind: 'lose' })
+      return new Initial(this.props, { attempt, kind: 'lose', rand: rand.state() })
     } else if (progress.state === 'win') {
-      return new Initial(this.props, { attempt, kind: 'win', lastOp: progress.done })
+      return new Initial(this.props, { attempt, kind: 'win', lastOp: progress.done, rand: rand.state() })
     }
 
-    return new Ongoing(this.props, attempt)
+    return new Ongoing(this.props, attempt, this.rand!)
   }
 
   setGamemode(gamemode: Gamemode): GamemodeSetWhen {
-    if (this.squareWasRemoved) {
-      this.props.nextGamemode = gamemode
-      return 'next-game'
-    }
+    // When starting a game, we always want to use
+    // the exact random state with which Ready was initialized.
+    // Switching gamemodes may advance random state (when switching
+    // to gamemodes with critical squares) so it must be reset.
+    this.rand = new Rand(this.randState)
 
     this.props.gamemode = gamemode
     if (gamemode.properties.criticalSquares) {
-      rand.set(this.randState)
-      this.props.grid.setColors(this.props.grid.colors, gamemode.initialSquares(this.props.grid.colors.length))
+      this.props.grid.setColors(this.props.grid.colors, gamemode.initialSquares(this.props.grid.colors.length, this.rand))
     }
 
     return 'now'
@@ -352,20 +341,23 @@ class Ready extends State {
   }
 
   transition() {
-    if (this.props.gamemode.properties.criticalSquares) {
-      rand.set(this.randState)
-    }
+    this.rand = new Rand(this.randState)
+    const { gamemode, grid } = this.props
 
-    return this.props.grid.create(this.animation, this.props.gamemode.initialSquares(this.props.grid.colors.length))
+    return grid.create(this.animation, gamemode.initialSquares(grid.colors.length, this.rand))
   }
 }
 
 class Ongoing extends State {
-  constructor(props: BaseProps, private readonly attempt: OngoingAttempt) {
+  constructor(
+    props: BaseProps,
+    private readonly attempt: OngoingAttempt,
+    private readonly rand: Rand,
+  ) {
     super('ongoing', props)
   }
 
-  protected processEvent(event: GameEvent): void | State | Error {
+  processEvent(event: GameEvent): void | State | Error {
     switch (event.type) {
       case 'prepare':
         return new Error('Game is ongoing, already prepared.')
@@ -397,11 +389,11 @@ class Ongoing extends State {
   private onRemoveSquare(square: Square): State | void {
     const { grid, gamemode } = this.props
 
-    const progress = gamemode.progress(grid, square)
+    const progress = gamemode.progress(grid, square, this.rand)
     if (progress.state === 'lose') {
-      return new Initial(this.props, { attempt: this.attempt, kind: 'lose' })
+      return new Initial(this.props, { attempt: this.attempt, kind: 'lose', rand: this.rand.state() })
     } else if (progress.state === 'win') {
-      return new Initial(this.props, { attempt: this.attempt, kind: 'win', lastOp: progress.done })
+      return new Initial(this.props, { attempt: this.attempt, kind: 'win', lastOp: progress.done, rand: this.rand.state() })
     }
 
     return
@@ -417,7 +409,7 @@ class Over extends State {
     super('over', props)
   }
 
-  protected processEvent(): void | State | Error {
+  processEvent(): void | State | Error {
     return new Error('Game over.')
   }
 
@@ -435,11 +427,14 @@ class Over extends State {
 }
 
 class Pause extends State {
-  constructor(private previousState: State, private readonly token: string) {
+  constructor(
+    private previousState: State,
+    private readonly token: string,
+  ) {
     super('pause', previousState.properties())
   }
 
-  protected processEvent(event: GameEvent): void | State | Error {
+  processEvent(event: GameEvent): void | State | Error {
     switch (event.type) {
       case 'prepare':
         return new Error('Game is paused, already prepared.')
@@ -453,10 +448,17 @@ class Pause extends State {
       case 'pause':
         return
       case 'resume':
+        // In the sequence of pause-resumes "pause A pause B resume B resume A"
+        // only "resume A" should resume the game. This is what tokens are for.
+        // Concretely, this happens when the user opens the game menu (A),
+        // leaves the window (B), comes back (B), closes the menu (A). Coming back
+        // to the game menu should not resume the game.
         if (event.token !== this.token) {
           return
         }
-        return changeStateTransitionForResume(this.previousState)
+        // Replace the default state transition (e.g. creating the grid for Ready)
+        // with one which only resumes the game and re-enables grid interaction.
+        return withResumeTransition(this.previousState)
       default:
         throw new UnreachableError(event, `Unimplemented event type received in Pause state.`)
     }
@@ -476,7 +478,7 @@ class Pause extends State {
   }
 }
 
-function changeStateTransitionForResume(state: State): State {
+function withResumeTransition(state: State): State {
   interface Wrapped extends State {
     unwrap(): State
   }

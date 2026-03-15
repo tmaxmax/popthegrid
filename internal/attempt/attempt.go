@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/tmaxmax/popthegrid/internal/handler/session"
+	"github.com/tmaxmax/popthegrid/internal/handler/sessionrand"
 )
 
 type Kind string
@@ -106,7 +106,7 @@ const (
 )
 
 type RandState struct {
-	session.Rand
+	sessionrand.Rand
 	Offset uint32 `json:"off"`
 }
 

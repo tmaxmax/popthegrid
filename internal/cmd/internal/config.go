@@ -30,7 +30,7 @@ func Getenv() Env {
 		Database:         os.Getenv("DATABASE"),
 		LogLevel:         httplog.LevelByName(os.Getenv("LOG_LEVEL")),
 		HMACSecret:       must(base64.StdEncoding.DecodeString(os.Getenv("HMAC_SECRET"))),
-		SessionExpiry:    time.Minute * time.Duration(must(strconv.Atoi(os.Getenv("VITE_SESSION_EXPIRY")))),
+		SessionExpiry:    time.Minute * time.Duration(must(strconv.Atoi(os.Getenv("SESSION_EXPIRY")))),
 	}
 }
 

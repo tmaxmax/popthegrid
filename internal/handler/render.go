@@ -8,9 +8,10 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/httplog/v2"
-	"github.com/tmaxmax/popthegrid/internal/handler/session"
+	"github.com/tmaxmax/popthegrid/internal/handler/sessionrand"
 	"github.com/tmaxmax/popthegrid/internal/share"
 )
 
@@ -123,24 +124,20 @@ func defaultIndex() indexData {
 
 type renderer struct {
 	randKey []byte
+	randExp time.Duration
 	index   *template.Template
 }
 
 func (r renderer) renderIndex(w http.ResponseWriter, req *http.Request, statusCode int, data indexData) {
-	var randSignature string
-	var randState session.Rand
-
-	if sess, ok := session.Get(req.Context()); ok {
-		randState = sess.Rand
-	} else {
-		randState = session.NewRand()
-		randSignature = randState.Signature(r.randKey)
+	var payload struct {
+		Config sessionrand.Rand `json:"config"`
+		sessionrand.Signature
 	}
 
-	data.SessionStorage["rand"] = jsonStr(randState)
-	if len(randSignature) > 0 {
-		data.SessionStorage["randSignature"] = template.JSStr(randSignature)
-	}
+	payload.Config = sessionrand.NewRand()
+	payload.Signature = sessionrand.Sign(payload.Config, time.Now().Add(r.randExp), r.randKey)
+
+	data.SessionStorage["rand"] = jsonStr(payload)
 
 	// These headers are required for ensuring an isolated context.
 	w.Header().Set("Cross-Origin-Opener-Policy", "same-origin")
