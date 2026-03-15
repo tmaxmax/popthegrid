@@ -39,8 +39,19 @@ export class UnreachableError extends Error {
   }
 }
 
-export function wait(time: number): Promise<void> {
-  return new Promise<void>((resolve) => setTimeout(resolve, time))
+export function wait(time: number, signal?: AbortSignal): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    let id: any
+    const abort = () => {
+      clearTimeout(id)
+      reject(signal?.reason)
+    }
+    id = setTimeout(() => {
+      resolve()
+      signal?.removeEventListener('abort', abort)
+    }, time)
+    signal?.addEventListener('abort', abort)
+  })
 }
 
 export function trusted<E extends Event = Event>(cb: (e: E) => void): (e: E) => void {
