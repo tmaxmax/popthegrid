@@ -18,6 +18,15 @@
     }
     return relative;
   };
+
+  const chromeURL = 'https://support.google.com/chrome/answer/9658361';
+  const safariURL = navigator.userAgent.includes('iPhone')
+    ? 'https://support.apple.com/guide/iphone/open-as-web-app-iphea86e5236/ios'
+    : navigator.userAgent.includes('Mac') && 'ontouchend' in document
+      ? 'https://support.apple.com/en-gb/guide/ipad/ipad8f1f7a29/ipados'
+      : 'https://support.apple.com/guide/safari/add-to-dock-ibrw9e991864/mac';
+
+  let persistenceSucceeded: boolean | null = $state(null);
 </script>
 
 <script lang="ts">
@@ -55,9 +64,38 @@
 
     return getShareContent(database, shareData, $sessionStatus === 'valid');
   };
+
+  const requestPersistence = async () => {
+    persistenceSucceeded = await navigator.storage.persist();
+  };
 </script>
 
 {#if total && last}
+  {#await navigator.storage.persisted() then persisted}
+    {#if !persisted && !persistenceSucceeded}
+      <div class="persistence">
+        <div>
+          {#if persistenceSucceeded === null}
+            <p class="caption">
+              <span class="warn">Warning:</span>
+              When you will leave Pop the grid! your games will be deleted by default. Press this button to prevent that!
+            </p>
+          {:else}
+            <p class="caption warn">Persisting has not succeeded.</p>
+            <p class="caption">
+              On <a href={chromeURL} target="_blank" class="external">Chrome</a> and
+              <a href={safariURL} target="_blank" class="external">Safari</a>
+              and others you can try to turn the website into an app.
+            </p>
+            <p class="caption">If you are tech savvy, you can also go to settings and enable persistent storage.</p>
+          {/if}
+        </div>
+        {#if persistenceSucceeded === null}
+          <button class="persist" onclick={requestPersistence}> Persist my games </button>
+        {/if}
+      </div>
+    {/if}
+  {/await}
   <p class="caption last-attempt">Here's your last attempt:</p>
   <ul>
     <li>Gamemode: {gamemodes[last.gamemode].display}</li>
@@ -116,7 +154,7 @@
 {/if}
 
 <style>
-  div {
+  :not(.persistence) div {
     width: 100%;
     overflow-x: auto;
     margin-bottom: 0.6em;
@@ -187,5 +225,60 @@
   li {
     margin-top: 0.2em;
     margin-left: 1.3em;
+  }
+
+  .persistence {
+    margin-bottom: 0.8em;
+  }
+
+  .warn {
+    font-weight: bold;
+    color: var(--color-danger);
+  }
+
+  .persist {
+    background: none;
+    border: 3px solid var(--color-body);
+    font-family: var(--font-heading);
+    color: var(--color-body);
+    padding: 0.4em 1em;
+    min-width: max-content;
+    height: fit-content;
+    flex: 0 0 auto;
+    border-radius: 0.4em;
+    margin-left: auto;
+    margin: 0.3em 0 0.6em 0;
+    cursor: pointer;
+  }
+
+  .persist:hover {
+    color: var(--color-heading);
+  }
+
+  .caption.bold {
+    color: var(--color-heading);
+    font-weight: bold;
+  }
+
+  .external {
+    color: var(--color-body);
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .external:visited {
+    color: var(--color-body);
+  }
+
+  .external:hover {
+    color: var(--color-heading);
+    text-decoration: underline;
+  }
+
+  @media (min-width: 560px) {
+    .persistence {
+      display: flex;
+      column-gap: 1em;
+    }
   }
 </style>
