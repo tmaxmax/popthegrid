@@ -86,7 +86,7 @@ type Theme string
 
 func (t Theme) Validate() error {
 	switch t {
-	case ThemeBlood, ThemeCandy, ThemeNoir, ThemeCozy, ThemeIris:
+	case ThemeBlood, ThemeCandy, ThemeNoir, ThemeCozy, ThemeFlowers:
 		return nil
 	default:
 		return fmt.Errorf("invalid theme %q", t)
@@ -98,11 +98,11 @@ func (t *Theme) UnmarshalJSON(data []byte) error {
 }
 
 const (
-	ThemeCandy Theme = "candy"
-	ThemeBlood Theme = "blood"
-	ThemeNoir  Theme = "noir"
-	ThemeCozy  Theme = "cozy"
-	ThemeIris  Theme = "iris"
+	ThemeCandy   Theme = "candy"
+	ThemeBlood   Theme = "blood"
+	ThemeNoir    Theme = "noir"
+	ThemeCozy    Theme = "cozy"
+	ThemeFlowers Theme = "flowers"
 )
 
 type RandState struct {

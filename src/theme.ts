@@ -53,6 +53,7 @@ export const themes = {
   },
   noir: {
     display: 'Noir',
+    // "Try to play Gleich" is another way to say "this theme does NOT satisfy WCAG".
     description: 'Inspired by the foggiest and haziest of the mornings. Try to play Gleich!',
     colors: {
       background: '#D5D5D8',
@@ -77,9 +78,9 @@ export const themes = {
       squares: ['#C4CEA1', '#D9E0A3', '#FDF2B0', '#F3D17C', '#CF9963'],
     },
   },
-  iris: {
-    display: 'Iris',
-    description: 'Like her dress. Trust me on this one.',
+  flowers: {
+    display: 'Flowers',
+    description: 'Kinda. Like the Minecraft ones. But not quite.',
     colors: {
       background: '#FFE7D1',
       heading: '#110903',

@@ -1,0 +1,1 @@
+update links set theme = 'iris' where theme = 'flowers';
