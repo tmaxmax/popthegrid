@@ -20,7 +20,7 @@ export default defineConfig({
   publicDir: false,
   build: {
     manifest: true,
-    rollupOptions: {
+    rolldownOptions: {
       input: path.resolve(__dirname, process.env.ENTRYPOINT!),
     },
   },
