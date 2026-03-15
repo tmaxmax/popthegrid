@@ -75,6 +75,7 @@ func run() error {
 			proxy := httputil.NewSingleHostReverseProxy(viteLocalhostURL)
 
 			m.Handle("GET /vite", proxy)
+			m.Handle("/@id/", proxy)
 			m.Handle("/@vite/", proxy)
 			m.Handle("/src/", proxy)
 			m.Handle("/node_modules/", proxy)
