@@ -44,7 +44,7 @@ where code = $1`
 }
 
 func (r *Repository) Save(ctx context.Context, record share.Record) (share.Code, error) {
-	now := time.Now()
+	now := time.Now().Truncate(0)
 
 	for range 10 {
 		code := share.NewCode()
@@ -118,7 +118,7 @@ func (r *Repository) Submit(ctx context.Context, att *attempt.Attempt, tr *trace
 	}
 
 	const query = `insert into attempts (id, gamemode, started_at, kind, num_squares, duration_ms, rand_state, trace, created_at) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
-	_, err = r.DB.ExecContext(ctx, query, id, att.Gamemode, att.StartedAt, att.Kind, att.NumSquares, att.DurationMs, randState(att.RandState), tr, time.Now())
+	_, err = r.DB.ExecContext(ctx, query, id, att.Gamemode, att.StartedAt, att.Kind, att.NumSquares, att.DurationMs, randState(att.RandState), tr, time.Now().Truncate(0))
 	if err != nil {
 		// TODO: handle particular error cases (ID conflict).
 		return uuid.Nil, fmt.Errorf("insert: %w", err)
