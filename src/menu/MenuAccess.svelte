@@ -1,13 +1,8 @@
 <script module lang="ts">
   import { isDefined } from '$util/index.ts';
-  import type { Event } from '$game/index.ts';
   import { duration } from './internal/duration.ts';
   import type { GameRecord } from '$share/record.ts';
   import { getRecordDelta } from './record.ts';
-
-  const isTransitionEvent = (e: Event): e is Extract<Event, { name: `transition${string}` }> => {
-    return e.name.startsWith('transition');
-  };
 
   const getRecordPrompt = (attempts: Attempts, record: GameRecord): string | undefined => {
     const result = getRecordDelta(attempts, record);
@@ -45,7 +40,7 @@
   import { Modal } from '$components/Modal.ts';
   import Menu from './Menu.svelte';
   import { Component } from '$components/internal/Component.ts';
-  import { createEventStore } from './internal/event.ts';
+  import { createEventStore, isTransitionEvent } from './internal/event.ts';
   import { Confetti } from 'svelte-confetti';
   import { fade } from 'svelte/transition';
   import { contextKey, getContext, type Attempts } from './context.ts';

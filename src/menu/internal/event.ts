@@ -5,6 +5,10 @@ type Transition = Exclude<GameEvent, { name: 'error' }>
 type Event = { message: string; isTransition?: boolean; isError?: boolean }
 type StoreOptions = { short?: boolean }
 
+export const isTransitionEvent = (e: GameEvent): e is Extract<GameEvent, { name: `transition${string}` }> => {
+  return e.name.startsWith('transition')
+}
+
 export const createEventStore = (events: Readable<GameEvent>, opts?: StoreOptions): Readable<Event> => {
   return derived(events, (ev, set) => {
     switch (ev.name) {
