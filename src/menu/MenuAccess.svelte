@@ -34,6 +34,9 @@
 
     return `You're now equal.`;
   };
+
+  const openedMenu = () => localStorage.getItem('openedMenu') === 'true';
+  const markOpenedMenu = () => localStorage.setItem('openedMenu', 'true');
 </script>
 
 <script lang="ts">
@@ -75,6 +78,7 @@
       allowClose: true,
       animateClose: true,
       afterClose() {
+        markOpenedMenu();
         resume(game, token);
       },
     });
@@ -89,9 +93,10 @@
   let isEnd = $derived((isTransitionEvent($event) && $event.to === 'win') || ($event.name === 'transitionstart' && $event.from === 'win'));
   let display = $derived(isError ? 'Something went wrong' : recordPrompt && isEnd ? recordPrompt : gamemodes[$gamemode].display);
   let isWin = $derived(isEnd && (recordPrompt ? recordPrompt?.includes('beaten') : !record));
+  let highlight = $derived(!openedMenu() && ($event.name === 'error' || ($event.name === 'transitionend' && $event.to === 'ready')));
 </script>
 
-<button {disabled} class:error={isError} class:win={isWin} class="noselect" onclick={handler}>
+<button {disabled} class:error={isError} class:highlight class:win={isWin} class="noselect" onclick={handler}>
   {#if isWin}
     <div transition:fade={{ duration: 100 }}>
       <Win class="your-game-icon" />
@@ -116,6 +121,7 @@
   button {
     background: none;
     border: none;
+    border-radius: 0.5em;
     margin: 0;
     color: var(--color-body);
     font-family: var(--font-body);
@@ -123,7 +129,9 @@
     font-size: 1em;
     padding: 0.6em 1em;
     cursor: pointer;
-    transition: all 0.1s ease-in;
+    transition:
+      all 0.1s ease-in,
+      background-color 0.6s ease-out;
   }
 
   button.win {
@@ -149,13 +157,17 @@
 
   button:hover,
   button:disabled:not(.error) {
-    filter: drop-shadow(0 0 0.03em var(--color-heading));
+    filter: drop-shadow(0 0 0.02em var(--color-heading));
     color: var(--color-heading);
   }
 
   button:disabled.error {
     color: var(--color-danger);
     filter: drop-shadow(0 0 0.03em var(--color-danger));
+  }
+
+  button.highlight {
+    background-color: color-mix(in srgb, var(--color-heading) 10%, transparent 100%);
   }
 
   span {
