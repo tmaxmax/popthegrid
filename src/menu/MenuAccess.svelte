@@ -88,7 +88,9 @@
   let isEnd = $derived((isTransitionEvent($event) && $event.to === 'win') || ($event.name === 'transitionstart' && $event.from === 'win'));
   let display = $derived(isError ? 'Something went wrong' : recordPrompt && isEnd ? recordPrompt : gamemodes[$gamemode].display);
   let isWin = $derived(isEnd && (recordPrompt ? recordPrompt?.includes('beaten') : !record));
-  let highlight = $derived(!openedMenu() && ($event.name === 'error' || ($event.name === 'transitionend' && $event.to === 'ready')));
+  let highlight = $derived(
+    !openedMenu() && ($event.name === 'error' || ($event.name === 'transitionend' && $event.to === 'ready')) && !!$attempts.last,
+  );
 </script>
 
 <button {disabled} class:error={isError} class:highlight class:win={isWin} class="noselect" onclick={handler}>
