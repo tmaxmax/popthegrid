@@ -29,7 +29,7 @@ func NewHandler(config HandlerConfig) *Handler {
 
 	return &Handler{
 		reqs:    reqs,
-		dcs:     reqs.Clone(),
+		decays:  reqs.Clone(),
 		hmacKey: config.HMACKey,
 		exempt:  config.Exempt,
 		id:      config.ID,
@@ -40,7 +40,7 @@ func NewHandler(config HandlerConfig) *Handler {
 
 type Handler struct {
 	reqs   *sketch.Sketch
-	dcs    *sketch.Sketch
+	decays *sketch.Sketch
 	mu     sync.Mutex
 	expiry time.Duration
 	window time.Duration
@@ -51,6 +51,8 @@ type Handler struct {
 }
 
 func (h *Handler) Start(ctx context.Context) {
+	// A system similar to the one described in https://ieeexplore.ieee.org/document/4544602
+	// is implemented here to protect the server from malicious requests.
 	const decay = 2
 
 	ticker := time.NewTicker(h.window)
@@ -63,12 +65,12 @@ func (h *Handler) Start(ctx context.Context) {
 
 			for id, iw := range h.reqs.All() {
 				reqs := h.reqs.At(id, iw)
-				dcs := h.dcs.At(id, iw)
+				dcs := h.decays.At(id, iw)
 				if reqs <= decay {
-					h.dcs.SetAt(id, iw, sketch.Sub(sketch.Add(dcs, reqs), decay))
+					h.decays.SetAt(id, iw, sketch.Sub(sketch.Add(dcs, reqs), decay))
 				} else {
 					v := uint32(min(math.Pow(1.01, float64(reqs-decay)), float64(math.MaxUint32)))
-					h.dcs.SetAt(id, iw, sketch.Add(dcs, v))
+					h.decays.SetAt(id, iw, sketch.Add(dcs, v))
 				}
 			}
 
@@ -124,7 +126,7 @@ func (h *Handler) WithChallenge(next http.Handler) http.Handler {
 func (h *Handler) create(id []byte, resource string) Challenge {
 	h.mu.Lock()
 	h.reqs.Add(id, 2)
-	difficulty := h.dcs.Count(id)
+	difficulty := h.decays.Count(id)
 	h.mu.Unlock()
 
 	exp := time.Now().Add(h.expiry)
