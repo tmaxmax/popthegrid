@@ -1,6 +1,7 @@
 <script module lang="ts">
   import { isDefined } from '$util/index.ts';
   import { duration } from './internal/duration.ts';
+  import { createFlag } from './internal/storage.svelte.ts';
   import type { GameRecord } from '$share/record.ts';
   import { getRecordDelta } from './record.ts';
 
@@ -30,8 +31,7 @@
     return `You're now equal.`;
   };
 
-  const openedMenu = () => localStorage.getItem('openedMenu') === 'true';
-  const markOpenedMenu = () => localStorage.setItem('openedMenu', 'true');
+  const { mark: markOpenedMenu, get: openedMenu } = createFlag('openedMenu');
 </script>
 
 <script lang="ts">
