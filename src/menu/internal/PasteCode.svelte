@@ -39,7 +39,14 @@
 </script>
 
 <div>
-  <input type="text" name="code" id="code" placeholder="Your link here..." bind:value onkeydown={onClick} />
+  <input
+    type="text"
+    name="code"
+    id="code"
+    placeholder="Your link here..."
+    bind:value
+    onkeydown={onClick}
+    onclick={(ev) => ev.currentTarget.select()} />
   <a aria-disabled={href === ''} class:disabled={href === ''} {href} onclick={onClick}>Go!</a>
 </div>
 
