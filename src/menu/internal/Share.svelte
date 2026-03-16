@@ -1,6 +1,6 @@
 <script lang="ts" module>
   import { writable } from 'svelte/store';
-  import { createFlag } from './storage.svelte';
+  import { createFlag } from '$util/storage.svelte';
 
   interface Modal {
     close(): void;

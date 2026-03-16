@@ -1,7 +1,7 @@
 <script module lang="ts">
   import { isDefined } from '$util/index.ts';
+  import { createFlag } from '$util/storage.svelte.ts';
   import { duration } from './internal/duration.ts';
-  import { createFlag } from './internal/storage.svelte.ts';
   import type { GameRecord } from '$share/record.ts';
   import { getRecordDelta } from './record.ts';
 
