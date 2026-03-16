@@ -1,5 +1,6 @@
 <script lang="ts" module>
   import { writable } from 'svelte/store';
+  import { createFlag } from './storage.svelte';
 
   interface Modal {
     close(): void;
@@ -13,6 +14,9 @@
     const newHeight = node.scrollHeight + parseFloat(computed.borderTopWidth) + parseFloat(computed.borderBottomWidth);
     node.style.height = `${newHeight}px`;
   }
+
+  const { mark: markHasShared, get: hasShared } = createFlag('hasShared');
+  export { hasShared };
 </script>
 
 <script lang="ts">
@@ -84,6 +88,8 @@
 
     clicked = false;
     toShare = resolvePopUp = popUpPosition = undefined;
+
+    markHasShared();
   };
 
   const onTextAreaClick = (e: Event) => {

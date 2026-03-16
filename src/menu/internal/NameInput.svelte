@@ -7,15 +7,16 @@
 
   interface Props {
     pretentious?: boolean;
+    enable: boolean;
   }
 
-  let { pretentious = false }: Props = $props();
+  let { pretentious = false, enable }: Props = $props();
+
+  const message = (pretentious ? 'Well' : 'Howdy') + (enable ? ',' : pretentious ? '…' : '!');
 
   const { name } = getContext();
 
   let value = $state($name);
-
-  let empty = $derived((value || '') === '');
 
   const onBlur = (ev: HTMLElementEventMap['blur']) => {
     // This function helps iOS safari to correctly handle input blurring.
@@ -35,19 +36,21 @@
   };
 </script>
 
-<label for={inputName} data-value={value} title="Your name is used for sharing records.">
-  <span class="message">{pretentious ? 'Well' : 'Howdy'},</span>
-  <input
-    type="text"
-    class:empty
-    name={inputName}
-    id={inputID}
-    size="1"
-    placeholder="…"
-    bind:value
-    aria-label="Your name"
-    onblur={onBlur}
-    onchange={onChange} />
+<label for={inputName} data-value={value} title="Input your name! It is used when you share games with others.">
+  <span class="message">{message}</span>
+  {#if enable}
+    <input
+      type="text"
+      name={inputName}
+      id={inputID}
+      size="1"
+      placeholder=" …"
+      bind:value
+      aria-label="Your name"
+      onblur={onBlur}
+      onchange={onChange} />
+    <span class="cursor">&nbsp;</span>
+  {/if}
 </label>
 
 <style>
@@ -66,7 +69,7 @@
   input {
     grid-area: 1 / 2;
     width: auto;
-    min-width: 1em;
+    min-width: 3em;
     font: inherit;
     margin: 0;
     resize: none;
@@ -94,16 +97,42 @@
     opacity: 100%;
   }
 
-  input.empty {
+  input:placeholder-shown {
     color: var(--color-body);
     transition: all 0.1s ease-in;
   }
 
-  input.empty:hover {
+  input:placeholder-shown:hover {
     color: var(--color-heading);
   }
 
   .message {
     margin-right: 0.24em;
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 0.13em;
+    border-radius: 0.02em;
+    height: 63%;
+    background-color: var(--color-heading);
+    grid-area: 1/2;
+    animation: 0.6s infinite alternate cursor-blink ease-out;
+  }
+
+  input:is(:not(:placeholder-shown), :focus) + .cursor {
+    display: none;
+  }
+
+  @keyframes cursor-blink {
+    0% {
+      opacity: 0;
+    }
+    20% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
   }
 </style>

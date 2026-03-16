@@ -8,15 +8,25 @@
   import SillyName from './internal/SillyName.svelte';
   import Statistics from './internal/Statistics.svelte';
   import PasteCode from './internal/PasteCode.svelte';
+  import { hasShared } from './internal/Share.svelte';
 
-  const { game, record } = getContext();
+  const { game, name, attempts, record } = getContext();
   const events = createEventStore(game.events);
+
+  let enableName = $derived(!!$name || ($attempts.statistics.at(0)?.numWins || 0) > 0);
+  let isWin = $derived($attempts.last?.isWin || false);
 </script>
 
 <section>
   <div class="align-name-input">
-    <NameInput pretentious={!!record} />
+    <NameInput pretentious={!!record} enable={enableName} />
   </div>
+  {#if enableName && !hasShared()}
+    <p class="win-instructions" out:fade={{ duration: 100, delay: 2000 }}>
+      {#if isWin}<span>That's a win!</span><br />{/if}Share {#if !isWin}your wins{/if} with your friends: type a nickname above and then go to
+      Statistics below to create a link.
+    </p>
+  {/if}
   <p class="game-status" class:error={$events.isError}>
     {#key $events.message}
       <span transition:fade={{ duration: 100 }}>{$events.message}</span>
@@ -49,6 +59,14 @@
   h2 {
     margin-top: 0.8em;
     margin-bottom: 0.4em;
+  }
+
+  .win-instructions {
+    margin-bottom: 0.4em;
+  }
+
+  .win-instructions span {
+    font-weight: bold;
   }
 
   .game-status {
