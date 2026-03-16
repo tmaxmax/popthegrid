@@ -9,12 +9,14 @@
   import Statistics from './internal/Statistics.svelte';
   import PasteCode from './internal/PasteCode.svelte';
   import { hasShared } from './internal/Share.svelte';
+  import { getRecordDelta } from './record.ts';
 
   const { game, name, attempts, record } = getContext();
   const events = createEventStore(game.events);
 
-  let enableName = $derived(!!$name || ($attempts.statistics.at(0)?.numWins || 0) > 0);
-  let isWin = $derived($attempts.last?.isWin || false);
+  let enableName = $derived(!!$name || ($attempts.statistics[0]?.numWins ?? 0) > 0);
+  let beatenRecord = $derived(!record || ((getRecordDelta($attempts, record) ?? [])[0] ?? -1) < 0);
+  let isWin = $derived(($attempts.last?.isWin ?? false) && beatenRecord);
 </script>
 
 <section>
