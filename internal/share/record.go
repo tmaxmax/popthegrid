@@ -57,13 +57,13 @@ func (r *Record) Description() string {
 	switch r.Gamemode {
 	case attempt.GamemodeRandom:
 		numWins := r.Data.NumWins
-		return fmt.Sprintf("%s can you win more? They won %d %s.", root, numWins, makePlural("time", numWins))
+		return fmt.Sprintf("%s can you pop all squares more times? They did it %d %s.", root, numWins, makePlural("time", numWins))
 	case attempt.GamemodeSameSquare:
 		return fmt.Sprintf("%s zerstöre schneller die gleichen Karos! They did it in %s.", root, formatDuration(r.Data.FastestWinDuration))
 	case attempt.GamemodePassthrough:
-		return fmt.Sprintf("%s do you have the FFITW? Beat %s to win!", root, formatDuration(r.Data.FastestWinDuration))
+		return fmt.Sprintf("%s are your fingers the fastest? Pop all squares in %s to win!", root, formatDuration(r.Data.FastestWinDuration))
 	case attempt.GamemodeOddOneOut:
-		return fmt.Sprintf("%s can you spot the odd square quicker? Finish in under %s to win!", root, formatDuration(r.Data.FastestWinDuration))
+		return fmt.Sprintf("%s can you pop the odd square quicker? Finish in under %s to win!", root, formatDuration(r.Data.FastestWinDuration))
 	default:
 		panic(fmt.Errorf("unknown gamemode %q", r.Gamemode))
 	}
