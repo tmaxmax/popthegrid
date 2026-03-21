@@ -122,7 +122,7 @@ This proves that $f_n(\frac{w}{h}) > 0 \implies S \in \Set{\frac{w}{a}, \frac{h}
 
 We conclude that this fallback solution does not always work. Let's find another way to determine $s$ when $\text{(2)}$ doesn't yield a valid solution.
 
-We start by reformulating the requirement every $s \in \text{Sol}$ fulfills, $\text{(4)}$, again adapted for a solution in $\text{Sol}_{a}$. 
+We start by reformulating the requirement every $s \in \text{Sol}$ fulfills, $\text{(4)}$, again adapted for a solution in $\text{Sol}_{a}$, so $as = w$. 
 
 $$\begin{align*} n \le \lfloor \frac{w}{s} \rfloor \cdotp \lfloor \frac{h}{s} \rfloor \iff & n \le a \lfloor \frac{h}{s} \rfloor \\ \iff &\frac{n}{a} \le \lfloor \frac{h}{s} \rfloor \\ \overset{(*)}{\iff} &\lceil \frac{n}{a} \rceil \le \lfloor \frac{h}{s} \rfloor \\ \overset{(10)}{\iff} &\lceil \frac{n}{a} \rceil \le \frac{h}{s} \\ \iff &\lceil \frac{n}{a} \rceil \frac{w}{h} \le \frac{w}{s} \\ \iff &a \ge r\lceil\frac{n}{a}\rceil \tag{13} \end{align*}$$
 
@@ -174,14 +174,14 @@ while (a < r * b) {
 return w / a
 ```
 
-The new loop condition removes the repeated computation of $s$ and makes analyzing the runtime a bit easier. Let's denote $a_0 = \lceil \sqrt{rn} \rceil$ the starting value of $a$. Since the loop condition is $a < rb$, $a$ will be incremented at most $\lceil rb - a_0 \rceil$ times. $b = \lceil n/a \rceil$ and since $a$ increases $b \le \lceil n/a_0 \rceil$. The bounds are relaxed (a stricter bound could determine what $b$ is at the end and use that) but strict enough to be relevant. We can now count iterations:
+The new loop condition removes the repeated computation of $s$ and makes analyzing the runtime a bit easier. Let's denote $a_0 = \lceil \sqrt{rn} \rceil$ the starting value of $a$. Since the loop condition is $a < rb$, $a$ will be incremented at most $\lceil rb - a_0 \rceil$ times. $b = \lceil n/a \rceil$ and since $a$ increases $b \le \lceil n/a_0 \rceil$. We can now count iterations:
 
-$$\begin{align*} r \lceil \frac{n}{a_0} \rceil - a_0 + 1< \thickspace &r \frac{n}{a_0} + r -a_0 + 1 \\ = \thickspace &r\frac{n}{\lceil \sqrt{rn} \rceil} + r - \lceil\sqrt{rn}\rceil + 1 \\ < \thickspace &\frac{rn}{\sqrt{rn}} + r - \sqrt{rn} \\ = \thickspace &r \end{align*}$$
+$$\begin{align*} \lceil rb - a_0 \rceil < \thickspace &r \lceil \frac{n}{a_0} \rceil - a_0 + 1 \\ < \thickspace &r \frac{n}{a_0} + r -a_0 + 1 \\ = \thickspace &r\frac{n}{\lceil \sqrt{rn} \rceil} + r - \lceil\sqrt{rn}\rceil + 1 \\ < \thickspace &\frac{rn}{\sqrt{rn}} + r - \sqrt{rn} \\ = \thickspace &r \tag{15} \end{align*}$$
 
 This gives a runtime of $\mathcal{O}(\lfloor r \rfloor)$, dependent only on the aspect ratio of the grid. Here would be the full code:
 
 ```javascript
-const r = w / hb
+const r = w / h
 
 let wa = Math.ceil(Math.sqrt(r * n))
 let wb = Math.ceil(n / wa)
@@ -200,7 +200,7 @@ while (hb < ha / r) {
 return Math.max(w / wa, h / hb)
 ```
 
-Notice that for the second loop the runtime is $\mathcal{O}(\lfloor \frac{1}{r} \rfloor)$, which implies that for $w \ge h$ grids it probably never runs, and vice-versa for the first loop when $h > w$. Proving this would also prove that the first algorithm only ever returns $w / a$ or $h / b$.
+Notice that for the second loop the runtime is $\mathcal{O}(\lceil \frac{1}{r} \rceil)$, which implies that for $w \ge h$ grids it probably never runs, and vice-versa for the first loop when $h > w$. Proving this would also prove that the first algorithm only ever returns $w / a$ or $h / b$. In fact, $\text{(15)}$ proves that a number of values strictly lower than $r$ is checked, so at most $\lfloor r \rfloor$. Then for tall containers, $\lfloor r \rfloor = 0$, while for wide containers $\lfloor 1/r \rfloor$ = 0. If the loop doesn't execute, then all solution conditions are fulfilled. Right?
 
 This is how Pop the grid! computes the grid and why it works.
 
