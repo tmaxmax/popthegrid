@@ -130,8 +130,6 @@ $\text{(*)}$ is a similar equivalence to $\text{(10)}$. For any $x \in \R$ and $
 
 $$\begin{align*} x \le n \iff x < n \iff &\lfloor x \rfloor + \{x\} < n \\ \iff &\{x\} < n - \lfloor x \rfloor \\ \iff & 1 \le n - \lfloor x \rfloor \\ \iff & \lfloor x \rfloor + 1 \le n \\ \iff & \lceil x \rceil \le n\end{align*}$$
 
-The equivalence after $\text{(*)}$ is proven in a similar fashion by analyzing $n \le x$ instead.
-
 We have proven in other words that $s \in \text{Sol}_{a} \iff a \ge r \lceil \frac{n}{a} \rceil$. How is this helpful? Let's look at the initial assumptions:
 
 $$\begin{equation} \tag{14} n \le ab \land as = w \land bs \le h \iff b \ge \frac{n}{a} \land a \ge rb \land s = \frac{w}{a} \end{equation}$$
@@ -141,7 +139,7 @@ In the last algorithm the approach was: ensure $bs \le h$ holds by picking $b = 
 $\text{(13)}$ confirms this works: it provides the fixed $b = \lceil n/a \rceil$, respecting the $b \ge \frac{n}{a}$ constraint, and the equivalence implies that $a < rb \implies bs > h \implies s \notin \text{Sol}$. We can use this to build a new algorithm:
 
 ```javascript
-let r = w / h
+const r = w / h
 let a = Math.ceil(Math.sqrt(r * n))
 let b = Math.ceil(n / a)
 let s = w / a
@@ -155,7 +153,9 @@ return s
 
 The invariant of the loop is $b = \lceil n/a \rceil \land a = ws$. When the loop ends, $b = \lceil n/a \rceil \land a = ws \land bs \le h$, implying that $s \in \text{Sol}_a$. The loop terminates, since both $b$ and $s$ decrease as their formulas have $a$ in the denominator, which is incremented. In fact:
 
-$$\begin{align*} \frac{s_{next}}{s} = \frac{a}{a + 1} = 1 - \frac{1}{a+1} \end{align*}$$
+$$
+\begin{align*} \frac{s_{next}}{s} = \frac{a}{a + 1} = 1 - \frac{1}{a+1} < 1 \end{align*} \\[1em]
+$$
 
 Finally, it must be that $s = \max \text{Sol}_a$, which is what we care about: $s$ always decreases, the loop tests all possible $s$ starting from the greatest one possible (by construction, see $\text{(2)}$) and terminates on the first value which satisfies the constraint; if $s$ is not maximal, then it means that the loop iterated while $bs \le h$, a contradiction.
 
