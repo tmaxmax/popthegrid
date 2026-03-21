@@ -107,7 +107,7 @@ export class Grid extends Component<HTMLDivElement> {
   addGridEventListener<E extends keyof HTMLElementEventMap>(
     event: E,
     callback: (ev: HTMLElementEventMap[E]) => void,
-    options?: AddEventListenerOptions
+    options?: AddEventListenerOptions,
   ) {
     this.addEventListener(event, callback, options)
   }
@@ -115,7 +115,7 @@ export class Grid extends Component<HTMLDivElement> {
   removeGridEventListener<E extends keyof HTMLElementEventMap>(
     event: E,
     callback: (ev: HTMLElementEventMap[E]) => void,
-    options?: AddEventListenerOptions
+    options?: AddEventListenerOptions,
   ): void {
     this.removeEventListener(event, callback, options)
   }
@@ -123,7 +123,7 @@ export class Grid extends Component<HTMLDivElement> {
   addSquareEventListener<E extends keyof HTMLElementEventMap>(
     event: E,
     callback: (ev: HTMLElementEventMap[E], square: Square) => unknown,
-    options?: AddEventListenerOptions
+    options?: AddEventListenerOptions,
   ) {
     const cb = (e: Event) => {
       if (!isHTMLDivElement(e.target) || !e.target.classList.contains('grid__square') || !e.isTrusted) {
@@ -154,7 +154,7 @@ export class Grid extends Component<HTMLDivElement> {
     this.addClass('grid--no-interaction')
     await this.appendSquares(
       squaresColorSequence.map((i) => new Square({ color: this.properties.colors[i] })),
-      animate
+      animate,
     )
     this.removeClass('grid--no-interaction')
   }
@@ -213,29 +213,27 @@ export class Grid extends Component<HTMLDivElement> {
 
   private squareData() {
     const n = this.initialNumSquares
-    const x = this.width
-    const y = this.height
+    const w = this.width
+    const h = this.height
 
-    log('Width: %d, Height: %d', x, y)
+    const r = w / h
 
-    const px = Math.ceil(Math.sqrt((n * x) / y))
-    let sx
-    if (Math.floor((px * y) / x) * px < n) {
-      sx = y / Math.ceil((px * y) / x)
-    } else {
-      sx = x / px
+    let wa = Math.ceil(Math.sqrt(r * n))
+    let wb = Math.ceil(n / wa)
+    while (wa < r * wb) {
+      wa++
+      wb = Math.ceil(n / wa)
     }
 
-    const py = Math.ceil(Math.sqrt((n * y) / x))
-    let sy
-    if (Math.floor((py * x) / y) * py < n) {
-      sy = x / Math.ceil((x * py) / y)
-    } else {
-      sy = y / py
+    let hb = Math.ceil(Math.sqrt(n / r))
+    let ha = Math.ceil(n / hb)
+    while (hb < ha / r) {
+      hb++
+      ha = Math.ceil(n / hb)
     }
 
-    const sideLength = Math.max(sx, sy)
-    const cols = (x / sideLength) | 0
+    const sideLength = Math.max(w / wa, h / hb)
+    const cols = (w / sideLength) | 0
     const offset = (this.width - cols * sideLength) / 2
 
     return { sideLength, cols, offset }
