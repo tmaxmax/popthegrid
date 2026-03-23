@@ -102,7 +102,7 @@ This is a server that receives unauthenticated requests, so something must be do
 
 In order to submit any requests to the servers, clients must acquire a session identifier first. To get this session ID, a proof-of-work protected endpoint must be queried with a valid solution to a challenge provided by the server. Then, under a strict rate limit imposed on the session ID, the client can submit attempts or send create share links.
 
-The session identifier expires after three hours, to require proof-of-work more often in case someone is hoarding session IDs and to enable the rate limiter to free memory more often to track new sessions. 
+The session identifier expires after three hours, to require proof-of-work more often in case someone is hoarding session IDs and to enable the rate limiter to free memory more often to track new sessions. There is also an IP-level more permissive rate limit, as a secondary level of defense.
 
 The default difficulty is calibrated such that it takes around 200ms on my M1 Pro CPU. To prevent a malicious client from retrieving a lot of sessions, a count-min sketch is used to track a time-windowed request count by IP, based on which the PoW challenge difficulty is increased. The difficulty decreases back very slowly, since there is no reason to query the sessions endpoint very often.
 
