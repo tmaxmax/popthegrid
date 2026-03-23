@@ -82,7 +82,7 @@ Note that right now only the signature check is implemented; for an example of h
 
 As a fun fact, after brute-forching my way through a dozen of keys I could not find games missing a color or with more than 15 identically colored squares. With this very rigorous test, I confirm that the RNG does indeed have the uniformity they claim!
 
-This choice of RNG could also simplify implementation of features like multiplayer gamemodes, since it could remove the need to sharing part of the game's state.
+This choice of RNG could also simplify implementation of features like multiplayer gamemodes, since it could remove the need to share part of the game's state.
 
 ### Share links
 
@@ -106,7 +106,7 @@ The session identifier expires after three hours, to require proof-of-work more 
 
 The default difficulty is calibrated such that it takes around 200ms on my M1 Pro CPU. To prevent a malicious client from retrieving a lot of sessions, a count-min sketch is used to track a time-windowed request count by IP, based on which the PoW challenge difficulty is increased. The difficulty decreases back very slowly, since there is no reason to query the sessions endpoint very often.
 
-This system is implemented based on the model presented in [this research paper](doc/mod-kapow.pdf). I have not tested that it works, so the configuration parameters are based purely on faulty, inexperienced intuition. Plus, my poor 6$ VPS won't withstand a DDoS by definition. Not that I'm worried about, since the game has zero players, but it's fun to think about it.
+This system is implemented based on the model presented in [this research paper](doc/mod-kapow.pdf). I have not tested that it works, so the configuration parameters are based purely on faulty, inexperienced intuition. Plus, my poor 6$ VPS won't withstand a DDoS by definition. Not that I'm worried about it, since the game has zero players, but it's fun to think about it.
 
 ## Future development
 
