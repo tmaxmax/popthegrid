@@ -212,28 +212,7 @@ export class Grid extends Component<HTMLDivElement> {
   }
 
   private squareData() {
-    const n = this.initialNumSquares
-    const w = this.width
-    const h = this.height
-
-    const r = w / h
-
-    let wa = Math.ceil(Math.sqrt(r * n))
-    let wb = Math.ceil(n / wa)
-    while (wa < r * wb) {
-      wa++
-      wb = Math.ceil(n / wa)
-    }
-
-    let hb = Math.ceil(Math.sqrt(n / r))
-    let ha = Math.ceil(n / hb)
-    while (hb < ha / r) {
-      hb++
-      ha = Math.ceil(n / hb)
-    }
-
-    const sideLength = Math.max(w / wa, h / hb)
-    const cols = (w / sideLength) | 0
+    const { sideLength, cols } = gridDimensions(this.initialNumSquares, this.width, this.height)
     const offset = (this.width - cols * sideLength) / 2
 
     return { sideLength, cols, offset }
@@ -242,4 +221,31 @@ export class Grid extends Component<HTMLDivElement> {
 
 const isHTMLDivElement = (v: unknown): v is HTMLDivElement => {
   return isDefined(v) && (v as any).__proto__.constructor.name === 'HTMLDivElement'
+}
+
+function gridDimensions(n: number, w: number, h: number) {
+  let r = w / h
+
+  let wa = Math.ceil(Math.sqrt(r * n))
+  let wb = Math.ceil(n / wa)
+  while (wa < r * wb) {
+    wa++
+    wb = Math.ceil(n / wa)
+  }
+
+  let hb = Math.ceil(Math.sqrt(n / r))
+  let ha = Math.ceil(n / hb)
+  while (hb < ha / r) {
+    hb++
+    ha = Math.ceil(n / hb)
+  }
+
+  let sw = w / wa
+  let sh = h / hb
+
+  if (sw > sh) {
+    return { sideLength: sw, cols: wa }
+  }
+
+  return { sideLength: sh, cols: ha }
 }
