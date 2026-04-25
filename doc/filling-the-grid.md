@@ -1,6 +1,11 @@
 # Filling the grid
 
-A container of fixed width and height $w, h \in \R^+$ is filled with $n \in \N$ (natural numbers without zero squares positioned in a grid-like fashion. The squares should cover as much of the $w \times h$ area as possible without overflowing, which means we must maximize the side length $S \in \R^+$ of the square. In other words, we are searching an $b \times a \in \N$ grid which fits all our $n$ squares and itself fits in the container while either being as wide or as tall as the container.
+$$
+\gdef\ceil#1{\left\lceil #1 \right\rceil}
+\gdef\floor#1{\left\lfloor #1 \right\rfloor}
+$$
+
+A container of fixed width and height $w, h \in \R^+$ is filled with $n \in \N$ (natural numbers without $0$) squares positioned in a grid-like fashion. The squares should cover as much of the $w \times h$ area as possible without overflowing, which means we must maximize the side length $S \in \R^+$ of the square. In other words, we are searching an $b \times a \in \N^2$ grid which fits all our $n$ squares and itself fits in the container while either being as wide or as tall as the container.
 
 We can state the problem in a formal manner as follows:
 
@@ -10,13 +15,13 @@ $$\begin{gather*}
 \text{Sol} \coloneqq \text{Sol}_{a} \cup \text{Sol}_{b} \\
 S \coloneqq \max \text{Sol} \end{gather*} $$
 
-Let's start solving for a solution $s_a \in \text{Sol}$ by attempting to find grid as wide as the container. For any $s \in \text{Sol}_{a}$:
+Let's start solving for a solution $s_a \in \text{Sol}$ by attempting to find a grid as wide as the container. For any $s \in \text{Sol}_{a}$:
 
 $$\begin{align*}n \leq ab \land as = w \land bs \leq h &\implies n \leq \frac{w}{s}b \land bs \leq h \\ &\implies n \leq \frac{w}{s} \cdotp \frac{h}{s} \\ &\implies n \leq \frac{wh}{s^2} \\ &\implies s \leq \sqrt{\frac{wh}{n}} \tag{1} \end{align*}$$
 
 This is an upper bound on the side length. Let's determine the grid's number of columns, $a$:
 
-$$\begin{align*} as = w \implies &a = \frac{w}{s} \\ \overset{(1)}{\implies} &a \geq \frac{w}{\sqrt{\frac{wh}{n}}} \\ \implies &a \geq \sqrt{\frac{w}{h}n} \\ (s \text{ maximized} \land a \in \N) \implies &a = \lceil \sqrt{\frac{w}{h}n} \rceil \tag{2} \end{align*}$$
+$$\begin{align*} as = w \implies &a = \frac{w}{s} \\ \overset{(1)}{\implies} &a \geq \frac{w}{\sqrt{\frac{wh}{n}}} \\ \implies &a \geq \sqrt{\frac{w}{h}n} \\ (s \text{ maximized} \land a \in \N) \implies &a = \ceil{\sqrt{\frac{w}{h}n}} \tag{2} \end{align*}$$
 
 To further clarify the last step: since $s$ is in the denominator, maximizing it means $a$ must take the smallest value greater than or equal to RHS. Since $a \in \N$ this is precisely RHS rounded up.
 
@@ -50,11 +55,11 @@ $$\begin{equation} \tag{8} as' = \frac{ah}{\lceil \frac{h}{w}a \rceil} = \frac{a
 
 With that we have determined $s_a$. Here's its formula based only on inputs $w, h, n$:
 
-$$\begin{gather*} a = \lceil \sqrt{\frac{w}{h}n} \rceil \qquad s_a = \begin{cases} \frac{w}{a} &\text{if } n \leq a \lfloor \frac{h}{w}a \rfloor \\ \frac{h}{\lceil \frac{h}{w}a \rceil} &\text{else} \end{cases} \end{gather*}$$
+$$\begin{gather*} a = \ceil{\sqrt{\frac{w}{h}n}} \qquad s_a = \begin{cases} \frac{w}{a} &\text{if } n \leq a \lfloor \frac{h}{w}a \rfloor \\ \frac{h}{\lceil \frac{h}{w}a \rceil} &\text{else} \end{cases} \end{gather*}$$
 
 Analoguously goes the process for determining $s_b$, whose formula is:
 
-$$\begin{gather*} b = \lceil \sqrt{\frac{h}{w}n} \rceil \qquad s_b = \begin{cases} \frac{h}{b} &\text{if } n \leq b \lfloor \frac{w}{h}b \rfloor \\ \frac{w}{\lceil \frac{w}{h}b \rceil} &\text{else} \end{cases} \end{gather*}$$
+$$\begin{gather*} b = \ceil{\sqrt{\frac{h}{w}n}} \qquad s_b = \begin{cases} \frac{h}{b} &\text{if } n \leq b \lfloor \frac{w}{h}b \rfloor \\ \frac{w}{\lceil \frac{w}{h}b \rceil} &\text{else} \end{cases} \end{gather*}$$
 
 Finally, $S = \max \Set{s_a, s_b}$.
 
@@ -65,7 +70,7 @@ Sadly, this algorithm sometimes fails to find the optimal solution. For example,
 
 What do these inputs have in common? When does this algorithm have issues?
 
-To investigate this, let's simplify our solution statement. Right now there are three variables, $s, a, b$ and three parameters, $n, w, h$. Observe that:
+To investigate this, let's simplify our solution statement. Observe that:
 
 $$\begin{equation} \tag{9}
 \begin{split}
@@ -75,7 +80,7 @@ s_h \in \text{Sol}_b \iff &bs_h = h \land as_h \le w \iff rb \ge a \land s_h = \
 \end{split}
 \end{equation}$$
 
-We've simplified width and height to just their ratio, $r = \frac{w}{h}$. Moreover, we don't need to compute $s_w$ and $s_h$ to compare them. Let $s_w = \frac{w}{a_w}$, $s_h = \frac{h}{b_h}$. Then: 
+We've simplified width and height to just their ratio, $r = \frac{w}{h}$. Moreover, we don't need the side lengths themselves to compare them. Let $s_w = \frac{w}{a_w}$, $s_h = \frac{h}{b_h}$. Then: 
 
 $$\begin{equation} \tag{10}
 s_w \gt s_h \iff \frac{w}{a_w} \gt \frac{h}{b_h} \iff \frac{1}{a_w} \gt \frac{1}{rb_h} \iff a_w \lt rb_h
@@ -94,11 +99,11 @@ s &= \begin{cases}
 \end{split}
 \end{equation}$$
 
-The problem is reduced to just $a, b$ and $r$. This simplification unlocks a powerful geometric representation: we're looking for points $(a_w, b_w), (a_h, b_h) \in \N^2$ such that they're on or above the hyperbola $xy = n$ and on, under, respectively above the line $x = ry$. $x = a$ is used as stand-in for columns in the continuous space, $y = b$ for rows. [Take a look]() (graph A):
+The problem is reduced to just $a, b$ and $r$. This simplification unlocks a powerful geometric representation in the 2D plane: we're looking for points $(a_w, b_w), (a_h, b_h) \in \N^2$ such that they're on or above the hyperbola $xy = n$ while accounting for their position relative to the line $x = ry$. $x = a$ is used as stand-in for columns in the continuous space, $y = b$ for rows. Take a look (graph A):
 
 <p id="graph-a" align=center><img src="./img/first-graph.png" alt="An introductory graph" width="300" /></p>
 
-This is the graph for the $n = 8, w = 10, h = 2$ counterexample above, with $r = 10/2 = 5$. The black area under $y = rx$ contains all fit-width solutions, the red area all the fit-height solutions. The union of these two contains the entire solution space, all $(a, b)$ for which $n \le ab$, i.e. all grid dimensions which fit all squares. Points on the green-red line $y = rx$ are grid dimensions having the ratio exactly $r$. Black points are a subset of other solution candidates.
+This is the graph for the $n = 8, w = 10, h = 2$ example above, with $r = 10/2 = 5$. The black area under $y = rx$ contains all fit-width solutions, the red area all the fit-height solutions. The union of these two contains the entire solution space, all $(a, b)$ for which $n \le ab$, i.e. all grid dimensions which fit all squares. Points on the green-red line $y = rx$ are grid dimensions having the ratio exactly $r$. Black points are a subset of other solution candidates.
 
 The symmetry of the problem with respect to ratio can now be directly visualized. For $n = 13$ and $r = 3$, respectively $r = 1/3$, we have:
 
@@ -107,7 +112,7 @@ The symmetry of the problem with respect to ratio can now be directly visualized
     <img src="./img/symm-height.png" alt="r < 1 graph to depict symmetry of problem" width="300" />
 </p>
 
-Terminology-wise, here on $(a_w, b_w), (a_h, b_h)$ will be called a _fit-width point_, respectively a _fit-height point_, if the points respect the requirements in $\text{(9)}$; if the points are those described in $\text{(11)}$, they'll also be called _minimal points_ (minimized coordinates for maximal side-length). $s_w$ and $s_h$ will be called _fit-width_ and _fit-height solutions_; unless explicitly mentioned, the $(a_w, b_w), (a_h, b_h)$ points implied by $s_w$ and $s_h$ are not minimal. Sometimes only $a_w$ or $b_h$ will be mentioned but keep in mind that by definition they do have a pair $b_w$ and $a_h$.
+Terminology-wise, from here on $(a_w, b_w), (a_h, b_h)$ will be called a _fit-width point_, respectively a _fit-height point_, if the points respect the requirements in $\text{(9)}$; if the points are those described in $\text{(11)}$, they'll also be called _minimal points_ (minimized coordinates for maximal side-length). $s_w$ and $s_h$ will be called _fit-width_ and _fit-height solutions_; unless explicitly mentioned, the $(a_w, b_w), (a_h, b_h)$ points implied by $s_w$ and $s_h$ are not necessarily minimal. Sometimes only $a_w$ or $b_h$ will be mentioned but keep in mind that by definition they do have a pair $b_w$ and $a_h$.
 
 Let's now analyze the solution space.
 
@@ -117,13 +122,13 @@ $$\begin{equation} \tag{12}
 x_0 = \frac{n}{y_0} = ry_0 \iff x_0 = \sqrt{rn} \land y_0 = \sqrt{\frac{n}{r}}
 \end{equation}$$
 
-The number of rows $a$ chosen in $\text{(2)}$ is precisely $\lceil x \rceil$. This is the visual confirmation of that result: all the fit-width points will find themselves to the left of that point, all the fit-height points to its right. In other words:
+The number of rows $a$ chosen in $\text{(2)}$ is precisely $\ceil{x_0}$. This is the visual confirmation of that result: all the fit-width points will find themselves to the left of that point, all the fit-height points to its right. In other words:
 
 $$\begin{equation} \tag{13}
 \forall a_w, b_h\text{ . } a_w \ge x_0 \land b_h \ge y_0
 \end{equation}$$
 
-If parameters are "nice" – $x_0, y_0 \in \N$ – the minimal fit-width and fit-height points coincide (graph B):
+If parameters are "nice" such that $x_0, y_0 \in \N$ the minimal fit-width and fit-height points coincide (graph B):
 
 <p id="graph-b" align=center><img src="./img/perfect-solution.png" alt="Parameters where the fit-width and fit-height solutions coincide" width="300" /></p>
 
@@ -131,7 +136,7 @@ Second, when is a point _valid_, i.e. satisfies solution requirements in $\text{
 
 <p id="graph-c" align=center><img src="./img/multiple-points-same-solution.png" alt="" width="300" /></p>
 
-The 4 points next to $(a_h, b_h)$ have the same ordinate and the point above $(a_w, b_w)$ the same abscissa, therefore their corresponding side lengths are still $s_w$, respectively $s_w$. This follows directly from the solution requirements in $\text{(9)}$:
+The 4 points next to $(a_h, b_h)$ have the same ordinate and the point above $(a_w, b_w)$ the same abscissa, therefore their corresponding side lengths are still $s_h$, respectively $s_w$. This follows directly from the solution requirements in $\text{(9)}$:
 
 $$\begin{equation} \tag{14}
 \begin{split}
@@ -145,7 +150,7 @@ a_hb_h \ge n \land b_h \ge \frac{a_h}{r} \iff &\lceil \frac{n}{b_h} \rceil \le a
 \end{split}
 \end{equation}$$
 
-Notice how the intervals describe the space between the hyperbola and the line for $a_h$ and $b_w$. The ceilings and floors are visible in the graph too: the points are a bit above/under the function graphs too. Thus:
+We can add the ceiling and floor as a consequence of them being [residuated mappings](#and--are-residuated-mappings). Notice how the intervals describe the space between the hyperbola and the line for $a_h$ and $b_w$. Doesn't matter which value from these intervals $a_h$ and $b_w$ have, the solutions of $(a_w, b_w)$, $(a_h, b_h)$ are the same. The ceilings and floors are visible in the graph too: the points are a bit above/under the function graphs too. We can compress the inequality to get the validity condition:
 
 $$\begin{equation} \tag{15}
 \begin{split}
@@ -161,7 +166,7 @@ Third, which points give the optimal solution $s$? How do they compare? Let's ob
 - in [graph B](#graph-b), $a_w$ and $b_h$ are equivalent, and $b_w = b_h$
 - in [graph C](#graph-c), $a_w$ is worse than $b_h$, and $b_w = b_h$ for one of the fit-width solutions
 
-It would also seem like a fit-width point with more rows than a fit-height point gives a worse solution: it's simply a bigger grid in the same space, since the number of columns must also increase.
+It would also seem like a fit-width point with more rows than a fit-height point, $b_w > b_h$, gives a worse solution: it's simply a bigger grid in the same space, since the number of columns must also increase ($a_w \ge rb_w$).
 
 Let's prove formally. For $b_w \ge b_h$ we have:
 
@@ -196,89 +201,86 @@ Read $\text{(17)}$ as:
 
 Note that the results above apply for any $r$.
 
-Fourth and finally, when $r \ge 1$ if the minimal fit-width solution is strictly better than any fit-height solution, then it is [unique (see appendix for proof)](#uniqueness-of-fit-width-solution-when), i.e. has only one single corresponding point. Symmetrically for $r \lt 1$ the same applies for the fit-height solution.
+Fourth and finally, when $r \ge 1$ if the minimal fit-width solution is strictly better than any fit-height solution, then it corresponds [uniquelly to a single point (see appendix for proof)](#uniqueness-of-fit-width-solution-when). Symmetrically for $r \lt 1$ the same applies for the fit-height solution.
 
-We can now conclude some facts which highlight why the first algorithm fails:
+We can now analyze when the algorithm we've developed fails. Translating its solution to points:
 
-Here is [the Desmos visualizer][1] used for the graphs in the document. 
+$$\begin{align*}
+P_a &= \begin{cases}
+    (a_w = \ceil{\sqrt{rn}}, b_w = \floor{\frac{a_w}{r}})_{0} &\text{if } n \le a_wb_w \\
+    (a_h = a_w, b_h = \ceil{\frac{a_w}{r}})_{1} &\text{else}
+\end{cases} \\
+P_b &= \begin{cases}
+    (a_h = \floor{rb_h}, b_h = \ceil{\sqrt{\frac{n}{r}}})_{0} &\text{if } n \le a_hb_h \\
+    (a_w = \ceil{rb_w}, b_w = b_h)_{1} &\text{else}
+\end{cases} \\
+\end{align*}$$
 
-We need a starting point for the algorithm. Let's pick one that ensures $\text{(4)}$ holds, which was broken by algorithm 1:
+Recall that if a fit-width point has a solution greater than that of a fit-height point it will have less rows. Above we can see that all of $P_{a,1}, P_{b,0}, P_{b,1}$ have a number of rows greater than $y_0$: for $P_b$ it is by construction, and for $P_{a,1}$:
 
-$$\begin{align*} n \le \lfloor \frac{w}{s} \rfloor \cdotp \lfloor \frac{h}{s} \rfloor \iff & n \le a \lfloor \frac{h}{s} \rfloor \\ \iff &\frac{n}{a} \le \lfloor \frac{h}{s} \rfloor \\ \overset{(*)}{\iff} &\lceil \frac{n}{a} \rceil \le \lfloor \frac{h}{s} \rfloor \\ \overset{(**)}{\iff} &\lceil \frac{n}{a} \rceil \le \frac{h}{s} \\ \iff &\lceil \frac{n}{a} \rceil \frac{w}{h} \le \frac{w}{s} \\ \iff &a \ge r\lceil\frac{n}{a}\rceil \tag{13} \end{align*}$$
+$$\begin{align*}
+\ceil{\frac{a_w}{r}} = \ceil{\frac{\ceil{\sqrt{rn}}}{r}} \ge \frac{\ceil{\sqrt{rn}}}{r} \ge \sqrt{\frac{n}{r}} = y_0
+\end{align*}$$
 
+Moreover, for $r \ge 1$ there exists a fit-height solution with $b_h = \ceil{y_0}$ with probability greater than $1 - \frac{1}{2r}$ (over 75% for $r \ge 2$) and fit-width solutions with $a_w = \ceil{x_0}$ are highly unlikely – in fact, almost never likely for $r \ge 2$ [(see appendix for proof)](#position-of-solution-points-relative-to). This means that the algorithm finds with very high guarantee the fit-height solution but rarely the fit-width one, if ever, even though the fit-width solution is most likely to be the optimal one.
 
-$\text{(*)}$ and $\text{(**)}$ hold because $\lfloor \cdot \rfloor$ and $\lceil \cdot \rceil$ are [residuated mappings](#proof-that--and--are-residuated-mappings).
+Let's visualize this on the graphs of the two counterexamples given above ($r = 5, n = 8$ and $r = 3.5, n = 20$):
 
-We have proven in other words that $s \in \text{Sol}_{a} \iff a \ge r \lceil \frac{n}{a} \rceil$. How is this helpful? Let's look at the initial assumptions:
+<p align=center>
+    <img src="./img/alg-1-points-1.png" alt="" width="300" />
+    <img src="./img/alg-1-points-2.png" alt="" height="300" />
+</p>
 
-In the last algorithm the approach was: ensure $bs \le h$ holds by picking $b = \lfloor h/s \rfloor$ and then readjust if $n \le ab$ doesn't hold. What if this time we do the opposite: ensure $n \le ab$ holds and adjust such that $bs \le h$ holds?
+The initial fit-width point candidate $P_{a,0}$ is invalid in both cases (under the hyperbola), so the algorithm falls back to $P_{a,1}$, a fit-height point. In the first example, $P_{b,0}$ is already valid, so the fallback $P_{b,1}$ is not used; in the second, the fallback is used instead but even though it's a fit-width point its solution is equivalent to the fit-height solution, as they have the same number of rows. 
 
-$\text{(13)}$ confirms this works: it provides the fixed $b = \lceil n/a \rceil$, respecting the $b \ge \frac{n}{a}$ constraint, and the equivalence implies that $a < rb \implies bs > h \implies s \notin \text{Sol}$. We can use this to build a new algorithm:
+Let's now build a new algorithm. This algorithm should find the minimal fit-width and fit height points and pick the solution with the greater side length. Putting $\text{(13)}$ and $\text{(15)}$ together, the solution we're looking for is:
+
+$$\begin{gather*}
+a_w = \min \Set{a \in \N : a \ge \ceil{\sqrt{rn}} \land \ceil{\frac{n}{a}} \le \floor{\frac{a}{r}}} \\
+b_h = \min \Set{b \in \N : b \ge \ceil{\sqrt{\frac{n}{r}}} \land \ceil{\frac{n}{b}} \le \floor{rb}} \\
+s = \max \Set{ \frac{w}{a_w}, \frac{h}{b_h} }
+\end{gather*}$$
+
+Let's walk through how we translate this to code. First, we are looking for minimum $a_w$ and $b_h$ greater than $\ceil{x0}$ and $\ceil{y0}$. We'll initialize variables `a` and `b` to those values, $a_w$ and $b_h$ can't be smaller. Then we need to ensure the second condition; for that, we just increment `a` and `b` in a loop until the condition holds. The loops execute while $a_w$ and $b_h$ are invalid points:
+
+$$\begin{equation} \tag{18}
+\begin{split}
+&\ceil{\frac{n}{a}} > \floor{\frac{a}{r}} \iff a < r\ceil{\frac{n}{a}} \\
+&\ceil{\frac{n}{b}} > \floor{rb} \iff rb < \ceil{\frac{n}{b}}
+\end{split}
+\end{equation}$$
+
+The implementation follows directly:
 
 ```javascript
 const r = w / h
+
 let a = Math.ceil(Math.sqrt(r * n))
-let b = Math.ceil(n / a)
-let s = w / a
-while (b * s > h) {
-    a = a + 1
-    b = Math.ceil(n / a)
-    s = w / a
-}
-return s
+for (; a < r * Math.ceil(n / a); a++);
+
+let b = Math.ceil(Math.sqrt(n / r))
+for (; r * b < Math.ceil(n / b); b++);
+
+return Math.max(w / a, h / b);
 ```
 
-The invariant of the loop is $b = \lceil n/a \rceil \land a = ws$. When the loop ends, $b = \lceil n/a \rceil \land a = ws \land bs \le h$, implying that $s \in \text{Sol}_a$. The loop terminates, since both $b$ and $s$ decrease:
+The algorithm always terminates: as $a$ grows, $\ceil{\frac{n}{a}}$ decreases and $\ceil{\frac{a}{r}}$ increases, shrinking the interval until the ordering of its endpoints is swapped; likewise for $b$. The values at the end of each loop are minimal – we check every value one by one in ascending order.
 
-$$
-\begin{align*} \frac{s_{next}}{s} = \frac{a}{a + 1} < 1 \end{align*} \\[1em]
-\begin{align*} \frac{b_{next}}{b} = \frac{\lceil \frac{n}{a + 1} \rceil}{\lceil \frac{n}{a} \rceil} < \frac{a}{a + 1} \cdotp \frac{n}{n + a} < 1 \end{align*}
-$$
+Intuitively, if the loop condition holds there is no valid $(a_w, b_w)$ or $(a_h, b_h)$ fit-width, respectively fit-height point with the iteration's current $a_w$ or $b_h$ value. If we take $b_w = \ceil{\frac{n}{a}}$ and $a_h = \ceil{\frac{n}{b}}$ (the minimum values for a valid solution) we can imagine this algorithm as "walking away" from $(x_0, y_0)$ alongside the hyperbola until we (inevitably) find ourselves in the fit-width/fit-height solution spaces:
 
-Finally, it must be that $s = \max \text{Sol}_a$, which is what we care about: $s$ always decreases, the loop tests all possible $s$ starting from the greatest one possible (by construction, see $\text{(2)}$) and terminates on the first value which satisfies the constraint; if $s$ is not maximal, then it means that the loop iterated while $bs \le h$, a contradiction.
+<p align=center><img src="./img/alg-2-walk.png" width=300 /></p>
 
-We can compress the code by using an equivalent invariant with the help of $\text{(14)}$:
+$a_0$ and $b_0$ are the starting points, right next to $(x_0, y_0)$. The algorithm "walks down" to $(a_w, b_w)$ and "up" to $(a_h, b_h)$. In fact, in this example, $b_0$ is initialized directly to $(a_h, b_h)$; $a_0$ must be incremented once.
 
-```javascript
-const r = w / h
+We have convinced ourselves of correctness. To analyze its runtime complexity, let's denote $a_0 = \ceil{\sqrt{rn}}$ the starting value of $a$. Since the loop condition is $a < r\ceil{\frac{n}{a}}$, $a$ will be incremented at most $\ceil{r\ceil{\frac{n}{a}} - a_0}$ times. Since $a$ increases $\ceil{\frac{n}{a}} \le \ceil{\frac{n}{a_0}} $. We can now count iterations:
 
-let a = Math.ceil(Math.sqrt(r * n))
-let b = Math.ceil(n / a)
-while (a < r * b) {
-    a = a + 1
-    b = Math.ceil(n / a)
-}
+$$\begin{align*} \ceil{r\ceil{\frac{n}{a}} - a_0} < \thickspace &r \ceil{\frac{n}{a_0}} - a_0 + 1 \\ < \thickspace &r \frac{n}{a_0} + r -a_0 + 1 \\ = \thickspace &r\frac{n}{\lceil \sqrt{rn} \rceil} + r - \lceil\sqrt{rn}\rceil + 1 \\ < \thickspace &\frac{rn}{\sqrt{rn}} + r - \sqrt{rn} + 1 \\ = \thickspace &r + 1\tag{19} \end{align*}$$
 
-return w / a
-```
+This means at most $\lfloor r \rfloor + 1$ iterations and a runtime of $\mathcal{O}(r)$, dependent only on the aspect ratio of the grid. To show that the bound is tight, consider this following example:
 
-The new loop condition removes the repeated computation of $s$ and makes analyzing the runtime a bit easier. Let's denote $a_0 = \lceil \sqrt{rn} \rceil$ the starting value of $a$. Since the loop condition is $a < rb$, $a$ will be incremented at most $\lceil rb - a_0 \rceil$ times. $b = \lceil n/a \rceil$ and since $a$ increases $b \le \lceil n/a_0 \rceil$. We can now count iterations:
+<p align=center><img src="./img/bound-tightness.png" width=300 /></p>
 
-$$\begin{align*} \lceil rb - a_0 \rceil < \thickspace &r \lceil \frac{n}{a_0} \rceil - a_0 + 1 \\ < \thickspace &r \frac{n}{a_0} + r -a_0 + 1 \\ = \thickspace &r\frac{n}{\lceil \sqrt{rn} \rceil} + r - \lceil\sqrt{rn}\rceil + 1 \\ < \thickspace &\frac{rn}{\sqrt{rn}} + r - \sqrt{rn} + 1 \\ = \thickspace &r + 1\tag{15} \end{align*}$$
-
-This means at most $\lfloor r \rfloor + 1$ iterations and a runtime of $\mathcal{O}(r)$, dependent only on the aspect ratio of the grid. Here would be the full code:
-
-```javascript
-const r = w / h
-
-let wa = Math.ceil(Math.sqrt(r * n))
-let wb = Math.ceil(n / wa)
-while (wa < r * wb) {
-    wa++
-    wb = Math.ceil(n / wa)
-}
-
-let hb = Math.ceil(Math.sqrt(n / r))
-let ha = Math.ceil(n / hb)
-while (hb < ha / r) {
-    hb++
-    ha = Math.ceil(n / hb)
-}
-
-return Math.max(w / wa, h / hb)
-```
-
-Notice that for the second loop the runtime is $\mathcal{O}(\lfloor \frac{1}{r} \rfloor)$, which implies that for $w \ge h$ grids it probably never runs, and vice-versa for the first loop when $h > w$. Proving this would also prove that the first algorithm only ever returns $w / a$ or $h / b$. In fact, $\text{(15)}$ proves that a number of values strictly lower than $r$ is checked, so at most $\lfloor r \rfloor$. Then for tall containers, $\lfloor r \rfloor = 0$, while for wide containers $\lfloor 1/r \rfloor$ = 0. If the loop doesn't execute, then all solution conditions are fulfilled. Right?
+Here $n = 33, r = 8.3$. The fit-height starting point $b_0$ is in the fit-width solution space. Consider the iteration count of the fit-height loop of the algorithm – by the same reasoning it is $\floor{\frac{1}{r}} + 1$. It's visible that in this example the loop will do exactly 1 iteration to reach $(a_h, b_h)$. Since the algorithm is symmetric relative to $r$ this goes as tightness proof for the first loop, too.
 
 With a correct algorithm and good understang of why it works, we conclude here.
 
@@ -289,13 +291,13 @@ With a correct algorithm and good understang of why it works, we conclude here.
 $\text{(9)}$ implies that for $b$ rows the minimal $a$ such that $(a, b)$ is a fit-width solution is:
 
 $$\begin{gather*}
-a = \max \Set{ \lceil\frac{n}{b}\rceil, \lceil rb \rceil }
+a = \max \Set{ \ceil{\frac{n}{b}}, \ceil{rb} }
 \end{gather*}$$
 
 Thus the minimal fit-width point is determined by:
 
 $$\begin{equation} \tag{*}
-a = \underset{b \in \N}{\min}\Set{ \max \Set{ \lceil \frac{n}{b} \rceil, \lceil rb \rceil }}
+a = \underset{b \in \N}{\min}\Set{ \max \Set{ \ceil{\frac{n}{b}}, \ceil{rb} }}
 \end{equation}$$
 
 This makes $a$ purely a function of $b$. This formula and a similar one for minimal fit-height solutions are used in [the Desmos visualizer][1] to plot minimal points for each $a$ and $b$ on the graph.
@@ -304,10 +306,10 @@ We now have all we need to begin the proof.
 
 Assume towards a contradiction that there exist two $(a, b), (a, b')$ minimal fit-width points, $b < b'$, with $s_w > s_h$ for all fit-height points $(a_h, b_h)$. Assume $r \ge 1$.
 
-Since they points are minimal, it follows from $\text{(*)}$ that:
+Since the points are minimal, it follows from $\text{(*)}$ that:
 
 $$\begin{align*}
-a = \max\Set{ \lceil \frac{n}{b} \rceil, \lceil rb \rceil } = \max\Set{ \lceil \frac{n}{b'} \rceil, \lceil rb' \rceil }
+a = \max\Set{ \ceil{\frac{n}{b}}, \ceil{rb} } = \max\Set{ \ceil{\frac{n}{b'}}, \ceil{rb'} }
 \end{align*}$$
 
 Without further deliberation, there are four situations we would have to tackle:
@@ -341,7 +343,7 @@ $$\begin{align*} \tag{**}
 \frac{n}{b} \ge \frac{n}{b + 1} + 1 \iff &\frac{n - b}{b} \ge \frac{n}{b + 1} \\
     \iff &b^2 + b - n \le 0 \\
     \iff &b \le \frac{\sqrt{1 + 4n} - 1}{2} \\
-    \overset{\text{rm.}}{\iff} &b \le \lfloor \sqrt{\frac{1}{4} + n} - \frac{1}{2} \rfloor
+    \overset{\text{rm.}}{\iff} &b \le \floor{\sqrt{\frac{1}{4} + n} - \frac{1}{2}}
 \end{align*}$$
 
 Great. (I'm marking usage of [residuated mapping properties](#and--are-residuated-mappings) with $\text{rm.}$ since it's a subtle change easy to misuse). Is our $b$ smaller than that?
@@ -351,12 +353,12 @@ a = \lceil \frac{n}{b'} \rceil \overset{\text{(*)}}{\implies} \lceil \frac{n}{b'
     \implies &\frac{n}{b'} + 1 > b' \\
     \implies &b'^2 - b' - n < 0 \\
     \implies &b' < \frac{\sqrt{1 + 4n} + 1}{2} \\
-    \overset{\text{rm.}}{\implies} &b' \le \lfloor \sqrt{\frac{1}{4} + n} + \frac{1}{2} \rfloor \\[1em]
+    \overset{\text{rm.}}{\implies} &b' \le \floor{\sqrt{\frac{1}{4} + n} + \frac{1}{2}} \\[1em]
 \end{align*}$$
 
 $$\begin{align*}
-b < b' \implies &b \le \lfloor \sqrt{\frac{1}{4} + n} + \frac{1}{2} \rfloor - 1 \\
-    \implies &b \le \lfloor \sqrt{\frac{1}{4} + n} - \frac{1}{2} \rfloor \\
+b < b' \implies &b \le \floor{\sqrt{\frac{1}{4} + n} + \frac{1}{2}} - 1 \\
+    \implies &b \le \floor{\sqrt{\frac{1}{4} + n} - \frac{1}{2}} \\
     \overset{\text{(**)}}{\implies} &\frac{n}{b} \ge \frac{n}{b + 1} + 1 \\
     \implies &\lceil \frac{n}{b} \rceil > \lceil \frac{n}{b'} \rceil \text{ contradiction}
 \end{align*}$$
@@ -429,16 +431,111 @@ All four cases contradict our assumptions. In conclusion, if $(a, b)$ is a minim
 Fun fact: the idea for disproving case 2 came from the intuition that since $n = \sqrt{n}^2$, dividing $n$ by $b < b' < \sqrt{n}$ should mostly produce distinct results, as the value grows quicker and quicker as $b$ approaches zero. $\text{(**)}$ implies exactly that:
 
 $$\begin{align*}
-b \le \lfloor \sqrt{\frac{1}{4} + n} - \frac{1}{2} \rfloor \le \lfloor \sqrt{(\frac{1}{2} + \sqrt{n})^2} - \frac{1}{2} \rfloor = \lfloor \sqrt{n} \rfloor
+b \le \floor{\sqrt{\frac{1}{4} + n} - \frac{1}{2}} \le \floor{\sqrt{(\frac{1}{2} + \sqrt{n})^2} - \frac{1}{2}} = \lfloor \sqrt{n} \rfloor
 \end{align*}$$
 
+### Position of solution points relative to $(x_0, y_0)$
 
+We'll approach this subject by handling fit-height points where $r \ge 1$. Due to the symmetry of the problem relative to ratio, we can make more general conclusions afterwards.
+
+$b = \ceil{\sqrt{\frac{n}{r}}}$ is a valid fit-height point by $\text{(15)}$ if and only if:
+
+$$\begin{align*}
+\ceil{\frac{n}{b}} \le \floor{rb}
+\end{align*}$$
+
+A sufficient condition for this is:
+
+$$\begin{align*}
+rb - \frac{n}{b} \ge 1 \implies &rb^2 -n - b \ge 0 \\
+    \implies &b \ge \frac{1}{2r} + \sqrt{\frac{1}{4r^2} + \frac{n}{r}} > \sqrt{\frac{n}{r}}
+\end{align*}$$
+
+If $b$ is greater than this value it is guaranteed that there exists a fit-height point $(a, b)$. There are more situations when this could happen not covered by this condition, for example when $\sqrt{\frac{n}{r}} \in \N$ or when $rb - \frac{n}{b} < 1 \land \frac{n}{b} \le k \le rb$ with $k \in \N$.
+
+The condition above is useful since it is easy to _quanitfy_. We can use it to answer: for fixed $r \ge 1$ what's the probability for $b$ to be a valid fit-height solution?
+
+To do this, observe that by the properties of ceiling, $\sqrt{\frac{n}{r}} \le b \lt \sqrt{\frac{n}{r}} + 1$. We can bound the expression above likewise, using $r \ge 1$:
+
+$$\begin{align*}
+    \sqrt{\frac{n}{r}} < \frac{1}{2r}+\sqrt{\frac{1}{4r^2}+\frac{n}{r}} < \frac{1}{2} + \sqrt{\left(\frac{1}{2} + \sqrt{\frac{n}{r}}\right)^2} = \sqrt{\frac{n}{r}} + 1
+\end{align*}$$
+
+It follows that:
+
+$$\begin{align*}
+\sqrt{\frac{n}{r}} < \frac{1}{2r} + \sqrt{\frac{1}{4r^2}+\frac{n}{r}} \le b = \ceil{\sqrt{\frac{n}{r}}} < \sqrt{\frac{n}{r}} + 1
+\end{align*}$$
+
+If we subtract $\sqrt{\frac{n}{r}}$, the difference will be always between $0$ and $1$:
+
+$$\begin{align*}
+0 < \underbrace{\frac{1}{2r} + \sqrt{\frac{1}{4r^2}+\frac{n}{r}} - \sqrt{\frac{n}{r}}}_{B_r(n)} \le \underbrace{\ceil{\sqrt{\frac{n}{r}}} - \sqrt{\frac{n}{r}}}_{C_r(n)} < 1
+\end{align*}$$
+
+Let's visualize this:
+
+<p align=center>
+    <img src="./img/prob-one.png" width="300" />
+    <img src="./img/prob-two.png" width="300" />
+</p>
+
+First graph depicts $r = 1$, the second $r = 3$. The red points represent $C_r(n)$, the black points $B_r(n)$. Whenever a red point is in the green area $C_r(n) \ge B_r(n)$, meaning $\ceil{\sqrt{\frac{n}{r}}}$ is a valid fit-height point for $n$. The points where $C_r(n) = 0$ are ignored because that means that the corresponding $b$ is an integer and thus a valid point.
+
+The probability that $b$ is a valid point up to a certain $n$ of choice is the number of points in the green area divided by the total number of points:
+
+$$\begin{align*}
+P_r = \frac{\left|\Set{n \in \N : C(n) \ge B(n)}\right|}{\left|\Set{n \in \N : C(n) > 0}\right|}
+\end{align*}$$
+
+We can approximate by counting points up to a certain $n$. For example $P_{1,n=10} = \frac{4}{7} \approx 0.571$ and $P_{3,n=26} = \frac{21}{24} = 0.875$.
+
+Counting points is difficult. Notice that on any interval where $C_r(x)$ is continuous for $x \in \R$, the points $(n, C_r(n))$ are distributed between the two areas proportionally with how much of the $C_r(x)$ segment is in either area. Since $0 < C_r(x) < 1$ covers the entire $(0, 1)$ space, the valid solutions area is the total area without the area of $B_r(x)$.
+
+To compute this, let's simplify $B_r(n)$ first:
+
+$$\begin{align*}
+B_r(n) &= \frac{1}{2r} + \sqrt{\frac{1}{4r^2}+\frac{n}{r}} - \sqrt{\frac{n}{r}} \\
+    &= \frac{1}{2r} + \sqrt{\frac{n}{r}}\left(\sqrt{1 + \frac{1}{4rn}} - 1\right) \\
+    &\le \frac{1}{2r} + \sqrt{\frac{n}{r}}\cdot\frac{1}{8rn} \\
+    &= \frac{1}{2r}+\frac{1}{8r\sqrt{rn}}
+\end{align*}$$
+
+The approximation $\sqrt{1 + x} \le 1 + \frac{x}{2}$ was used. We can observe the following:
+
+$$\begin{align*}
+\lim_{x \to \infin}B_r(x) \le \frac{1}{2r} \qquad \displaystyle\int_{1}^{\infin}B_r(x)dx = \infin
+\end{align*}$$
+
+where the integral is the area under $B_r(x)$. We can now compute the probability:
+
+$$\begin{align*}
+P_r \ge 1 - \lim_{x \to \infin}\frac{\displaystyle\int_{1}^{x}B_r(n)dn}{\int_{1}^{x}1} = 1 - \lim_{x \to \infin}B_r(x) \ge 1 - \frac{1}{2r}
+\end{align*}$$
+
+Since we are in the $\frac{\infin}{\infin}$ indeterminate form l'Hôpital can be applied to avoid integration. $P_r$ is greater than or equal to this result since we know there exist more successful cases beyond those included in this measurement.
+
+Thus, for the examples above $P_1 \ge 0.5$ and $P_3 \ge 0.833$. This bound is more exact as $n$ grows.
+
+The first conclusion is that fit-height solutions will for the most part have $b_h = \ceil{\sqrt{\frac{n}{r}}}$. We can derive even more interesting information by looking at the graph for $r < 1$:
+
+<p align=center>
+    <img src="./img/prob-three.png" width="300" />
+</p>
+
+Note that $r < 1$ means we've essentially flipped dimensions: the fit-height points correspond to the fit-width points of ratio $ \frac{1}{r}$. For $r = \frac{1}{2}$ as depicted above, $P_{\frac{1}{2}} \ge 0$. How do we interpret this?
+
+> For $r \ge 2$, no a = $\ceil{\sqrt{rn}}$ satisfies the sufficient condition above to fulfill the fit-width solution requirements.
+
+Any valid $a_w$ will be greater than $\ceil{x_0}$ with very high certainty, especially when considering the growth rate of $\frac{1}{2r}$ as $r \to 0$. This also provides an intuitive explanation for the second algorithm's runtime: as $r$ grows the fit-width solutions are farther and farther away from $(x_0, y_0)$, so the first loop will have to iterate more; at the same time, the probability that the initial fit-height solution candidate is valid rapidly increases, which prevents the second loop from iterating.
+
+The final conclusion is: for $r \ge 1$ it is very likely that $b_h = \ceil{\sqrt{\frac{n}{r}}}$ is a valid fit-height point and almost never likely that $a_w = \ceil{\sqrt{rn}}$ is a valid fit-width point. Then mostly $b_w < b_h$, since with more columns the grid requires less rows to fit all squares. Therefore by $\text{(17)}$ for $r \ge 1$ _the fit-width solution is in the majority of cases better than any fit-height solution_. Likewise for $r < 1$ but with fit-width and fit-height swapped.
 
 ### Using binary search in the second algorithm
 
-Recall that $a_w \in \N$ is part of a feasible solution if and only if $\lceil \frac{n}{a_w} \rceil \le \lfloor \frac{a_w}{r} \rfloor$. Moreover, according to $\text{(15)}$ the algorithm always finds a solution after $\lfloor r \rfloor + 1$ iterations, thus $a_0 \le a_w \lt a_0 + r + 1$, where $a_0 = \lceil \sqrt{rn} \rceil$ is the starting value for $a_w$.
+According to $\text{(15)}$ the algorithm always finds a solution after $\floor{r}+ 1$ iterations, thus $a_0 \le a_w \lt a_0 + r + 1$, where $a_0 = \lceil \sqrt{rn} \rceil$ is the starting value for $a_w$.
 
-We can binary search over that interval using the feasability condition. If the midpoint is not feasible, we search in the left half, since we're not yet in the solution space, otherwise we search in the right half, since we want the minimal solution. Here is the algorithm:
+We can binary search over that interval using the same loop condition from $\text{(18)}$. If the midpoint is not a valid $a_w$, we search in the upper half, since we're not yet in the solution space, otherwise we search in the lower half, since we want the minimal solution. Here is the algorithm for $a_w$:
 
 ```javascript
 const r = w / h
@@ -448,10 +545,10 @@ let right = Math.ceil(left + r + 1)
 
 while (left < right) {
     const mid = Math.floor(left + (right - left) / 2)
-    if (Math.ceil(n / mid) <= Math.floor(mid / r)) {
-        right = mid 
-    } else {
+    if (mid < r * Math.ceil(n / mid)) {
         left = mid + 1
+    } else {
+        right = mid 
     }
 }
 
@@ -459,22 +556,6 @@ return w / left
 ```
 
 Upper bound ceiled so interval is open. `left` stores $a_w$. This reduces the asymptotic runtime to $\mathcal{O}(\log r)$. Useful for very large ratios but very large ratios seem utterly useless.
-
-### Filling the grid as an integer optimization problem
-
-By rearranging the solution constraints in $\text{(14)}$ we can reformulate the problem as an [integer programming](https://en.wikipedia.org/wiki/Integer_programming) one:
-
-$$\begin{align*}  \underset{a, b \in \N}{\text{minimize}} \quad &a \\ \text{subject to} \quad & ab \ge n \\ &a \ge rb \end{align*}$$
-
-The first algorithm attempts to solve it naively by relaxing the integer constraint and adjust the obtained solution if it's not feasible. As proven, the algorithm is not optimal.
-
-We can further work it into a 1D integer optimization problem over a convex function by searching $a$ using arbitrary $b$, to be able to solve it using [lattice reduction](https://en.wikipedia.org/wiki/Lattice_reduction):
-
-$$\begin{align*} a = \underset{b \in \N}{\min} \set{\max \set{\lceil rb \rceil, \lceil \frac{n}{b} \rceil} } \end{align*}$$
-
-For this particular problem it's overkill, the algorithm developed here is way simpler and equally correct. I presented this approach because this last formulation is used in the [Desmos visualizer](https://www.desmos.com/calculator/lkigtugg1f) to plot the solution candidates.
-
-It also places the problem in context – I've always had it in the back of my mind that there must be a higher-level way to approach it, even though it ended up not being (too) useful.
 
 ### $\lfloor \cdot \rfloor$ and $\lceil \cdot \rceil$ are residuated mappings
 
@@ -494,4 +575,4 @@ $$\begin{align*} x \le n \iff x < n \iff &\lfloor x \rfloor + \{x\} < n \\ \iff 
 
 The others are proven in a similar fashion. Read more about this on [Wikipedia's "Equivalences" for floor and ceiling](https://en.wikipedia.org/wiki/Floor_and_ceiling_functions#Equivalences). These are standard properties but I insisted on writing them here as a "note to self" since I've confused myself and applied them wrong way too many times. I probably know that Wikipedia page now by heart.
 
-[1]: https://www.desmos.com/calculator/fa3g7kanmh
+[1]: https://www.desmos.com/calculator/8y5xph34oc
