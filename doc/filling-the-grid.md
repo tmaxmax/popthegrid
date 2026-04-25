@@ -383,17 +383,10 @@ $$\begin{equation} \tag{***}
 \end{split}
 \end{equation}$$
 
-Let $(a_h = \lceil \frac{n}{b'} \rceil, b_h = b')$. If $(a_h, b_h)$ is a fit-height point, $\text{(9)}$ must hold true:
+Let $(a_h = \lceil \frac{n}{b'} \rceil, b_h = b')$. For $(a_h, b_h)$ to be a valid fit-height point, $\text{(15)}$ must hold true:
 
 $$\begin{align*}
-n \le a_hb_h \land a_h \le rb_h
-\end{align*}$$
-
-The first condition is trivially true by construction. We tackle the second.
-
-$$\begin{align*}
-a_h \le rb_h \iff &\lceil \frac{n}{b'} \rceil \le rb' \\
-    \overset{\text{rm.}}{\iff} & \lceil \frac{n}{b'} \rceil \le \lfloor rb' \rfloor
+    \lceil \frac{n}{b'} \rceil \le \lfloor rb' \rfloor
 \end{align*}$$
 
 Whether $rb'$ is an integer or not changes the ceiling and floor result. Starting with $rb' \in \N$:
@@ -402,10 +395,10 @@ $$\begin{align*}
 rb' \in \N \implies &a = rb' \\
     \overset{\text{(***)}}{\implies} &n \le brb' \\
     \implies &\frac{n}{b'} \le rb < rb' \\
-    \overset{\text{rm.}}{\implies} &\lceil \frac{n}{b'} \rceil \le rb' \implies a_h \le rb_h
+    \overset{\text{rm.}}{\implies} &\lceil \frac{n}{b'} \rceil \le \lfloor rb' \rfloor = rb'
 \end{align*}$$
 
-The fit-height solution condition holds. For $rb' \notin \N$ let now $F = \lfloor rb' \rfloor$ and recall that $b' \ge b + 1 > b$ by assumption. Then:
+It holds. For $rb' \notin \N$ let now $F = \lfloor rb' \rfloor$ and recall that $b' \ge b + 1 > b$ by assumption. Then:
 
 $$\begin{gather*}
 \begin{align*}
@@ -420,13 +413,12 @@ $$\begin{gather*}
     &\overset{\text{(ii)}}{\le} F - 1 + 1 = F
 \end{align*} \\
 &\begin{align*}
-\frac{n}{b'} \le F \overset{\text{rm.}}{\iff} &\lceil \frac{n}{b'} \rceil \le \lfloor rb' \rfloor \\
-    \overset{\text{rm.}}{\iff} &\lceil \frac{n}{b_h} \rceil \le rb_h \iff a_h \le rb_h
+\frac{n}{b'} \le F \overset{\text{rm.}}{\iff} &\lceil \frac{n}{b'} \rceil \le \lfloor rb' \rfloor
 \end{align*}
 \end{align*}
 \end{gather*}$$
 
-With this we have shown that $\text{(9)}$ holds for $(a_h = \lceil \frac{n}{b'} \rceil, b_h = b')$, meaning that $(a_h, b_h)$ is a valid fit-height point. We assumed at the beginning that $s_w > s_h$. But:
+With this we have shown that $\text{(15)}$ holds for $(a_h = \lceil \frac{n}{b'} \rceil, b_h = b')$, meaning that $(a_h, b_h)$ is a valid fit-height point. We assumed at the beginning that $s_w > s_h$. But by $\text{(***)}$:
 
 $$\begin{align*}
 a \ge rb' \iff \frac{1}{a} \le \frac{1}{rb_h} \iff s_w \le s_h \text{ contradiction}
