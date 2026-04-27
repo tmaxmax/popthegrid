@@ -20,6 +20,8 @@ $$\begin{align*} as = w \implies &a = \frac{w}{s} \\ \overset{(1)}{\implies} &a 
 
 To further clarify the last step: since $s$ is in the denominator, maximizing it means $a$ must take the smallest value greater than or equal to RHS. Since $a \in \N$ this is precisely RHS rounded up.
 
+<hr class="print-page-break">
+
 Knowing $a$ we can now determine the side length $s$:
 
 $$\begin{equation}\tag{3} as = w \implies s = \frac{w}{a} \end{equation}$$
@@ -47,6 +49,8 @@ $$\begin{equation} \tag{7} s' = \frac{h}{b} = \frac{h}{\left\lceil \frac{h}{s} \
 Is this $s' \in \text{Sol}$? Yes, in fact in $\text{Sol}_{b}$: $(6) \implies n \leq ab$, $(7) \implies bs' = h$ and
 
 $$\begin{equation} \tag{8} as' = \frac{ah}{\left\lceil \frac{h}{w}a \right\rceil} = \frac{ah}{\left\lceil \frac{ah}{w} \right\rceil} \overset{\left\lceil x \right\rceil \geq x}{\implies} as' \leq \frac{ah}{\frac{ah}{w}} \implies as' \leq w \end{equation}$$
+
+<hr class="print-page-break">
 
 With that we have determined $s_a$. Here's its formula based only on inputs $w, h, n$:
 
@@ -96,16 +100,18 @@ s &= \begin{cases}
 
 The problem is reduced to just $a, b$ and $r$. This simplification unlocks a powerful geometric representation in the 2D plane: we're looking for points $(a_w, b_w), (a_h, b_h) \in \N^2$ such that they're on or above the hyperbola $xy = n$ while accounting for their position relative to the line $x = ry$. $x = a$ is used as stand-in for columns in the continuous space, $y = b$ for rows. Take a look (graph A):
 
-<p id="graph-a" align=center><img src="./img/first-graph.png" alt="An introductory graph" width="300" /></p>
+<p id="graph-a" align=center><img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/first-graph.png" alt="An introductory graph" width="300" /></p>
 
 This is the graph for the $n = 8, w = 10, h = 2$ example above, with $r = 10/2 = 5$. The black area under $y = rx$ contains all fit-width solutions, the red area all the fit-height solutions. The union of these two contains the entire solution space, all $(a, b)$ for which $n \le ab$, i.e. all grid dimensions which fit all squares. Points on the green-red line $x = ry$ are grid dimensions having the ratio exactly $r$. Black points are a subset of other solution candidates.
 
 The symmetry of the problem with respect to ratio can now be directly visualized. For $n = 13$ and $r = 3$, respectively $r = 1/3$, we have:
 
 <p style="display: flex; gap: 1em; justify-content: center">
-    <img src="./img/symm-width.png" alt="r > 1 graph to depict symmetry of problem" width="300" />
-    <img src="./img/symm-height.png" alt="r < 1 graph to depict symmetry of problem" width="300" />
+    <img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/symm-width.png" alt="r > 1 graph to depict symmetry of problem" width="300" />
+    <img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/symm-height.png" alt="r < 1 graph to depict symmetry of problem" width="300" />
 </p>
+
+<hr class="print-page-break">
 
 Terminology-wise, from here on $(a_w, b_w), (a_h, b_h)$ will be called a _fit-width point_, respectively a _fit-height point_, if the points respect the requirements in $\text{(9)}$; if the points are those described in $\text{(11)}$, they'll also be called _minimal points_ (minimized coordinates for maximal side-length). $s_w$ and $s_h$ will be called _fit-width_ and _fit-height solutions_; unless explicitly mentioned, the $(a_w, b_w), (a_h, b_h)$ points implied by $s_w$ and $s_h$ are not necessarily minimal. Sometimes only $a_w$ or $b_h$ will be mentioned but keep in mind that by definition they do have a pair $b_w$ and $a_h$.
 
@@ -125,11 +131,11 @@ $$\begin{equation} \tag{13}
 
 If parameters are "nice" such that $x_0, y_0 \in \N$ the minimal fit-width and fit-height points coincide (graph B):
 
-<p id="graph-b" align=center><img src="./img/perfect-solution.png" alt="Parameters where the fit-width and fit-height solutions coincide" width="300" /></p>
+<p id="graph-b" align=center><img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/perfect-solution.png" alt="Parameters where the fit-width and fit-height solutions coincide" width="300" /></p>
 
 Second, when is a point _valid_, i.e. satisfies solution requirements in $\text{(9)}$? Also, can multiple points give the same solution? Consider the following ($n = 23, r = 3.9$, graph C):
 
-<p id="graph-c" align=center><img src="./img/multiple-points-same-solution.png" alt="" width="300" /></p>
+<p id="graph-c" align=center><img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/multiple-points-same-solution.png" alt="" width="300" /></p>
 
 The 4 points next to $(a_h, b_h)$ have the same ordinate and the point above $(a_w, b_w)$ the same abscissa, therefore their corresponding side lengths are still $s_h$, respectively $s_w$. This follows directly from the solution requirements in $\text{(9)}$:
 
@@ -207,6 +213,8 @@ P_b &= \begin{cases}
 \end{cases} \\
 \end{align*}$$
 
+<hr class="print-page-break">
+
 Recall that if a fit-width point has a solution greater than that of a fit-height point it will have less rows. Above we can see that all of $P_{a,1}, P_{b,0}, P_{b,1}$ have a number of rows greater than $y_0$: for $P_b$ it is by construction, and for $P_{a,1}$:
 
 $$\begin{align*}
@@ -218,8 +226,8 @@ Moreover, for $r \ge 1$ there exists a fit-height solution with $b_h = \left\lce
 Let's visualize this on the graphs of the two counterexamples given above ($r = 5, n = 8$ and $r = 3.5, n = 20$):
 
 <p style="display: flex; gap: 1em; justify-content: center">
-    <img src="./img/alg-1-points-1.png" alt="" width="300" />
-    <img src="./img/alg-1-points-2.png" alt="" height="300" />
+    <img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/alg-1-points-1.png" alt="" width="300" />
+    <img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/alg-1-points-2.png" alt="" width="300" />
 </p>
 
 The initial fit-width point candidate $P_{a,0}$ is invalid in both cases (under the hyperbola), so the algorithm falls back to $P_{a,1}$, a fit-height point. In the first example, $P_{b,0}$ is already valid, so the fallback $P_{b,1}$ is not used; in the second, the fallback is used instead but even though it's a fit-width point its solution is equivalent to the fit-height solution, as they have the same number of rows. 
@@ -259,7 +267,7 @@ The algorithm always terminates: as $a$ grows, $\left\lceil\frac{n}{a}\right\rce
 
 Intuitively, if the loop condition holds there is no valid $(a_w, b_w)$ or $(a_h, b_h)$ fit-width, respectively fit-height point with the iteration's current $a_w$ or $b_h$ value. If we take $b_w = \left\lceil\frac{n}{a}\right\rceil$ and $a_h = \left\lceil\frac{n}{b}\right\rceil$ (the minimum values for a valid solution) we can imagine this algorithm as "walking away" from $(x_0, y_0)$ alongside the hyperbola until we (inevitably) find ourselves in the fit-width/fit-height solution spaces:
 
-<p align=center><img src="./img/alg-2-walk.png" width=300 /></p>
+<p align=center><img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/alg-2-walk.png" width=300 /></p>
 
 $a_0$ and $b_0$ are the starting points, right next to $(x_0, y_0)$. The algorithm "walks down" to $(a_w, b_w)$ and "up" to $(a_h, b_h)$. In fact, in this example, $b_0$ is initialized directly to $(a_h, b_h)$; $a_0$ must be incremented once.
 
@@ -277,11 +285,13 @@ $$\begin{equation} \tag{18}
 
 This means at most $\left\lfloor r \right\rfloor + 1$ iterations and a runtime of $\mathcal{O}(r)$, dependent only on the aspect ratio of the grid. To show that the bound is tight, consider this following example:
 
-<p align=center><img src="./img/bound-tightness.png" width=300 /></p>
+<p align=center><img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/bound-tightness.png" width=300 /></p>
 
 Here $n = 33, r = 8.3$. A very rare case when the fit-height starting point $b_0$ is in the fit-width solution space. Consider the iteration count of the fit-height loop of the algorithm – by the same reasoning it is $\left\lfloor{\frac{1}{r}}\right\rfloor + 1$. It's visible that in this example the loop will do exactly 1 iteration to reach $(a_h, b_h)$. Since the algorithm is symmetric this proves tightness for the first loop by using the same $n$ and $r' = \frac{1}{r}$.
 
 With a correct algorithm and good understang of why it works, we conclude here.
+
+<hr class="print-page-break">
 
 ## Appendix
 
@@ -328,7 +338,7 @@ b < b' \implies rb < rb' \implies &rb < \underbrace{rb + 1 \le r(b + 1)}_{\text{
 
 \end{align*}$$
 
-One would think disproving case 2 would be just as easy since it's still about monotonicity. Knowing that $r \ge 1$ helped tremendously above; doing the same for $\frac{n}{x}$ results in just $\left\lceil \frac{n}{b} \right\rceil \ge \left\lceil \frac{n}{b'} \right\rceil$. We need to get rid of the equality to actually have a contradiction, so let's find a sufficient condition for strict inequality:
+Disproving case 2 is more involved, as knowing $r \ge 1$ won't help, unlike above; doing the same for $\frac{n}{x}$ results in just $\left\lceil \frac{n}{b} \right\rceil \ge \left\lceil \frac{n}{b'} \right\rceil$. We must eliminate the equality to get a contradiction. Let's find a sufficient condition for strict inequality:
 
 $$\begin{align*}
 b < b' \implies \frac{n}{b} > \frac{n}{b'} \implies &\frac{n}{b} > \frac{n}{b + 1} \ge \frac{n}{b'} \\
@@ -398,6 +408,8 @@ rb' \in \N \implies &a = rb' \\
     \overset{\text{rm.}}{\implies} &\left\lceil \frac{n}{b'} \right\rceil \le \left\lfloor rb' \right\rfloor = rb'
 \end{align*}$$
 
+<hr class="print-page-break">
+
 It holds. For $rb' \notin \N$ let now $F = \left\lfloor rb' \right\rfloor$ and recall that $b' \ge b + 1 > b$ by assumption. Then:
 
 $$\begin{gather*}
@@ -431,6 +443,8 @@ Fun fact: the idea for disproving case 2 came from the intuition that since $n =
 $$\begin{align*}
 b \le \left\lfloor{\sqrt{\frac{1}{4} + n} - \frac{1}{2}}\right\rfloor \le \left\lfloor{\sqrt{(\frac{1}{2} + \sqrt{n})^2} - \frac{1}{2}}\right\rfloor = \left\lfloor \sqrt{n} \right\rfloor
 \end{align*}$$
+
+<hr class="print-page-break">
 
 ### Position of solution points relative to $(x_0, y_0)$
 
@@ -469,11 +483,13 @@ $$\begin{align*}
 0 < \underbrace{\frac{1}{2r} + \sqrt{\frac{1}{4r^2}+\frac{n}{r}} - \sqrt{\frac{n}{r}}}_{B_r(n)} \le \underbrace{\left\lceil{\sqrt{\frac{n}{r}}}\right\rceil - \sqrt{\frac{n}{r}}}_{C_r(n)} < 1
 \end{align*}$$
 
+<hr class="print-page-break">
+
 Let's visualize this:
 
 <p style="display: flex; gap: 1em; justify-content: center">
-    <img src="./img/prob-one.png" width="300" />
-    <img src="./img/prob-two.png" width="300"/>
+    <img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/prob-one.png" width="300" />
+    <img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/prob-two.png" width="300"/>
 </p>
 
 First graph depicts $r = 1$, the second $r = 3$. The red points represent $C_r(n)$, the black points $B_r(n)$. Whenever a red point is in the green area $C_r(n) \ge B_r(n)$, meaning $\left\lceil{\sqrt{\frac{n}{r}}}\right\rceil$ is a valid fit-height point for $n$.
@@ -503,6 +519,8 @@ $$\begin{align*}
 
 This tells us that a percentage of $1 - t$ points out of $n$ are in $[t, 1]$. One can roughly notice this on the graph: the points $(n, C_r(n))$ are [distributed uniformly](https://en.wikipedia.org/wiki/Continuous_uniform_distribution) between the green and blue areas, proportionally with their sizes. 
 
+<hr class="print-page-break">
+
 The limit's numerator is equivalent to $\left|\Set{k \in [n] : C_r(k) \ge t}\right|$. For $t = B_r(k)$ this would've been precisely $S_n$, with the limit then giving us $d(S)$ directly, but $t$ must be constant. To find an appropriate value, let's bound $B_r(n)$:
 
 $$\begin{align*}
@@ -520,15 +538,17 @@ $$\begin{align*}
 P_r \ge d(S) = \lim_{n \to \infin}\frac{\left|\Set{C_r(k) : k \in [n]} \cap [\frac{1}{2r}, 1]\right|}{n} = 1 - \frac{1}{2r}
 \end{align*}$$
 
-As a final note, attempting to exclude points where $C_r(n) = 0$, i.e. $\sqrt{\frac{n}{r}} \in \N$, would've not influenced the result: $\left|\Set{ k \in [n] : C_r(n) = 0 }\right| \le \mathcal{O}(\sqrt{n})$, so it's a density-zero set.
+As a final note, attempting to exclude points where $C_r(n) = 0$, i.e. $\sqrt{\frac{n}{r}} \in \N$, would've not influenced the result. $\frac{n}{r} \in A$, where $A = \Set{ p^2 | p \in \N }$ the set of all squares, and since $|A \cap [n]| \le \mathcal{O}(\sqrt{n})$, $d(A) = 0$. Our set of points is a subset of that, so it must also be density-zero. By other means one could strengthen the bound to $1 - \frac{1}{4r}$ for $r \in \R \setminus \mathbb{Q}$, and to $p \in [1 - \frac{1}{2r}, 1]$ otherwise (with $p = 1$ for $r \in \N$).
 
 Thus, for the examples above $P_1 \ge 0.5$ and $P_3 \ge 0.833$. [Desmos for the graph here.][2]
 
 The first conclusion is that fit-height solutions will for the most part have $b_h = \left\lceil{\sqrt{\frac{n}{r}}}\right\rceil$. We can derive even more interesting information by looking at the graph for $r < 1$:
 
 <p align=center>
-    <img src="./img/prob-three.png" width="300" />
+    <img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/prob-three.png" width="300" />
 </p>
+
+<hr class="print-page-break">
 
 Note that $r < 1$ means we've essentially flipped dimensions: the fit-height points correspond to the fit-width points of ratio $ \frac{1}{r}$. For $r = \frac{1}{2}$ as depicted above, $P_{\frac{1}{2}} \ge 0$. How do we interpret this?
 
@@ -563,6 +583,8 @@ return w / left
 ```
 
 Upper bound ceiled so interval is open. `left` stores $a_w$. This reduces the asymptotic runtime to $\mathcal{O}(\log r)$. Useful for very large ratios but very large ratios seem utterly useless.
+
+<hr class="print-page-break">
 
 ### $\left\lfloor \cdot \right\rfloor$ and $\left\lceil \cdot \right\rceil$ are residuated mappings
 
