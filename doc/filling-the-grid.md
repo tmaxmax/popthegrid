@@ -85,8 +85,8 @@ We can now state the final solution:
 
 $$\begin{equation} \tag{11}
 \begin{split}
-a_w &= \underset{b_w \in \N}{\min} \Set{a \in \N : a \ge \frac{n}{b_w} \land a \ge rb_w} \\
-b_h &= \underset{a_h \in \N}{\min} \Set{b \in \N : b \ge \frac{n}{a_h} \land b \ge \frac{a_h}{r}} \\
+a_w &= \min \Set{a \in \N : \exist b_w \text{ . } a \ge \frac{n}{b_w} \land a \ge rb_w} \\
+b_h &= \min \Set{b \in \N : \exist a_h \text{ . } b \ge \frac{n}{a_h} \land b \ge \frac{a_h}{r}} \\
 s &= \begin{cases}
     s_w = \frac{w}{a_w} &\text{ if } a_w < rb_h, \\
     s_h = \frac{h}{b_h} &\text{ otherwise} 
@@ -98,11 +98,11 @@ The problem is reduced to just $a, b$ and $r$. This simplification unlocks a pow
 
 <p id="graph-a" align=center><img src="./img/first-graph.png" alt="An introductory graph" width="300" /></p>
 
-This is the graph for the $n = 8, w = 10, h = 2$ example above, with $r = 10/2 = 5$. The black area under $y = rx$ contains all fit-width solutions, the red area all the fit-height solutions. The union of these two contains the entire solution space, all $(a, b)$ for which $n \le ab$, i.e. all grid dimensions which fit all squares. Points on the green-red line $y = rx$ are grid dimensions having the ratio exactly $r$. Black points are a subset of other solution candidates.
+This is the graph for the $n = 8, w = 10, h = 2$ example above, with $r = 10/2 = 5$. The black area under $y = rx$ contains all fit-width solutions, the red area all the fit-height solutions. The union of these two contains the entire solution space, all $(a, b)$ for which $n \le ab$, i.e. all grid dimensions which fit all squares. Points on the green-red line $x = ry$ are grid dimensions having the ratio exactly $r$. Black points are a subset of other solution candidates.
 
 The symmetry of the problem with respect to ratio can now be directly visualized. For $n = 13$ and $r = 3$, respectively $r = 1/3$, we have:
 
-<p align=center>
+<p style="display: flex; gap: 1em; justify-content: center">
     <img src="./img/symm-width.png" alt="r > 1 graph to depict symmetry of problem" width="300" />
     <img src="./img/symm-height.png" alt="r < 1 graph to depict symmetry of problem" width="300" />
 </p>
@@ -117,7 +117,7 @@ $$\begin{equation} \tag{12}
 x_0 = \frac{n}{y_0} = ry_0 \iff x_0 = \sqrt{rn} \land y_0 = \sqrt{\frac{n}{r}}
 \end{equation}$$
 
-The number of rows $a$ chosen in $\text{(2)}$ is precisely $\left\lceil x_0 \right\rceil$. This is the visual confirmation of that result: all the fit-width points will find themselves to the left of that point, all the fit-height points to its right. In other words:
+The number of columns $a$ chosen in $\text{(2)}$ is precisely $\left\lceil x_0 \right\rceil$. This is the visual confirmation of that result: all the fit-width points will find themselves to the left of that point, all the fit-height points to its right. In other words:
 
 $$\begin{equation} \tag{13}
 \forall a_w, b_h\text{ . } a_w \ge x_0 \land b_h \ge y_0
@@ -154,47 +154,43 @@ b_h \text{ valid }\iff &\left\lceil \frac{n}{b_h} \right\rceil \le \left\lfloor 
 \end{split}
 \end{equation}$$
 
-The number of points with equal solutions is easily derived.
+The number of points with equal solutions is easily derived by subtracting the interval endpoints.
 
-Third, which points give the optimal solution $s$? How do they compare? Let's observe the example graphs for intuition:
-- in [graph A](#graph-a), $a_w$ is optimal, and $b_w < b_h$
-- in [graph B](#graph-b), $a_w$ and $b_h$ are equivalent, and $b_w = b_h$
-- in [graph C](#graph-c), $a_w$ is worse than $b_h$, and $b_w = b_h$ for one of the fit-width solutions
+Third, which points give the optimal solution $s$? How do they compare? Recall $\text{(10)}$:
 
-It would also seem like a fit-width point with more rows than a fit-height point, $b_w > b_h$, gives a worse solution: it's simply a bigger grid in the same space, since the number of columns must also increase ($a_w \ge rb_w$).
+$$\begin{align*}
+s_w > s_h \iff a_w \lt rb_h
+\end{align*}$$
 
-Let's prove formally. For $b_w \ge b_h$ we have:
+From $\text{(9)}$ we know that for any $(a_h, b_h)$ fit-height point, $a_h \le rb_h$, meaning $rb_h$ is an upper bound on a fit-height solution's number of columns. Therefore:
+
+> A fit-width point with less columns than _some_ fit-height point gives the better solution between the two.
+
+If $rb_h \notin \N$ then both $a_w \le \lfloor rb_h \rfloor$ and $a_h \le \lfloor rb_h \rfloor$, meaning they can have at most as many columns. This is unsuprising: the fit-width solution stretches the columns fully, while the fit-height doesn't.
+
+What about the number of rows? Since $a_w \ge rb_w$ we get that:
 
 $$\begin{equation} \tag{16}
-b_w \ge b_h \overset{\text{(9)}}{\implies} a_w \ge rb_w \ge rb_h \ge a_h \implies \frac{1}{a_w} \le \frac{1}{rb_h} \overset{\text{(10)}}{\implies} s_h \ge s_w
+a_w \ge rb_w \land s_w > s_h \implies rb_w \le a < rb_h \implies b_w < b_h
 \end{equation}$$
 
-One can read this intuitively as:
+This means:
 
-> Fit-width solution has at least as many rows and columns, so at least as many squares, thus their side length cannot increase.
+> A fit-width point must have less rows than a fit-height point to correspond to a better solution.
 
-This was simple. For $b_w < b_h$ it is a bit more involved:
+It makes sense intuitively: a fit-height solution stretches the rows fully, a fit-width doesn't; if a fit-width solution has as many rows or more, it must be worse.
 
-$$\begin{equation} \tag{17}
-\begin{split}
-&b_w < b_h \implies rb_w < rb_h \\[0.5em]
-&\text{From (9), } a_w \ge rb_w. \text{ By total ordering:} \\
-&\begin{aligned}\enspace \text{(1)} \quad rb_h > a_w \ge rb_w \implies \frac{1}{a_w} \gt \frac{1}{rb_h} \implies s_w \gt s_h
-\end{aligned} \\
-&\begin{aligned}\enspace \text{(2)} \quad
-    &a_w \ge rb_h \ge rb_w \text{:} \\
-    &b_w < b_h \implies \frac{n}{b_w} > \frac{n}{b_h} \implies a_w > \frac{n}{b_h} \\
-    &a_w \ge rb_h \land a_w > \frac{n}{b_h} \overset{\text{(9)}}{\implies} (a_w, b_h) \text{ fit-width, same solution} \overset{\text{(16)}}{\implies} s_h \ge s_w
-\end{aligned}
-\end{split}
-\end{equation}$$
+We can observe these properties on the graphs above:
+- in [graph A](#graph-a) the fit-width solution has less columns: it is the better one
+- in [graph C](#graph-c) the fit-width solution has more columns: it is worse
 
-Read $\text{(17)}$ as:
+Graph C shows that having less rows doesn't matter, since one can simply add more rows. Mathematically, for $(a_w, b_w)$ fit-width, $(a_h, b_h)$ fit-height points, if $s_w \le s_h$:
 
-> 1. Fit-width solution has at most as many columns than the fit-height solution but stretches them out more.
-> 1. Fit-width solution can be extended to have as many rows as a fit-height solution but by comparison may not fully stretch them out.
+$$\begin{align*}
+a_w \ge rb_h \ge a_h \land n \le a_hb_h \implies a_w \ge rb_h \land n \le a_wb_h \overset{\text{(9)}}{\implies} (a_w, b_h) \text{ fit-width}
+\end{align*}$$
 
-Note that the results above apply for any $r$.
+Note that all the results above apply for any $r$.
 
 Fourth and finally, when $r \ge 1$ if the minimal fit-width solution is strictly better than any fit-height solution, then it corresponds [uniquelly to a single point (see appendix for proof)](#uniqueness-of-fit-width-solution-when). Symmetrically for $r \lt 1$ the same applies for the fit-height solution.
 
@@ -221,24 +217,24 @@ Moreover, for $r \ge 1$ there exists a fit-height solution with $b_h = \left\lce
 
 Let's visualize this on the graphs of the two counterexamples given above ($r = 5, n = 8$ and $r = 3.5, n = 20$):
 
-<p align=center>
+<p style="display: flex; gap: 1em; justify-content: center">
     <img src="./img/alg-1-points-1.png" alt="" width="300" />
     <img src="./img/alg-1-points-2.png" alt="" height="300" />
 </p>
 
 The initial fit-width point candidate $P_{a,0}$ is invalid in both cases (under the hyperbola), so the algorithm falls back to $P_{a,1}$, a fit-height point. In the first example, $P_{b,0}$ is already valid, so the fallback $P_{b,1}$ is not used; in the second, the fallback is used instead but even though it's a fit-width point its solution is equivalent to the fit-height solution, as they have the same number of rows. 
 
-Let's now build a new algorithm. This algorithm should find the minimal fit-width and fit height points and pick the solution with the greater side length. Putting $\text{(13)}$ and $\text{(15)}$ together, the solution we're looking for is:
+Let's now build a new algorithm. This algorithm should find the minimal fit-width and fit height points and pick the solution with the greater side length. Using $\text{(15)}$ , the solution we're looking for is:
 
 $$\begin{gather*}
-a_w = \min \Set{a \in \N : a \ge \left\lceil\sqrt{rn}\right\rceil \land \left\lceil \frac{n}{a} \right\rceil \le \left\lfloor{\frac{a}{r}}\right\rfloor} \\
-b_h = \min \Set{b \in \N : b \ge \left\lceil\sqrt{\frac{n}{r}}\right\rceil \land \left\lceil \frac{n}{b} \right\rceil \le \left\lfloor{rb}\right\rfloor} \\
+a_w = \min \Set{a \in \N : \left\lceil \frac{n}{a} \right\rceil \le \left\lfloor{\frac{a}{r}}\right\rfloor} \\
+b_h = \min \Set{b \in \N : \left\lceil \frac{n}{b} \right\rceil \le \left\lfloor{rb}\right\rfloor} \\
 s = \max \Set{ \frac{w}{a_w}, \frac{h}{b_h} }
 \end{gather*}$$
 
-Let's walk through how we translate this to code. First, we are looking for minimum $a_w$ and $b_h$ greater than $\left\lceil x0 \right\rceil$ and $\left\lceil y0 \right\rceil$. We'll initialize variables `a` and `b` to those values, $a_w$ and $b_h$ can't be smaller. Then we need to ensure the second condition; for that, we just increment `a` and `b` in a loop until the condition holds. The loops execute while $a_w$ and $b_h$ are invalid points:
+Let's walk through how we translate this to code. First, we are looking for minimum $a_w$ and $b_h$; from $\text{(13)}$ we know that $a_w \ge \left\lceil \sqrt{rn} \right\rceil$ and $b \ge \left\lceil \frac{n}{r} \right\rceil$. We'll initialize variables `a` and `b` to those values. Then we need to ensure the validity condition; for that, we just increment `a` and `b` in a loop until the condition holds. The loops execute while $a_w$ and $b_h$ are invalid points:
 
-$$\begin{equation} \tag{18}
+$$\begin{equation} \tag{17}
 \begin{split}
 &\left\lceil\frac{n}{a}\right\rceil > \left\lfloor{\frac{a}{r}}\right\rfloor \iff a < r\left\lceil\frac{n}{a}\right\rceil \\
 &\left\lceil\frac{n}{b}\right\rceil > \left\lfloor{rb}\right\rfloor \iff rb < \left\lceil\frac{n}{b}\right\rceil
@@ -269,13 +265,21 @@ $a_0$ and $b_0$ are the starting points, right next to $(x_0, y_0)$. The algorit
 
 We have convinced ourselves of correctness. To analyze its runtime complexity, let's denote $a_0 = \left\lceil\sqrt{rn}\right\rceil$ the starting value of $a$. Since the loop condition is $a < r\left\lceil{\frac{n}{a}}\right\rceil$, $a$ will be incremented at most $\left\lceil{r\left\lceil{\frac{n}{a}}\right\rceil - a_0}\right\rceil$ times. Since $a$ increases $\left\lceil{\frac{n}{a}}\right\rceil \le \left\lceil{\frac{n}{a_0}}\right\rceil $. We can now count iterations:
 
-$$\begin{align*} \left\lceil{r\left\lceil{\frac{n}{a}}\right\rceil - a_0}\right\rceil < \thickspace &r \left\lceil{\frac{n}{a_0}}\right\rceil - a_0 + 1 \\ < \thickspace &r \frac{n}{a_0} + r -a_0 + 1 \\ = \thickspace &r\frac{n}{\left\lceil \sqrt{rn} \right\rceil} + r - \left\lceil\sqrt{rn}\right\rceil + 1 \\ < \thickspace &\frac{rn}{\sqrt{rn}} + r - \sqrt{rn} + 1 \\ = \thickspace &r + 1\tag{19} \end{align*}$$
+$$\begin{equation} \tag{18}
+\begin{split}
+\left\lceil{r\left\lceil{\frac{n}{a}}\right\rceil - a_0}\right\rceil < \thickspace &r \left\lceil{\frac{n}{a_0}}\right\rceil - a_0 + 1 \\
+    < \thickspace &r \frac{n}{a_0} + r -a_0 + 1 \\
+    = \thickspace &r\frac{n}{\left\lceil \sqrt{rn} \right\rceil} + r - \left\lceil\sqrt{rn}\right\rceil + 1 \\
+    < \thickspace &\frac{rn}{\sqrt{rn}} + r - \sqrt{rn} + 1 \\
+    = \thickspace &r + 1
+\end{split}
+\end{equation}$$
 
 This means at most $\left\lfloor r \right\rfloor + 1$ iterations and a runtime of $\mathcal{O}(r)$, dependent only on the aspect ratio of the grid. To show that the bound is tight, consider this following example:
 
 <p align=center><img src="./img/bound-tightness.png" width=300 /></p>
 
-Here $n = 33, r = 8.3$. The fit-height starting point $b_0$ is in the fit-width solution space. Consider the iteration count of the fit-height loop of the algorithm – by the same reasoning it is $\left\lfloor{\frac{1}{r}}\right\rfloor + 1$. It's visible that in this example the loop will do exactly 1 iteration to reach $(a_h, b_h)$. Since the algorithm is symmetric relative to $r$ this goes as tightness proof for the first loop, too.
+Here $n = 33, r = 8.3$. A very rare case when the fit-height starting point $b_0$ is in the fit-width solution space. Consider the iteration count of the fit-height loop of the algorithm – by the same reasoning it is $\left\lfloor{\frac{1}{r}}\right\rfloor + 1$. It's visible that in this example the loop will do exactly 1 iteration to reach $(a_h, b_h)$. Since the algorithm is symmetric this proves tightness for the first loop by using the same $n$ and $r' = \frac{1}{r}$.
 
 With a correct algorithm and good understang of why it works, we conclude here.
 
@@ -292,7 +296,7 @@ a = \max \Set{ \left\lceil{\frac{n}{b}}\right\rceil, \left\lceil{rb}\right\rceil
 Thus the minimal fit-width point is determined by:
 
 $$\begin{equation} \tag{*}
-a = \underset{b \in \N}{\min}\Set{ \max \Set{ \left\lceil{\frac{n}{b}}\right\rceil, \left\lceil{rb}\right\rceil }}
+a = \min_{b \in \N} \left\lceil\ \max \Set{ \frac{n}{b}, rb} \right\rceil
 \end{equation}$$
 
 This makes $a$ purely a function of $b$. This formula and a similar one for minimal fit-height solutions are used in [the Desmos visualizer][1] to plot minimal points for each $a$ and $b$ on the graph.
@@ -348,10 +352,9 @@ a = \left\lceil \frac{n}{b'} \right\rceil \overset{\text{(*)}}{\implies} \left\l
     \implies &\frac{n}{b'} + 1 > b' \\
     \implies &b'^2 - b' - n < 0 \\
     \implies &b' < \frac{\sqrt{1 + 4n} + 1}{2} \\
-    \overset{\text{rm.}}{\implies} &b' \le \left\lfloor{\sqrt{\frac{1}{4} + n} + \frac{1}{2}}\right\rfloor \\[1em]
-\end{align*}$$
-
-$$\begin{align*}
+    \overset{\text{rm.}}{\implies} &b' \le \left\lfloor{\sqrt{\frac{1}{4} + n} + \frac{1}{2}}\right\rfloor
+\end{align*} \\
+\begin{align*}
 b < b' \implies &b \le \left\lfloor{\sqrt{\frac{1}{4} + n} + \frac{1}{2}}\right\rfloor - 1 \\
     \implies &b \le \left\lfloor{\sqrt{\frac{1}{4} + n} - \frac{1}{2}}\right\rfloor \\
     \overset{\text{(**)}}{\implies} &\frac{n}{b} \ge \frac{n}{b + 1} + 1 \\
@@ -433,22 +436,20 @@ b \le \left\lfloor{\sqrt{\frac{1}{4} + n} - \frac{1}{2}}\right\rfloor \le \left\
 
 We'll approach this subject by handling fit-height points where $r \ge 1$. Due to the symmetry of the problem relative to ratio, we can make more general conclusions afterwards.
 
-$b = \left\lceil{\sqrt{\frac{n}{r}}}\right\rceil$ is a valid fit-height point by $\text{(15)}$ if and only if:
+$b = \lceil y_0 \rceil = \left\lceil{\sqrt{\frac{n}{r}}}\right\rceil$ is a valid fit-height point by $\text{(15)}$ if and only if:
 
 $$\begin{align*}
 \left\lceil{\frac{n}{b}}\right\rceil \le \left\lfloor{rb}\right\rfloor
 \end{align*}$$
 
-A sufficient condition for this is:
+A sufficient condition is:
 
 $$\begin{align*}
 rb - \frac{n}{b} \ge 1 \implies &rb^2 -n - b \ge 0 \\
     \implies &b \ge \frac{1}{2r} + \sqrt{\frac{1}{4r^2} + \frac{n}{r}} > \sqrt{\frac{n}{r}}
 \end{align*}$$
 
-If $b$ is greater than this value it is guaranteed that there exists a fit-height point $(a, b)$. There are more situations when this could happen not covered by this condition, for example when $\sqrt{\frac{n}{r}} \in \N$ or when $rb - \frac{n}{b} < 1 \land \frac{n}{b} \le k \le rb$ with $k \in \N$.
-
-The condition above is useful since it is easy to _quanitfy_. We can use it to answer: for fixed $r \ge 1$ what's the probability for $b$ to be a valid fit-height solution?
+If $b$ is greater than that the fit-height point $(a, b)$ is valid. The bound doesn't cover all cases when $\exist k \in \N \text{ . } k \in [\frac{n}{b}, rb]$ (e.g. when $y_0 \in \N$ then the point valid for every $n$) but it is easy to _quanitfy_. We can use it to answer: for fixed $r \ge 1$ what's the probability for $b$ to be a valid fit-height solution?
 
 To do this, observe that by the properties of ceiling, $\sqrt{\frac{n}{r}} \le b \lt \sqrt{\frac{n}{r}} + 1$. We can bound the expression above likewise, using $r \ge 1$:
 
@@ -470,27 +471,27 @@ $$\begin{align*}
 
 Let's visualize this:
 
-<p align=center>
+<p style="display: flex; gap: 1em; justify-content: center">
     <img src="./img/prob-one.png" width="300" />
     <img src="./img/prob-two.png" width="300" />
 </p>
 
 First graph depicts $r = 1$, the second $r = 3$. The red points represent $C_r(n)$, the black points $B_r(n)$. Whenever a red point is in the green area $C_r(n) \ge B_r(n)$, meaning $\left\lceil{\sqrt{\frac{n}{r}}}\right\rceil$ is a valid fit-height point for $n$. The points where $C_r(n) = 0$ are ignored because that means that the corresponding $b$ is an integer and thus a valid point.
 
-The probability that $b$ is a valid point up to a certain $n$ of choice is the number of points in the green area divided by the total number of points:
+Since this criterion doesn't cover all possibilities, the probability that $b$ is a valid point up to a certain $n$ of choice is greater than or equal to the number of points in the green area divided by the total number of points:
 
 $$\begin{align*}
-P_r = \frac{\left|\Set{n \in \N : C(n) \ge B(n)}\right|}{\left|\Set{n \in \N : C(n) > 0}\right|}
+P_r \ge \lim_{n \to \infin} \frac{\left|\Set{k \in [n] : C_r(k) \ge B_r(k)}\right|}{\left|\Set{k \in [n] : C_r(k) > 0}\right|} \qquad
 \end{align*}$$
 
-We can approximate by counting points up to a certain $n$. For example $P_{1,n=10} = \frac{4}{7} \approx 0.571$ and $P_{3,n=26} = \frac{21}{24} = 0.875$.
+We can approximate by counting points up to a certain $n$. For example $P_{1,n=10} \ge \frac{4}{7} \approx 0.571$ and $P_{3,n=26} \ge \frac{21}{24} = 0.875$.
 
-Counting points is difficult. Notice that on any interval where $C_r(x)$ is continuous for $x \in \R$, the points $(n, C_r(n))$ are distributed between the two areas proportionally with how much of the $C_r(x)$ segment is in either area. Since $0 < C_r(x) < 1$ covers the entire $(0, 1)$ space, the valid solutions area is the total area without the area of $B_r(x)$.
+But we can't count to infinity. Luckily, $C(n)$ is [equidistributed modulo 1](https://en.wikipedia.org/wiki/Equidistributed_sequence#Equidistribution_modulo_1): the points $(n, C_r(n))$ are [uniformly distributed](https://en.wikipedia.org/wiki/Continuous_uniform_distribution) between the two green and blue areas, proportionally with their sizes. This enables us to just compute the ratio of the solution area to the total area, which is the complement of $B_r(x)$'s area within $(0, 1)$.
 
-To compute this, let's simplify $B_r(n)$ first:
+To compute this, let's bound $B_r(n)$ first:
 
 $$\begin{align*}
-B_r(n) &= \frac{1}{2r} + \sqrt{\frac{1}{4r^2}+\frac{n}{r}} - \sqrt{\frac{n}{r}} \\
+\frac{1}{2r} \le B_r(n) &= \frac{1}{2r} + \sqrt{\frac{1}{4r^2}+\frac{n}{r}} - \sqrt{\frac{n}{r}} \\
     &= \frac{1}{2r} + \sqrt{\frac{n}{r}}\left(\sqrt{1 + \frac{1}{4rn}} - 1\right) \\
     &\le \frac{1}{2r} + \sqrt{\frac{n}{r}}\cdot\frac{1}{8rn} \\
     &= \frac{1}{2r}+\frac{1}{8r\sqrt{rn}}
@@ -499,18 +500,16 @@ B_r(n) &= \frac{1}{2r} + \sqrt{\frac{1}{4r^2}+\frac{n}{r}} - \sqrt{\frac{n}{r}} 
 The approximation $\sqrt{1 + x} \le 1 + \frac{x}{2}$ was used. We can observe the following:
 
 $$\begin{align*}
-\lim_{x \to \infin}B_r(x) \le \frac{1}{2r} \qquad \displaystyle\int_{1}^{\infin}B_r(x)dx = \infin
+\lim_{x \to \infin}B_r(x) = \frac{1}{2r} \qquad \displaystyle\int_{1}^{\infin}B_r(x)dx = \infin
 \end{align*}$$
 
 where the integral is the area under $B_r(x)$. We can now compute the probability:
 
 $$\begin{align*}
-P_r \ge 1 - \lim_{x \to \infin}\frac{\displaystyle\int_{1}^{x}B_r(n)dn}{\int_{1}^{x}1} = 1 - \lim_{x \to \infin}B_r(x) \ge 1 - \frac{1}{2r}
+P_r \ge 1 - \lim_{x \to \infin}\frac{\displaystyle\int_{1}^{x}B_r(n)dn}{\int_{1}^{x}1} = 1 - \lim_{x \to \infin}B_r(x) = 1 - \frac{1}{2r}
 \end{align*}$$
 
-Since we are in the $\frac{\infin}{\infin}$ indeterminate form l'Hôpital can be applied to avoid integration. $P_r$ is greater than or equal to this result since we know there exist more successful cases beyond those included in this measurement.
-
-Thus, for the examples above $P_1 \ge 0.5$ and $P_3 \ge 0.833$. This bound is more exact as $n$ grows.
+Since we are in the $\frac{\infin}{\infin}$ indeterminate form l'Hôpital was applied, avoiding integration. Thus, for the examples above $P_1 \ge 0.5$ and $P_3 \ge 0.833$.
 
 The first conclusion is that fit-height solutions will for the most part have $b_h = \left\lceil{\sqrt{\frac{n}{r}}}\right\rceil$. We can derive even more interesting information by looking at the graph for $r < 1$:
 
@@ -528,9 +527,9 @@ The final conclusion is: for $r \ge 1$ it is very likely that $b_h = \left\lceil
 
 ### Using binary search in the second algorithm
 
-According to $\text{(15)}$ the algorithm always finds a solution after $\left\lfloor{r}\right\rfloor+ 1$ iterations, thus $a_0 \le a_w \lt a_0 + r + 1$, where $a_0 = \left\lceil \sqrt{rn} \right\rceil$ is the starting value for $a_w$.
+According to $\text{(18)}$ the algorithm always finds a solution after $\left\lfloor{r}\right\rfloor+ 1$ iterations, thus $a_0 \le a_w \lt a_0 + r + 1$, where $a_0 = \left\lceil \sqrt{rn} \right\rceil$ is the starting value for $a_w$.
 
-We can binary search over that interval using the same loop condition from $\text{(18)}$. If the midpoint is not a valid $a_w$, we search in the upper half, since we're not yet in the solution space, otherwise we search in the lower half, since we want the minimal solution. Here is the algorithm for $a_w$:
+We can binary search over that interval using the same loop condition from $\text{(17)}$. If the midpoint is not a valid $a_w$, we search in the upper half, since we're not yet in the solution space, otherwise we search in the lower half, since we want the minimal solution. Here is the algorithm for $a_w$:
 
 ```javascript
 const r = w / h
