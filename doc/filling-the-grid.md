@@ -449,7 +449,7 @@ rb - \frac{n}{b} \ge 1 \implies &rb^2 -n - b \ge 0 \\
     \implies &b \ge \frac{1}{2r} + \sqrt{\frac{1}{4r^2} + \frac{n}{r}} > \sqrt{\frac{n}{r}}
 \end{align*}$$
 
-If $b$ is greater than that the fit-height point $(a, b)$ is valid. The bound doesn't cover all cases when $\exist k \in \N \text{ . } k \in [\frac{n}{b}, rb]$ (e.g. when $y_0 \in \N$ then the point valid for every $n$) but it is easy to _quanitfy_. We can use it to answer: for fixed $r \ge 1$ what's the probability for $b$ to be a valid fit-height solution?
+If $b$ is greater than that the fit-height point $(a, b)$ is valid. The condition excludes cases when $\exist k \in \N \text{ . } k \in [\frac{n}{b}, rb]$ (e.g. when $y_0 \in \N$ then the point valid for every $n$) but it is easy to _quanitfy_. We can use it to answer: for fixed $r \ge 1$ what's the probability for $b$ to be a valid fit-height solution?
 
 To do this, observe that by the properties of ceiling, $\sqrt{\frac{n}{r}} \le b \lt \sqrt{\frac{n}{r}} + 1$. We can bound the expression above likewise, using $r \ge 1$:
 
@@ -473,22 +473,37 @@ Let's visualize this:
 
 <p style="display: flex; gap: 1em; justify-content: center">
     <img src="./img/prob-one.png" width="300" />
-    <img src="./img/prob-two.png" width="300" />
+    <img src="./img/prob-two.png" width="300"/>
 </p>
 
-First graph depicts $r = 1$, the second $r = 3$. The red points represent $C_r(n)$, the black points $B_r(n)$. Whenever a red point is in the green area $C_r(n) \ge B_r(n)$, meaning $\left\lceil{\sqrt{\frac{n}{r}}}\right\rceil$ is a valid fit-height point for $n$. The points where $C_r(n) = 0$ are ignored because that means that the corresponding $b$ is an integer and thus a valid point.
+First graph depicts $r = 1$, the second $r = 3$. The red points represent $C_r(n)$, the black points $B_r(n)$. Whenever a red point is in the green area $C_r(n) \ge B_r(n)$, meaning $\left\lceil{\sqrt{\frac{n}{r}}}\right\rceil$ is a valid fit-height point for $n$.
 
-Since this criterion doesn't cover all possibilities, the probability that $b$ is a valid point up to a certain $n$ of choice is greater than or equal to the number of points in the green area divided by the total number of points:
+Since this criterion doesn't cover all possibilities, the ratio between the number of valid points in the green area and the total number of points provides a lower bound for the probability that $b$ is a valid point:
 
 $$\begin{align*}
-P_r \ge \lim_{n \to \infin} \frac{\left|\Set{k \in [n] : C_r(k) \ge B_r(k)}\right|}{\left|\Set{k \in [n] : C_r(k) > 0}\right|} \qquad
+P_r \ge \lim_{n \to \infin} \frac{\left|S_n\right|}{n} \qquad
+\begin{align*}
+S_n &= \Set{k \in [n] : C_r(k) \ge B_r(k)}
+\end{align*}
 \end{align*}$$
 
-We can approximate by counting points up to a certain $n$. For example $P_{1,n=10} \ge \frac{4}{7} \approx 0.571$ and $P_{3,n=26} \ge \frac{21}{24} = 0.875$.
+We can approximate by counting points up to a certain $n$. For example $P_{1,n=10} \ge \frac{4}{10}$ and $P_{3,n=26} \ge \frac{21}{26}$.
 
-But we can't count to infinity. Luckily, $C(n)$ is [equidistributed modulo 1](https://en.wikipedia.org/wiki/Equidistributed_sequence#Equidistribution_modulo_1): the points $(n, C_r(n))$ are [uniformly distributed](https://en.wikipedia.org/wiki/Continuous_uniform_distribution) between the two green and blue areas, proportionally with their sizes. This enables us to just compute the ratio of the solution area to the total area, which is the complement of $B_r(x)$'s area within $(0, 1)$.
+But we can't count to infinity. Enter [asymptotic density](https://en.wikipedia.org/wiki/Natural_density): a measure of how big a subset of $\N$ is relative to $\N$! For our solution set $S$ its density is:
 
-To compute this, let's bound $B_r(n)$ first:
+$$\begin{align*}
+d(S) = \lim_{n \to \infin}\frac{|S_n|}{n} \le P_r
+\end{align*}$$
+
+Exactly what we need. To compute $d(S)$ we use that $C_r(n)$ is [equidistributed modulo 1](https://www.isibang.ac.in/~sury/weyl.pdf). Equidistribution modulo 1 implies that, for constant $t \in [0, 1)$:
+
+$$\begin{align*}
+\lim_{n \to \infin}\frac{\left|\Set{ C_r(k) : k \in [n] } \cap [t, 1]\right|}{n} = 1 - t
+\end{align*}$$
+
+This tells us that a percentage of $1 - t$ points out of $n$ are in $[t, 1]$. One can roughly notice this on the graph: the points $(n, C_r(n))$ are [distributed uniformly](https://en.wikipedia.org/wiki/Continuous_uniform_distribution) between the green and blue areas, proportionally with their sizes. 
+
+The limit's numerator is equivalent to $\left|\Set{k \in [n] : C_r(k) \ge t}\right|$. For $t = B_r(k)$ this would've been precisely $S_n$, with the limit then giving us $d(S)$ directly, but $t$ must be constant. To find an appropriate value, let's bound $B_r(n)$:
 
 $$\begin{align*}
 \frac{1}{2r} \le B_r(n) &= \frac{1}{2r} + \sqrt{\frac{1}{4r^2}+\frac{n}{r}} - \sqrt{\frac{n}{r}} \\
@@ -497,19 +512,17 @@ $$\begin{align*}
     &= \frac{1}{2r}+\frac{1}{8r\sqrt{rn}}
 \end{align*}$$
 
-The approximation $\sqrt{1 + x} \le 1 + \frac{x}{2}$ was used. We can observe the following:
+The approximation $\sqrt{1 + x} \le 1 + \frac{x}{2}$ was used. Observe that the second term vanishes as $n \to \infin$. There may be an initial finite interval on which it excludes numbers, but for the remaining infinite tail it changes nothing. Since the density of a finite subset of integers is $0$, we can ignore that segment when computing $d(S)$. The effect is also visible on the graph early on.
+
+This means we can simply take $t = \lim_{n \to \infin} B_r(n) = \frac{1}{2r}$. Our final result is:
 
 $$\begin{align*}
-\lim_{x \to \infin}B_r(x) = \frac{1}{2r} \qquad \displaystyle\int_{1}^{\infin}B_r(x)dx = \infin
+P_r \ge d(S) = \lim_{n \to \infin}\frac{\left|\Set{C_r(k) : k \in [n]} \cap [\frac{1}{2r}, 1]\right|}{n} = 1 - \frac{1}{2r}
 \end{align*}$$
 
-where the integral is the area under $B_r(x)$. We can now compute the probability:
+As a final note, attempting to exclude points where $C_r(n) = 0$, i.e. $\sqrt{\frac{n}{r}} \in \N$, would've not influenced the result: $\left|\Set{ k \in [n] : C_r(n) = 0 }\right| \le \mathcal{O}(\sqrt{n})$, so it's a density-zero set.
 
-$$\begin{align*}
-P_r \ge 1 - \lim_{x \to \infin}\frac{\displaystyle\int_{1}^{x}B_r(n)dn}{\int_{1}^{x}1} = 1 - \lim_{x \to \infin}B_r(x) = 1 - \frac{1}{2r}
-\end{align*}$$
-
-Since we are in the $\frac{\infin}{\infin}$ indeterminate form l'Hôpital was applied, avoiding integration. Thus, for the examples above $P_1 \ge 0.5$ and $P_3 \ge 0.833$.
+Thus, for the examples above $P_1 \ge 0.5$ and $P_3 \ge 0.833$. [Desmos for the graph here.][2]
 
 The first conclusion is that fit-height solutions will for the most part have $b_h = \left\lceil{\sqrt{\frac{n}{r}}}\right\rceil$. We can derive even more interesting information by looking at the graph for $r < 1$:
 
@@ -570,3 +583,4 @@ $$\begin{align*} x \le n \iff x < n \iff &\left\lfloor x \right\rfloor + \{x\} <
 The others are proven in a similar fashion. Read more about this on [Wikipedia's "Equivalences" for floor and ceiling](https://en.wikipedia.org/wiki/Floor_and_ceiling_functions#Equivalences). These are standard properties but I insisted on writing them here as a "note to self" since I've confused myself and applied them wrong way too many times. I probably know that Wikipedia page now by heart.
 
 [1]: https://www.desmos.com/calculator/8y5xph34oc
+[2]: https://www.desmos.com/calculator/lmc2x29a3i
