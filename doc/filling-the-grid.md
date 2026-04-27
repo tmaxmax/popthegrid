@@ -1,6 +1,6 @@
 # Filling the grid
 
-A container of fixed width and height $w, h \in \R^+$ is filled with $n \in \N$ (natural numbers without $0$) squares positioned in a grid-like fashion. The squares should cover as much of the $w \times h$ area as possible without overflowing, which means we must maximize the side length $S \in \R^+$ of the square. In other words, we are searching an $b \times a \in \N^2$ grid which fits all our $n$ squares and itself fits in the container while either being as wide or as tall as the container.
+A container of fixed width and height $w, h \in \R^+$ is filled with $n \in \N$ (natural numbers without $0$) squares positioned in a grid-like fashion. The squares should cover as much of the $w \times h$ area as possible without overflowing, which means we must maximize the side length $S \in \R^+$ of the square. In other words, we are searching a $b \times a \in \N^2$ grid which fits all our $n$ squares and itself fits in the container while either being as wide or as tall as the container.
 
 We can state the problem in a formal manner as follows:
 
@@ -56,7 +56,7 @@ With that we have determined $s_a$. Here's its formula based only on inputs $w, 
 
 $$\begin{gather*} a = \left\lceil\sqrt{\frac{w}{h}n}\right\rceil \qquad s_a = \begin{cases} \frac{w}{a} &\text{if } n \leq a \left\lfloor \frac{h}{w}a \right\rfloor \\ \frac{h}{\left\lceil \frac{h}{w}a \right\rceil} &\text{else} \end{cases} \end{gather*}$$
 
-Analoguously goes the process for determining $s_b$, whose formula is:
+Analogously goes the process for determining $s_b$, whose formula is:
 
 $$\begin{gather*} b = \left\lceil\sqrt{\frac{h}{w}n}\right\rceil \qquad s_b = \begin{cases} \frac{h}{b} &\text{if } n \leq b \left\lfloor \frac{w}{h}b \right\rfloor \\ \frac{w}{\left\lceil \frac{w}{h}b \right\rceil} &\text{else} \end{cases} \end{gather*}$$
 
@@ -172,7 +172,7 @@ From $\text{(9)}$ we know that for any $(a_h, b_h)$ fit-height point, $a_h \le r
 
 > A fit-width point with less columns than _some_ fit-height point gives the better solution between the two.
 
-If $rb_h \notin \N$ then both $a_w \le \lfloor rb_h \rfloor$ and $a_h \le \lfloor rb_h \rfloor$, meaning they can have at most as many columns. This is unsuprising: the fit-width solution stretches the columns fully, while the fit-height doesn't.
+If $rb_h \notin \N$ then both $a_w \le \lfloor rb_h \rfloor$ and $a_h \le \lfloor rb_h \rfloor$, meaning they can have at most as many columns. This is unsurprising: the fit-width solution stretches the columns fully, while the fit-height doesn't.
 
 What about the number of rows? Since $a_w \ge rb_w$ we get that:
 
@@ -198,7 +198,7 @@ a_w \ge rb_h \ge a_h \land n \le a_hb_h \implies a_w \ge rb_h \land n \le a_wb_h
 
 Note that all the results above apply for any $r$.
 
-Fourth and finally, when $r \ge 1$ if the minimal fit-width solution is strictly better than any fit-height solution, then it corresponds [uniquelly to a single point (see appendix for proof)](#uniqueness-of-fit-width-solution-when). Symmetrically for $r \lt 1$ the same applies for the fit-height solution.
+Fourth and finally, when $r \ge 1$ if the minimal fit-width solution is strictly better than any fit-height solution, then it corresponds [uniquely to a single point (see appendix for proof)](#uniqueness-of-fit-width-solution-when). Symmetrically for $r \lt 1$ the same applies for the fit-height solution.
 
 We can now analyze when the algorithm we've developed fails. Translating its solution to points:
 
@@ -221,7 +221,7 @@ $$\begin{align*}
 \left\lceil \frac{a_w}{r} \right\rceil = \left\lceil \frac{\left\lceil \sqrt{rn} \right\rceil}{r} \right\rceil \ge \frac{\left\lceil \sqrt{rn} \right\rceil}{r} \ge \sqrt{\frac{n}{r}} = y_0
 \end{align*}$$
 
-Moreover, for $r \ge 1$ there exists a fit-height solution with $b_h = \left\lceil y_0 \right\rceil$ with probability greater than $1 - \frac{1}{2r}$ (over 75% for $r \ge 2$) and fit-width solutions with $a_w = \left\lceil x_0 \right\rceil$ are highly unlikely – in fact, almost never likely for $r \ge 2$ [(see appendix for proof)](#position-of-solution-points-relative-to). This means that the algorithm finds with very high guarantee the fit-height solution but rarely the fit-width one, if ever, even though the fit-width solution is most likely to be the optimal one.
+Moreover, for $r \ge 1$ there exists a fit-height solution with $b_h = \left\lceil y_0 \right\rceil$ with very high probability and fit-width solutions with $a_w = \left\lceil x_0 \right\rceil$ are highly unlikely – in fact, almost never likely for $r \ge 2$ [(see appendix for proof)](#position-of-solution-points-relative-to). Therefore, the optimal solution mainly corresponds to a unique fit-width point $(a_w, b_w)$ with $a_w > \lceil x_0 \rceil$ and $b_w < \lceil y_0 \rceil$ yet the algorithm is optimized to find a fit-height point $(a_h, b_h)$ with $a_h \le \lceil x_0 \rceil$ and $b_h \ge \lceil y_0 \rceil$. By the conclusions in the appendix, the outcome is predominantly ratio-dependent; for the vast majority of ratios the algorithm does not find the optimal solution (e.g. $r \in [1.5, 2)$ paired with most $n$).
 
 Let's visualize this on the graphs of the two counterexamples given above ($r = 5, n = 8$ and $r = 3.5, n = 20$):
 
@@ -289,7 +289,7 @@ This means at most $\left\lfloor r \right\rfloor + 1$ iterations and a runtime o
 
 Here $n = 33, r = 8.3$. A very rare case when the fit-height starting point $b_0$ is in the fit-width solution space. Consider the iteration count of the fit-height loop of the algorithm – by the same reasoning it is $\left\lfloor{\frac{1}{r}}\right\rfloor + 1$. It's visible that in this example the loop will do exactly 1 iteration to reach $(a_h, b_h)$. Since the algorithm is symmetric this proves tightness for the first loop by using the same $n$ and $r' = \frac{1}{r}$.
 
-With a correct algorithm and good understang of why it works, we conclude here.
+With a correct algorithm and good understanding of why it works, we conclude here.
 
 <hr class="print-page-break">
 
@@ -463,7 +463,7 @@ rb - \frac{n}{b} \ge 1 \implies &rb^2 -n - b \ge 0 \\
     \implies &b \ge \frac{1}{2r} + \sqrt{\frac{1}{4r^2} + \frac{n}{r}} > \sqrt{\frac{n}{r}}
 \end{align*}$$
 
-If $b$ is greater than that the fit-height point $(a, b)$ is valid. The condition excludes cases when $\exist k \in \N \text{ . } k \in [\frac{n}{b}, rb]$ (e.g. when $y_0 \in \N$ then the point valid for every $n$) but it is easy to _quanitfy_. We can use it to answer: for fixed $r \ge 1$ what's the probability for $b$ to be a valid fit-height solution?
+If $b$ is greater than that the fit-height point $(a, b)$ is valid. The condition excludes cases when $\exist k \in \N \text{ . } k \in [\frac{n}{b}, rb]$ (e.g. when $y_0 \in \N$ then the point valid for every $n$) but it is easy to _quantify_. We can use it to answer: for fixed $r \ge 1$ what's the probability for $b$ to be a valid fit-height solution?
 
 To do this, observe that by the properties of ceiling, $\sqrt{\frac{n}{r}} \le b \lt \sqrt{\frac{n}{r}} + 1$. We can bound the expression above likewise, using $r \ge 1$:
 
