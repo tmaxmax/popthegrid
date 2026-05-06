@@ -20,8 +20,6 @@ $$\begin{align*} as = w \implies &a = \frac{w}{s} \\ \overset{(1)}{\implies} &a 
 
 To further clarify the last step: since $s$ is in the denominator, maximizing it means $a$ must take the smallest value greater than or equal to RHS. Since $a \in \N$ this is precisely RHS rounded up.
 
-<hr class="print-page-break">
-
 Knowing $a$ we can now determine the side length $s$:
 
 $$\begin{equation}\tag{3} as = w \implies s = \frac{w}{a} \end{equation}$$
@@ -49,8 +47,6 @@ $$\begin{equation} \tag{7} s' = \frac{h}{b} = \frac{h}{\left\lceil \frac{h}{s} \
 Is this $s' \in \text{Sol}$? Yes, in fact in $\text{Sol}_{b}$: $(6) \implies n \leq ab$, $(7) \implies bs' = h$ and
 
 $$\begin{equation} \tag{8} as' = \frac{ah}{\left\lceil \frac{h}{w}a \right\rceil} = \frac{ah}{\left\lceil \frac{ah}{w} \right\rceil} \overset{\left\lceil x \right\rceil \geq x}{\implies} as' \leq \frac{ah}{\frac{ah}{w}} \implies as' \leq w \end{equation}$$
-
-<hr class="print-page-break">
 
 With that we have determined $s_a$. Here's its formula based only on inputs $w, h, n$:
 
@@ -98,7 +94,7 @@ s &= \begin{cases}
 \end{split}
 \end{equation}$$
 
-The problem is reduced to just $a, b$ and $r$. This simplification unlocks a powerful geometric representation in the 2D plane: we're looking for points $(a_w, b_w), (a_h, b_h) \in \N^2$ such that they're on or above the hyperbola $xy = n$ while accounting for their position relative to the line $x = ry$. $x = a$ is used as stand-in for columns in the continuous space, $y = b$ for rows. Take a look (graph A):
+The problem is reduced to just $a, b$ and $r$. This simplification unlocks a powerful geometric representation in the 2D plane: we're looking for points $(a_w, b_w), (a_h, b_h) \in \N^2$ such that they're on or above the hyperbola $xy = n$ while accounting for their position relative to the line $x = ry$. $x = a$ is used as stand-in for columns in the continuous space, $y = b$ for rows. Take a look (graph A; [full visualizer here][1]):
 
 <p id="graph-a" align=center><img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/first-graph.png" alt="An introductory graph" width="300" /></p>
 
@@ -110,8 +106,6 @@ The symmetry of the problem with respect to ratio can now be directly visualized
     <img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/symm-width.png" alt="r > 1 graph to depict symmetry of problem" width="300" />
     <img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/symm-height.png" alt="r < 1 graph to depict symmetry of problem" width="300" />
 </p>
-
-<hr class="print-page-break">
 
 Terminology-wise, from here on $(a_w, b_w), (a_h, b_h)$ will be called a _fit-width point_, respectively a _fit-height point_, if the points respect the requirements in $\text{(9)}$; if the points are those described in $\text{(11)}$, they'll also be called _minimal points_ (minimized coordinates for maximal side-length). $s_w$ and $s_h$ will be called _fit-width_ and _fit-height solutions_; unless explicitly mentioned, the $(a_w, b_w), (a_h, b_h)$ points implied by $s_w$ and $s_h$ are not necessarily minimal. Sometimes only $a_w$ or $b_h$ will be mentioned but keep in mind that by definition they do have a pair $b_w$ and $a_h$.
 
@@ -213,8 +207,6 @@ P_b &= \begin{cases}
 \end{cases} \\
 \end{align*}$$
 
-<hr class="print-page-break">
-
 Recall that if a fit-width point has a solution greater than that of a fit-height point it will have less rows. Above we can see that all of $P_{a,1}, P_{b,0}, P_{b,1}$ have a number of rows greater than $y_0$: for $P_b$ it is by construction, and for $P_{a,1}$:
 
 $$\begin{align*}
@@ -291,160 +283,56 @@ Here $n = 33, r = 8.3$. A very rare case when the fit-height starting point $b_0
 
 With a correct algorithm and good understanding of why it works, we conclude here.
 
-<hr class="print-page-break">
+
 
 ## Appendix
 
 ### Uniqueness of fit-width solution when $r \ge 1$
 
-$\text{(9)}$ implies that for $b$ rows the minimal $a$ such that $(a, b)$ is a fit-width solution is:
+Let $(a, b)$ be a minimal fit-width point. We prove there is no $b'$ such that $(a, b')$ is a fit-width point when $r \ge 1$ and $(a, b)$ corresponds to the best solution, meaning that $s_w > s_h$ for $(a_h, b_h)$ minimal fit-width point.
 
-$$\begin{gather*}
-a = \max \Set{ \left\lceil{\frac{n}{b}}\right\rceil, \left\lceil{rb}\right\rceil }
-\end{gather*}$$
+Assume towards a contradiction there exists $b' \ne b$ such that $(a, b')$ is a fit-width point. Without loss of generality, we can further assume $b < b'$. From $\text{(14)}$ and the fact that $a$ is minimal a relationship between $a$ and $b'$ follows:
 
-Thus the minimal fit-width point is determined by:
-
-$$\begin{equation} \tag{*}
-a = \min_{b \in \N} \left\lceil\ \max \Set{ \frac{n}{b}, rb} \right\rceil
-\end{equation}$$
-
-This makes $a$ purely a function of $b$. This formula and a similar one for minimal fit-height solutions are used in [the Desmos visualizer][1] to plot minimal points for each $a$ and $b$ on the graph.
-
-We now have all we need to begin the proof.
-
-Assume towards a contradiction that there exist two $(a, b), (a, b')$ minimal fit-width points, $b < b'$, with $s_w > s_h$ for all fit-height points $(a_h, b_h)$. Assume $r \ge 1$.
-
-Since the points are minimal, it follows from $\text{(*)}$ that:
-
-$$\begin{align*}
-a = \max\Set{ \left\lceil{\frac{n}{b}}\right\rceil, \left\lceil{rb}\right\rceil } = \max\Set{ \left\lceil{\frac{n}{b'}}\right\rceil, \left\lceil{rb'}\right\rceil }
-\end{align*}$$
-
-Without further deliberation, there are four situations we would have to tackle:
-1. $a = \left\lceil rb \right\rceil = \left\lceil rb' \right\rceil$
-1. $a = \left\lceil \frac{n}{b} \right\rceil = \left\lceil \frac{n}{b'} \right\rceil$
-1. $a = \left\lceil rb \right\rceil = \left\lceil \frac{n}{b'} \right\rceil$
-1. $a = \left\lceil \frac{n}{b} \right\rceil = \left\lceil rb' \right\rceil$
-
-Intuitively, the first two shouldn't happen due to the monotonicity of $rx$ and $\frac{n}{x}$. The third one also shouldn't happen, since $(a, b)$ is around $(x_0, y_0)$, where $b' > b$ would imply $\frac{n}{b'} < rb$. Only the fourth case seems legitimate. Let's confirm our intuition formally.
-
-Disproving case 1 is easy:
-
-$$\begin{align*}
-b < b' \implies rb < rb' \implies &rb < \underbrace{rb + 1 \le r(b + 1)}_{\text{from }r \ge 1} \le rb' \\
-    \implies &\left\lceil rb \right\rceil \lt \left\lceil rb \right\rceil + 1 \le \left\lceil rb' \right\rceil \\
-    \implies &\left\lceil rb \right\rceil < \left\lceil rb' \right\rceil \text{ contradiction}
-
-\end{align*}$$
-
-Disproving case 2 is more involved, as knowing $r \ge 1$ won't help, unlike above; doing the same for $\frac{n}{x}$ results in just $\left\lceil \frac{n}{b} \right\rceil \ge \left\lceil \frac{n}{b'} \right\rceil$. We must eliminate the equality to get a contradiction. Let's find a sufficient condition for strict inequality:
-
-$$\begin{align*}
-b < b' \implies \frac{n}{b} > \frac{n}{b'} \implies &\frac{n}{b} > \frac{n}{b + 1} \ge \frac{n}{b'} \\
-\overbrace{\frac{n}{b} \ge \frac{n}{b + 1} + 1}^{\text{condition candidate}} > \frac{n}{b + 1} \ge \frac{n}{b'} \implies &\left\lceil \frac{n}{b} \right\rceil \ge \left\lceil \frac{n}{b + 1} \right\rceil + 1 \ge \left\lceil \frac{n}{b'} \right\rceil \\
-\implies &\left\lceil \frac{n}{b} \right\rceil > \left\lceil \frac{n}{b'} \right\rceil
-\end{align*}$$
-
-Perfect! When does this happen?
-
-$$\begin{align*} \tag{**}
-\frac{n}{b} \ge \frac{n}{b + 1} + 1 \iff &\frac{n - b}{b} \ge \frac{n}{b + 1} \\
-    \iff &b^2 + b - n \le 0 \\
-    \iff &b \le \frac{\sqrt{1 + 4n} - 1}{2} \\
-    \overset{\text{rm.}}{\iff} &b \le \left\lfloor{\sqrt{\frac{1}{4} + n} - \frac{1}{2}}\right\rfloor
-\end{align*}$$
-
-Great. (I'm marking usage of [residuated mapping properties](#and--are-residuated-mappings) with $\text{rm.}$ since it's a subtle change easy to misuse). Is our $b$ smaller than that?
-
-$$\begin{align*}
-a = \left\lceil \frac{n}{b'} \right\rceil \overset{\text{(*)}}{\implies} \left\lceil \frac{n}{b'} \right\rceil \ge \left\lceil rb' \right\rceil \implies &\left\lceil \frac{n}{b'} \right\rceil \ge \overbrace{rb' \ge b'}^{r \ge 1} \\
-    \implies &\frac{n}{b'} + 1 > b' \\
-    \implies &b'^2 - b' - n < 0 \\
-    \implies &b' < \frac{\sqrt{1 + 4n} + 1}{2} \\
-    \overset{\text{rm.}}{\implies} &b' \le \left\lfloor{\sqrt{\frac{1}{4} + n} + \frac{1}{2}}\right\rfloor
-\end{align*} \\
-\begin{align*}
-b < b' \implies &b \le \left\lfloor{\sqrt{\frac{1}{4} + n} + \frac{1}{2}}\right\rfloor - 1 \\
-    \implies &b \le \left\lfloor{\sqrt{\frac{1}{4} + n} - \frac{1}{2}}\right\rfloor \\
-    \overset{\text{(**)}}{\implies} &\frac{n}{b} \ge \frac{n}{b + 1} + 1 \\
-    \implies &\left\lceil \frac{n}{b} \right\rceil > \left\lceil \frac{n}{b'} \right\rceil \text{ contradiction}
-\end{align*}$$
-
-Yes, disproven! We can proceed with a counterproof for case 3, which is trivial:
-
-$$\begin{align*}
-a = \left\lceil \frac{n}{b'} \right\rceil \overset{\text{(*)}}{\implies} &\left\lceil \frac{n}{b'} \right\rceil \ge \left\lceil rb' \right\rceil \\
-    \implies &\left\lceil \frac{n}{b} \right\rceil \ge \left\lceil \frac{n}{b'} \right\rceil \ge \overbrace{\left\lceil rb' \right\rceil > \left\lceil rb \right\rceil}^{\text{strict, see case 1}} \\
-    \implies & \left\lceil \frac{n}{b} \right\rceil > \left\lceil rb \right\rceil \\
-a = \left\lceil rb \right\rceil \overset{\text{(*)}}{\implies} &\left\lceil \frac{n}{b} \right\rceil \le \left\lceil rb \right\rceil \text{ contradiction}
-\end{align*}$$
-
-Finally we are left with only case 4, $a = \left\lceil rb' \right\rceil = \left\lceil \frac{n}{b} \right\rceil$, the only one speculated to make sense.
-
-To get an idea of what to prove, look at [graph C](#graph-c) again: there are two minimal fit-width points with equivalent solutions. Those points do not give the best solution: $a_w = 12 > rb_h = 3.9 \cdot 3$. Notice that one solution has $b_w = b_h$. Empirical observation on multiple parameters seems to always exhibit this, so let's prove that there is _always_ an equivalent or better fit-height solution if $(a, b), (a, b')$ as chosen above are valid solutions.
-
-Let's begin: since $(a, b)$ and $(a, b')$ are fit-width solutions, by $\text{(9)}$ the following holds:
-
-$$\begin{equation} \tag{***}
+$$\begin{equation} \tag{U1}
 \begin{split}
-&n \le ab \land a \ge rb \\
-&n \le ab' \land a \ge rb'
+n \le ab' \land a \ge rb'
+\implies &a \ge \left\lceil \frac{n}{b'} \right\rceil \land a \ge \left\lceil rb' \right\rceil \\
+     \implies &a = \max \Set{ \left\lceil \frac{n}{b'} \right\rceil, \left\lceil rb' \right\rceil }
 \end{split}
 \end{equation}$$
 
-Let $(a_h = \left\lceil \frac{n}{b'} \right\rceil, b_h = b')$. For $(a_h, b_h)$ to be a valid fit-height point, $\text{(15)}$ must hold true:
+Also from $\text{(14)}$ we have that $n \le ab$. A useful sequence of implications emerges:
+
+$$\begin{equation} \tag{U2}
+\begin{split}
+n \le ab < ab' \implies &\frac{n}{b'} \le a\frac{b}{b'} < a \\
+    \implies &\left\lceil \frac{n}{b'} \right\rceil \le \left\lceil a\frac{b}{b'} \right\rceil \le a
+\end{split}
+\end{equation}$$
+
+Let's analyze when the last two terms are equal. Keep in mind that since $b, b' \in \N$, $b < b' \iff b' - b \ge 1$. We have:
 
 $$\begin{align*}
-    \left\lceil \frac{n}{b'} \right\rceil \le \left\lfloor rb' \right\rfloor
+\left\lceil a\frac{b}{b'} \right\rceil = a \implies &a\frac{b}{b'} \le a < a\frac{b}{b'} + 1 \\
+    \implies &\frac{b}{b'} \le 1 < \frac{b}{b'} + \frac{1}{a} \\
+    \overset{a \ge rb'}{\implies} &0 \le \frac{b' - b}{b'} < \frac{1}{rb'} \\
+    \overset{r \ge 1}{\implies} &b' - b < \frac{1}{r} \le 1
 \end{align*}$$
 
-Whether $rb'$ is an integer or not changes the ceiling and floor result. Starting with $rb' \in \N$:
-
-$$\begin{align*}
-rb' \in \N \implies &a = rb' \\
-    \overset{\text{(***)}}{\implies} &n \le brb' \\
-    \implies &\frac{n}{b'} \le rb < rb' \\
-    \overset{\text{rm.}}{\implies} &\left\lceil \frac{n}{b'} \right\rceil \le \left\lfloor rb' \right\rfloor = rb'
-\end{align*}$$
-
-<hr class="print-page-break">
-
-It holds. For $rb' \notin \N$ let now $F = \left\lfloor rb' \right\rfloor$ and recall that $b' \ge b + 1 > b$ by assumption. Then:
+This contradicts the assumption that $b < b'$, meaning the inequality $\text{(U2)}$ is strict. Two important implications follow:
 
 $$\begin{gather*}
-\begin{align*}
-(i) \enspace &a = \left\lceil rb' \right\rceil = F + 1 \\
-(ii) \ &F = \left\lfloor rb' \right\rfloor \ge \underbrace{\left\lfloor r(b + 1) \right\rfloor \ge b + 1}_{r \ge 1} \implies \frac{F}{b + 1} \ge 1 \\[2em]
-& \begin{align*}
-\frac{n}{b'} \overset{\text{(***)}}{\le} \frac{ab}{b'} &\overset{\text{(i)}}{=} \frac{(F + 1)b}{b'} \\
-    &\le \frac{(F + 1)b}{b + 1} \\
-    &= F\frac{b}{b + 1} + \frac{b}{b + 1} \\
-    &= F\frac{(b + 1) - 1}{b + 1} + \frac{b}{b + 1} \\
-    &= F - \frac{F}{b + 1} + \underbrace{\frac{b}{b + 1}}_{<1} \\
-    &\overset{\text{(ii)}}{\le} F - 1 + 1 = F
-\end{align*} \\
-&\begin{align*}
-\frac{n}{b'} \le F \overset{\text{rm.}}{\iff} &\left\lceil \frac{n}{b'} \right\rceil \le \left\lfloor rb' \right\rfloor
-\end{align*}
-\end{align*}
+a > \left\lceil \frac{n}{b'} \right\rceil \overset{\text{(U1)}}\implies a = \left\lceil rb' \right\rceil \implies a - 1 < rb' \\
+a > \left\lceil \frac{n}{b'} \right\rceil \implies a \ge \left\lceil \frac{n}{b'} \right\rceil + 1 \implies (a - 1)b' \ge \left\lceil \frac{n}{b'} \right\rceil b' \ge n
 \end{gather*}$$
 
-With this we have shown that $\text{(15)}$ holds for $(a_h = \left\lceil \frac{n}{b'} \right\rceil, b_h = b')$, meaning that $(a_h, b_h)$ is a valid fit-height point. We assumed at the beginning that $s_w > s_h$. But by $\text{(***)}$:
+The point $(a - 1, b')$ satisfies $\text{(14)}$: it is fit-height (see [graph C](#graph-c) for a real example). Since we've assumed $b_h$ is minimal, it must be that $b' \ge b_h$, but this result contradicts the assumption that the fit-width solution is better:
 
-$$\begin{align*}
-a \ge rb' \iff \frac{1}{a} \le \frac{1}{rb_h} \iff s_w \le s_h \text{ contradiction}
-\end{align*}$$
+$$\begin{gather*}
+s > s_h \implies rb' \le a < rb_h \implies b' < b_h
+\end{gather*}$$
 
-All four cases contradict our assumptions. In conclusion, if $(a, b)$ is a minimal fit-width point with $s_w > s_h$ for all valid fit-height $(a_h, b_h)$ points, it must be unique.
-
-Fun fact: the idea for disproving case 2 came from the intuition that since $n = \sqrt{n}^2$, dividing $n$ by $b < b' < \sqrt{n}$ should mostly produce distinct results, as the value grows quicker and quicker as $b$ approaches zero. $\text{(**)}$ implies exactly that:
-
-$$\begin{align*}
-b \le \left\lfloor{\sqrt{\frac{1}{4} + n} - \frac{1}{2}}\right\rfloor \le \left\lfloor{\sqrt{(\frac{1}{2} + \sqrt{n})^2} - \frac{1}{2}}\right\rfloor = \left\lfloor \sqrt{n} \right\rfloor
-\end{align*}$$
-
-<hr class="print-page-break">
+In conclusion, no $b' \ne b$ can exist, therefore $(a, b)$ is unique.
 
 ### Position of solution points relative to $(x_0, y_0)$
 
@@ -483,8 +371,6 @@ $$\begin{align*}
 0 < \underbrace{\frac{1}{2r} + \sqrt{\frac{1}{4r^2}+\frac{n}{r}} - \sqrt{\frac{n}{r}}}_{B_r(n)} \le \underbrace{\left\lceil{\sqrt{\frac{n}{r}}}\right\rceil - \sqrt{\frac{n}{r}}}_{C_r(n)} < 1
 \end{align*}$$
 
-<hr class="print-page-break">
-
 Let's visualize this:
 
 <p style="display: flex; gap: 1em; justify-content: center">
@@ -519,8 +405,6 @@ $$\begin{align*}
 
 This tells us that a percentage of $1 - t$ points out of $n$ are in $[t, 1]$. One can roughly notice this on the graph: the points $(n, C_r(n))$ are [distributed uniformly](https://en.wikipedia.org/wiki/Continuous_uniform_distribution) between the green and blue areas, proportionally with their sizes. 
 
-<hr class="print-page-break">
-
 The limit's numerator is equivalent to $\left|\Set{k \in [n] : C_r(k) \ge t}\right|$. For $t = B_r(k)$ this would've been precisely $S_n$, with the limit then giving us $d(S)$ directly, but $t$ must be constant. To find an appropriate value, let's bound $B_r(n)$:
 
 $$\begin{align*}
@@ -547,8 +431,6 @@ The first conclusion is that fit-height solutions will for the most part have $b
 <p align=center>
     <img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/prob-three.png" width="300" />
 </p>
-
-<hr class="print-page-break">
 
 Note that $r < 1$ means we've essentially flipped dimensions: the fit-height points correspond to the fit-width points of ratio $ \frac{1}{r}$. For $r = \frac{1}{2}$ as depicted above, $P_{\frac{1}{2}} \ge 0$. How do we interpret this?
 
@@ -583,8 +465,6 @@ return w / left
 ```
 
 Upper bound ceiled so interval is open. `left` stores $a_w$. This reduces the asymptotic runtime to $\mathcal{O}(\log r)$. Useful for very large ratios but very large ratios seem utterly useless.
-
-<hr class="print-page-break">
 
 ### $\left\lfloor \cdot \right\rfloor$ and $\left\lceil \cdot \right\rceil$ are residuated mappings
 
