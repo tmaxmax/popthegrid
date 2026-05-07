@@ -291,41 +291,43 @@ With a correct algorithm and good understanding of why it works, we conclude her
 
 Let $(a, b)$ be a minimal fit-width point. We prove there is no $b'$ such that $(a, b')$ is a fit-width point when $r \ge 1$ and $(a, b)$ corresponds to the best solution, meaning that $s_w > s_h$ for $(a_h, b_h)$ minimal fit-width point.
 
-Assume towards a contradiction there exists $b' \ne b$ such that $(a, b')$ is a fit-width point. Without loss of generality, we can further assume $b < b'$. From $\text{(14)}$ and the fact that $a$ is minimal a relationship between $a$ and $b'$ follows:
+Assume towards a contradiction there exists $b' \ne b$ such that $(a, b')$ is a fit-width point. Based on $\text{(14)}$, we can assume without loss of generality that $b = \left\lceil \frac{n}{a} \right\rceil$ and that $b' = b + 1$. By $\text{(17)}$, the minimality of $a$ and monotonicity of compared terms with respect to $a$ we have:
 
 $$\begin{equation} \tag{U1}
-n \le ab' \land a \ge rb'
-\implies a \ge \left\lceil \frac{n}{b'} \right\rceil \land a \ge \left\lceil rb' \right\rceil
-     \implies a = \max \Set{ \left\lceil \frac{n}{b'} \right\rceil, \left\lceil rb' \right\rceil }
+a - 1 < r \left\lceil \frac{n}{a - 1} \right\rceil
 \end{equation}$$
 
-Also from $\text{(14)}$ we have that $n \le ab$. A useful sequence of implications emerges:
+We further know from $\text{(14)}$ that $n \le ab$ and $a \ge r(b + 1)$, so $a - 1 \ge b$ for $r \ge 1$. Let's now bound $\left\lceil \frac{n}{a - 1} \right\rceil$:
 
-$$\begin{equation} \tag{U2}
-n \le ab < ab' \implies \frac{n}{b'} \le a\frac{b}{b'} < a
-    \implies \left\lceil \frac{n}{b'} \right\rceil \le \left\lceil a\frac{b}{b'} \right\rceil \le a
-\end{equation}$$
+$$
+\begin{gather*} 
+\frac{n}{a - 1} = \frac{n}{a} \cdot \frac{a}{a - 1} \le \frac{ab}{a} \cdot \left(1 + \frac{1}{a - 1}\right) = b + \frac{b}{a - 1} \le b + 1 \\
+\implies \left\lceil \frac{n}{a - 1} \right\rceil \le b + 1 \tag{U2}
+\end{gather*}
+$$
 
-Let's analyze when the last two terms are equal. Keep in mind that since $b, b' \in \N$, $b < b' \iff b' - b \ge 1$. We have:
-
-$$\begin{align*}
-\left\lceil a\frac{b}{b'} \right\rceil = a \implies &a\frac{b}{b'} \le a < a\frac{b}{b'} + 1 \\
-    \implies &\frac{b}{b'} \le 1 < \frac{b}{b'} + \frac{1}{a} \\
-    \overset{a \ge rb'}{\implies} &0 \le \frac{b' - b}{b'} < \frac{1}{rb'} \\
-    \overset{r \ge 1}{\implies} &b' - b < \frac{1}{r} \le 1
-\end{align*}$$
-
-This contradicts the assumption that $b < b'$, meaning the inequality $\text{(U2)}$ is strict. Two important implications follow:
+Assume that $\left\lceil \frac{n}{a - 1} \right\rceil \le b$. By $\text{(U1)}$ we have that: 
 
 $$\begin{gather*}
-a > \left\lceil \frac{n}{b'} \right\rceil \overset{\text{(U1)}}\implies a = \left\lceil rb' \right\rceil \implies a - 1 < rb' \\
-a > \left\lceil \frac{n}{b'} \right\rceil \implies a \ge \left\lceil \frac{n}{b'} \right\rceil + 1 \implies (a - 1)b' \ge \left\lceil \frac{n}{b'} \right\rceil b' \ge n
+a - 1 < rb \le a \implies a = \left\lceil rb \right\rceil
 \end{gather*}$$
 
-The point $(a - 1, b')$ satisfies $\text{(14)}$: it is fit-height (see [graph C](#graph-c) for a real example). Since we've assumed $b_h$ is minimal, it must be that $b' \ge b_h$, but this result contradicts the assumption that the fit-width solution is better:
+But under the assumption that $(a, b + 1)$ is valid:
 
 $$\begin{gather*}
-s > s_h \implies rb' \le a < rb_h \implies b' < b_h
+a \ge r(b + 1) \implies \left\lceil rb \right\rceil \ge r(b+1) \ge rb + 1
+\end{gather*}$$
+
+A contradiction which together with $\text{(U2)}$ determines $\left\lceil \frac{n}{a - 1} \right\rceil = b + 1$. It follows using $\text{(U1)}$ that:
+
+$$\begin{gather*}
+a - 1 < r(b + 1) \land n \le (a - 1)(b + 1)
+\end{gather*}$$
+
+The point $(a - 1, b + 1)$ satisfies $\text{(14)}$: it is fit-height (see [graph C](#graph-c) for a real example). Since we've assumed $b_h$ is minimal, it must be that $b + 1 \ge b_h$, but this result contradicts the assumption that the fit-width solution is better:
+
+$$\begin{gather*}
+s > s_h \implies r(b + 1) \le a < rb_h \implies b + 1 < b_h
 \end{gather*}$$
 
 In conclusion, no $b' \ne b$ can exist, therefore $(a, b)$ is unique.
