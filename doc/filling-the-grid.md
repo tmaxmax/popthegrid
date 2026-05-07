@@ -294,20 +294,16 @@ Let $(a, b)$ be a minimal fit-width point. We prove there is no $b'$ such that $
 Assume towards a contradiction there exists $b' \ne b$ such that $(a, b')$ is a fit-width point. Without loss of generality, we can further assume $b < b'$. From $\text{(14)}$ and the fact that $a$ is minimal a relationship between $a$ and $b'$ follows:
 
 $$\begin{equation} \tag{U1}
-\begin{split}
 n \le ab' \land a \ge rb'
-\implies &a \ge \left\lceil \frac{n}{b'} \right\rceil \land a \ge \left\lceil rb' \right\rceil \\
-     \implies &a = \max \Set{ \left\lceil \frac{n}{b'} \right\rceil, \left\lceil rb' \right\rceil }
-\end{split}
+\implies a \ge \left\lceil \frac{n}{b'} \right\rceil \land a \ge \left\lceil rb' \right\rceil
+     \implies a = \max \Set{ \left\lceil \frac{n}{b'} \right\rceil, \left\lceil rb' \right\rceil }
 \end{equation}$$
 
 Also from $\text{(14)}$ we have that $n \le ab$. A useful sequence of implications emerges:
 
 $$\begin{equation} \tag{U2}
-\begin{split}
-n \le ab < ab' \implies &\frac{n}{b'} \le a\frac{b}{b'} < a \\
-    \implies &\left\lceil \frac{n}{b'} \right\rceil \le \left\lceil a\frac{b}{b'} \right\rceil \le a
-\end{split}
+n \le ab < ab' \implies \frac{n}{b'} \le a\frac{b}{b'} < a
+    \implies \left\lceil \frac{n}{b'} \right\rceil \le \left\lceil a\frac{b}{b'} \right\rceil \le a
 \end{equation}$$
 
 Let's analyze when the last two terms are equal. Keep in mind that since $b, b' \in \N$, $b < b' \iff b' - b \ge 1$. We have:
