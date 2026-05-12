@@ -1,30 +1,29 @@
 # Uniqueness of fit-width solution
 
-Let $(a, b)$ be a minimal fit-width point. **Prove** there is no $b'$ such that $(a, b')$ is a fit-width point when $r \ge 1$ and $(a, b)$ corresponds to the best solution, meaning that $s > s_h$ for $(a_h, b_h)$ minimal fit-width point.
+Let $(a, b)$ be a minimal fit-width point. **Prove** there is no $b' \ne b$ such that $(a, b')$ is a fit-width point when $r \ge 1$ and $(a, b)$ corresponds to the best solution, meaning that $s_w > s_h$ for all $(a_h, b_h)$ fit-width points.
 
-If you didn't read the script, here's a more detailed problem statement:
+If you didn't read the main document, here's a self-contained problem statement:
 
-> Let: $r \in [1, \infin)$,
-> $n \in \N$ (for this task $\N$ does not include $0$),
-> $W = \Set{ (a, b) \in \N^2 | n \le ab \land a \ge rb }$ (the set of "fit-width" points),
-> $H = \Set{ (a, b) \in \N^2 | n \le ab \land rb \ge a }$ (the set of "fit-height" points),
-> $(a_w, b_w) = \argmin_{(a, b) \in W} a$,
-> $(a_h, b_h) = \argmin_{(a, b) \in H} b$.
-> Assume $a_w < rb_h$.
-> Prove there exists no other $b \ne b_w$ such that $(a_w, b) \in W$.
+Let: $r \in [1, \infin)$, <br>
+$\quad n \in \N$ (for this task $\N$ does not include $0$),<br>
+$\quad W = \Set{ (a, b) \in \N^2 | n \le ab \land a \ge rb }$ (the "fit-width" points),<br>
+$\quad H = \Set{ (a, b) \in \N^2 | n \le ab \land rb \ge a }$ (the "fit-height" points),<br>
+$\quad (a, b) = \argmin_{(a, b) \in W} a$. <br>
+Assume $\forall b_h \in H : a < rb_h$. <br>
+Prove there exists no $b' \ne b$ such that $(a, b') \in W$.
 
-_Try to prove this yourself after reading the main part of the script, **without** reading the appendix. Three hints are provided in case you get stuck; attempt to solve without them first, then try again one hint at a time. Don't jump to hint 3 directly._
+_Three hints are provided in case you get stuck; attempt to solve without them first, then try again, one more hint at a time. Don't jump to the end directly. Reading the [main document][6] may help; **do not** read its appendix section, it spoils the solution._
 
 ## Hint 1
 
-Recall graphs A ($n = 8, r = 5$) and C ($n = 23, r = 3.9$) from the script: 
+Here are graphs for $n = 8, r = 5$ and $n = 23, r = 3.9$ (graphs A and C in the document): 
 
 <p style="display: flex; gap: 1em; justify-content: center">
     <img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/first-graph.png" alt="Graph A" width="300" />
     <img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/multiple-points-same-solution.png" alt="Graph C" width="300" />
 </p>
 
-How do the fit-width and fit-height solutions compare in each of them?
+How do the fit-width and fit-height points compare in each of them?
 
 ## Hint 2
 
@@ -281,19 +280,26 @@ Using the prompt in a fresh conversation:
 
 All current frontier models managed to prove the statement correctly (don't click on links if you didn't solve yet):
 
-- [GPT 5.5 Pro](https://github.com/tmaxmax/popthegrid/blob/alt-uniqueness-proof/doc/ai/gpt-5-5-pro.pdf) had a correct, concise, minimal proof, light on algebra and easy to follow;
-- [Claude Opus 4.7](https://github.com/tmaxmax/popthegrid/blob/alt-uniqueness-proof/doc/ai/claude-opus-4-7.pdf) proved the same result as GPT 5.5 Pro but by more complex, slightly less readable means; a nice touch was providing the geometrical intuition for the proof, just as it is described in the main document;
-- [Gemini 3.1 Pro](https://github.com/tmaxmax/popthegrid/blob/alt-uniqueness-proof/doc/ai/gemini-3-1-pro.pdf) had an unintuitive roundabout excessively long but correct proof;
-- [DeepSeek v4](https://github.com/tmaxmax/popthegrid/blob/alt-uniqueness-proof/doc/ai/deepseek-v4.pdf) had a different yet equally elegant approach as GPT & Claude but the writing itself was hard to follow and full of redundant statements.
+- [GPT 5.5 Pro][1] had a correct, concise, minimal proof, light on algebra and easy to follow;
+- [Claude Opus 4.7][2] proved the same result as GPT 5.5 Pro but by more complex, slightly less readable means; a nice touch was providing the geometrical intuition for the proof, just as it is described in the main document;
+- [Gemini 3.1 Pro][3] had an unintuitive roundabout excessively long but correct proof;
+- [DeepSeek v4][4] had a different yet equally elegant approach as GPT & Claude but the writing itself was hard to follow and full of redundant statements.
 
 DeepSeek's two failed proofs are part of a much greater conversation and used a more ambiguous prompt. It had a lot more context: the algorithm's code, its complexity analysis, the graph representation, the terminology. This seems to have hurt its performance.
 
 The prompt itself was built such that QED-Nano managed to output a response. If any ambiguities were present it would "overthink" them and wouldn't make meaningful progress beyond continuously reanalyzing the problem statement. Running QED-Nano with smaller context (8k is all I could run locally), resulted in it forgetting about the initial problem and proving unrelated statements (e.g. that there are $a, b, c \in \N$ such that $a^3 + b^3 = c^3$, lol). I paid [vast.ai](https://vast.ai) 5$ to run it using the biggest supported context, which required ~46GB of VRAM.
 
-That being said, [QED-Nano did prove](https://github.com/tmaxmax/popthegrid/blob/alt-uniqueness-proof/doc/ai/qed-nano.pdf) the statement with a very minor push in a second prompt. The approach is equivalent to DeepSeek's, with even more verbose writing. The cause for verbosity is not redundancy but derivations of intermediary results through alternative more inefficient methods.
+That being said, [QED-Nano did prove][5] the statement with a very minor push in a second prompt. The approach is equivalent to DeepSeek's, with even more verbose writing. The cause for verbosity is not redundancy but derivations of intermediary results through alternative more inefficient methods.
 
 I've also tried ChatGPT 5.5 Thinking Mini with the same prompt. After a failed proof which didn't use the $a_w < rb_h$ assumption and some subsequent corrective prompts, it concluded that:
 
 > As it stands, I cannot honestly provide a correct proof because the crucial implication needed for the contradiction is not derivable from the assumptions you gave.
 
 Such hubris!
+
+[1]: https://github.com/tmaxmax/popthegrid/blob/alt-uniqueness-proof/doc/ai/gpt-5-5-pro.pdf
+[2]: https://github.com/tmaxmax/popthegrid/blob/alt-uniqueness-proof/doc/ai/claude-opus-4-7.pdf
+[3]: https://github.com/tmaxmax/popthegrid/blob/alt-uniqueness-proof/doc/ai/gemini-3-1-pro.pdf
+[4]: https://github.com/tmaxmax/popthegrid/blob/alt-uniqueness-proof/doc/ai/deepseek-v4.pdf
+[5]: https://github.com/tmaxmax/popthegrid/blob/alt-uniqueness-proof/doc/ai/qed-nano.pdf
+[6]: https://github.com/tmaxmax/popthegrid/blob/main/doc/filling-the-grid.pdf
