@@ -311,7 +311,7 @@ $$
 a \ne \left\lceil \frac{n}{b'} \right\rceil \implies \left\lceil \frac{n}{b'} \right\rceil < \left\lceil rb' \right\rceil = a \implies \left\lceil \frac{n}{b'} \right\rceil \le \left\lfloor rb' \right\rfloor 
 $$
 
-By $\text{(14)}$ this means there is a valid fit-height point $(a', b')$ (real example in [graph C](#graph-c)). But then, if one takes $s_h = \frac{h}{b'}$:
+By $\text{(14)}$ this means for integer $\left\lceil \frac{n}{b'} \right\rceil \le a' \le \left\lfloor rb' \right\rfloor$ the point $(a', b')$ is fit-height (real example in [graph C](#graph-c)). But then, since for this one fit-height point $s_h = \frac{h}{b'}$:
 
 $$\begin{align*}
     a \ge rb' \implies s_w \le s_h
