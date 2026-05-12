@@ -145,7 +145,7 @@ a_hb_h \ge n \land b_h \ge \frac{a_h}{r} \iff &\left\lceil \frac{n}{b_h} \right\
 \end{split}
 \end{equation}$$
 
-We can add the ceiling and floor as a consequence of them being [residuated mappings](#and--are-residuated-mappings). Notice how the intervals describe the space between the hyperbola and the line for $a_h$ and $b_w$. Doesn't matter which value from these intervals $a_h$ and $b_w$ have, the solutions of $(a_w, b_w)$, $(a_h, b_h)$ are the same. The ceilings and floors are visible in the graph too: the points are a bit above/under the function graphs too. We can compress the inequality to get the validity condition:
+We can add the ceiling and floor as a consequence of them being residuated mappings. Notice how the intervals describe the space between the hyperbola and the line for $a_h$ and $b_w$. Doesn't matter which value from these intervals $a_h$ and $b_w$ have, the solutions of $(a_w, b_w)$, $(a_h, b_h)$ are the same. The ceilings and floors are visible in the graph too: the points are a bit above/under the function graphs too. We can compress the inequality to get the validity condition:
 
 $$\begin{equation} \tag{15}
 \begin{split}
@@ -192,7 +192,7 @@ a_w \ge rb_h \ge a_h \land n \le a_hb_h \implies a_w \ge rb_h \land n \le a_wb_h
 
 Note that all the results above apply for any $r$.
 
-Fourth and finally, when $r \ge 1$ if the minimal fit-width solution is strictly better than any fit-height solution, then it corresponds [uniquely to a single point (see appendix for proof)](#uniqueness-of-fit-width-solution-when). Symmetrically for $r \lt 1$ the same applies for the fit-height solution.
+Fourth and finally, when $r \ge 1$ if the minimal fit-width solution is strictly better than any fit-height solution, then it corresponds uniquely to a single point ([prove it yourself!][3] or see appendix for proof). Symmetrically for $r \lt 1$ the same applies for the fit-height solution.
 
 We can now analyze when the algorithm we've developed fails. Translating its solution to points:
 
@@ -213,7 +213,7 @@ $$\begin{align*}
 \left\lceil \frac{a_w}{r} \right\rceil = \left\lceil \frac{\left\lceil \sqrt{rn} \right\rceil}{r} \right\rceil \ge \frac{\left\lceil \sqrt{rn} \right\rceil}{r} \ge \sqrt{\frac{n}{r}} = y_0
 \end{align*}$$
 
-Moreover, for $r \ge 1$ there exists a fit-height solution with $b_h = \left\lceil y_0 \right\rceil$ with very high probability and fit-width solutions with $a_w = \left\lceil x_0 \right\rceil$ are highly unlikely – in fact, almost never likely for $r \ge 2$ [(see appendix for proof)](#position-of-solution-points-relative-to). Therefore, the optimal solution mainly corresponds to a unique fit-width point $(a_w, b_w)$ with $a_w > \lceil x_0 \rceil$ and $b_w < \lceil y_0 \rceil$ yet the algorithm is optimized to find a fit-height point $(a_h, b_h)$ with $a_h \le \lceil x_0 \rceil$ and $b_h \ge \lceil y_0 \rceil$. By the conclusions in the appendix, the outcome is predominantly ratio-dependent; for the vast majority of ratios the algorithm does not find the optimal solution (e.g. $r \in [1.5, 2)$ paired with most $n$).
+Moreover, for $r \ge 1$ there exists a fit-height solution with $b_h = \left\lceil y_0 \right\rceil$ with very high probability and fit-width solutions with $a_w = \left\lceil x_0 \right\rceil$ are highly unlikely – in fact, almost never likely for $r \ge 2$ (see appendix for proof). Therefore, the optimal solution mainly corresponds to a unique fit-width point $(a_w, b_w)$ with $a_w > \lceil x_0 \rceil$ and $b_w < \lceil y_0 \rceil$ yet the algorithm is optimized to find a fit-height point $(a_h, b_h)$ with $a_h \le \lceil x_0 \rceil$ and $b_h \ge \lceil y_0 \rceil$. By the conclusions in the appendix, the outcome is predominantly ratio-dependent; for the vast majority of ratios the algorithm does not find the optimal solution (e.g. $r \in [1.5, 2)$ paired with most $n$).
 
 Let's visualize this on the graphs of the two counterexamples given above ($r = 5, n = 8$ and $r = 3.5, n = 20$):
 
@@ -467,3 +467,4 @@ The others are proven in a similar fashion. Read more about this on [Wikipedia's
 
 [1]: https://www.desmos.com/calculator/8y5xph34oc
 [2]: https://www.desmos.com/calculator/lmc2x29a3i
+[3]: https://github.com/tmaxmax/popthegrid/blob/main/doc/filling-the-grid-uniqueness-proof-exercise.pdf
