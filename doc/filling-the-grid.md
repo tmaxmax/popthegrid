@@ -289,46 +289,35 @@ With a correct algorithm and good understanding of why it works, we conclude her
 
 ### Uniqueness of fit-width solution when $r \ge 1$
 
-Let $(a, b)$ be a minimal fit-width point. We prove there is no $b'$ such that $(a, b')$ is a fit-width point when $r \ge 1$ and $(a, b)$ corresponds to the best solution, meaning that $s_w > s_h$ for $(a_h, b_h)$ minimal fit-width point.
+Let $(a, b)$ be a minimal fit-width point. We prove there is no $b'$ such that $(a, b')$ is a fit-width point when $r \ge 1$ and $(a, b)$ corresponds to the best solution, meaning that $s_w > s_h$ for all $(a_h, b_h)$ fit-height points.
 
-Assume towards a contradiction there exists $b' \ne b$ such that $(a, b')$ is a fit-width point. Without loss of generality, we can further assume $b < b'$. From $\text{(14)}$ and the fact that $a$ is minimal a relationship between $a$ and $b'$ follows:
+Assume towards a contradiction there exists $b' \ne b$ such that $(a, b')$ is a fit-width point. Without loss of generality, we can further assume $b < b'$. From $\text{(14)}$ and the minimality of $a$ we can write $a$ in terms of $b'$:
 
-$$\begin{equation} \tag{U1}
+$$
 n \le ab' \land a \ge rb'
 \implies a \ge \left\lceil \frac{n}{b'} \right\rceil \land a \ge \left\lceil rb' \right\rceil
      \implies a = \max \Set{ \left\lceil \frac{n}{b'} \right\rceil, \left\lceil rb' \right\rceil }
-\end{equation}$$
+$$
 
-Also from $\text{(14)}$ we have that $n \le ab$. A useful sequence of implications emerges:
+Suppose that $a = \left\lceil \frac{n}{b'} \right\rceil$. Since we have $n \le ab$ from $\text{(14)}$, $b < b'$ and $r \ge 1$:
 
-$$\begin{equation} \tag{U2}
-n \le ab < ab' \implies \frac{n}{b'} \le a\frac{b}{b'} < a
-    \implies \left\lceil \frac{n}{b'} \right\rceil \le \left\lceil a\frac{b}{b'} \right\rceil \le a
-\end{equation}$$
+$$
+a - 1 < \frac{n}{b'} \implies b'(a - 1) < ab \implies (b' - b)a < b' \implies a < rb'
+$$
 
-Let's analyze when the last two terms are equal. Keep in mind that since $b, b' \in \N$, $b < b' \iff b' - b \ge 1$. We have:
+But $a \ge rb'$ so we've reached a contradiction. Therefore, together with the first result:
+
+$$
+a \ne \left\lceil \frac{n}{b'} \right\rceil \implies \left\lceil \frac{n}{b'} \right\rceil < \left\lceil rb' \right\rceil = a \implies \left\lceil \frac{n}{b'} \right\rceil \le \left\lfloor rb' \right\rfloor 
+$$
+
+By $\text{(14)}$ this means there is a valid fit-height point $(a', b')$ (real example in [graph C](#graph-c)). But then, if one takes $s_h = \frac{h}{b'}$:
 
 $$\begin{align*}
-\left\lceil a\frac{b}{b'} \right\rceil = a \implies &a\frac{b}{b'} \le a < a\frac{b}{b'} + 1 \\
-    \implies &\frac{b}{b'} \le 1 < \frac{b}{b'} + \frac{1}{a} \\
-    \overset{a \ge rb'}{\implies} &0 \le \frac{b' - b}{b'} < \frac{1}{rb'} \\
-    \overset{r \ge 1}{\implies} &b' - b < \frac{1}{r} \le 1
+    a \ge rb' \implies s_w \le s_h
 \end{align*}$$
 
-This contradicts the assumption that $b < b'$, meaning the inequality $\text{(U2)}$ is strict. Two important implications follow:
-
-$$\begin{gather*}
-a > \left\lceil \frac{n}{b'} \right\rceil \overset{\text{(U1)}}\implies a = \left\lceil rb' \right\rceil \implies a - 1 < rb' \\
-a > \left\lceil \frac{n}{b'} \right\rceil \implies a \ge \left\lceil \frac{n}{b'} \right\rceil + 1 \implies (a - 1)b' \ge \left\lceil \frac{n}{b'} \right\rceil b' \ge n
-\end{gather*}$$
-
-The point $(a - 1, b')$ satisfies $\text{(14)}$: it is fit-height (see [graph C](#graph-c) for a real example). Since we've assumed $b_h$ is minimal, it must be that $b' \ge b_h$, but this result contradicts the assumption that the fit-width solution is better:
-
-$$\begin{gather*}
-s > s_h \implies rb' \le a < rb_h \implies b' < b_h
-\end{gather*}$$
-
-In conclusion, no $b' \ne b$ can exist, therefore $(a, b)$ is unique.
+In conclusion, $b' \ne b$ contradicts $s_w > s_h$, thus $b'$ can't exist and $(a, b)$ is unique.
 
 ### Position of solution points relative to $(x_0, y_0)$
 
@@ -473,10 +462,6 @@ This means that, for $\forall x \in \R, n \in \N$:
 To prove the first, if $x \in \N$ then clearly $n \le \left\lfloor x \right\rfloor = x$, else if $x \in \R \setminus \N$:
 
 $$\begin{align*}n \le x \iff n < x \iff &n < \left\lfloor x \right\rfloor + \{x\} \\ \iff &n \le \left\lfloor x \right\rfloor \lor (\left\lfloor x \right\rfloor < n < \left\lfloor x \right\rfloor + \{x\}) \\ \overset{\{x\} < 1}{\iff} &n \le \left\lfloor x \right\rfloor \lor (\left\lfloor x \right\rfloor < n < \left\lfloor x \right\rfloor + 1) \\ \overset{n \in \N}\iff &n \le \left\lfloor x \right\rfloor \end{align*}$$
-
-To prove the second, if $x \in \N$ then clearly $x = \left\lceil x \right\rceil \le n$, else if $x \in \R \setminus \N$:
-
-$$\begin{align*} x \le n \iff x < n \iff &\left\lfloor x \right\rfloor + \{x\} < n \\ \iff &\{x\} < n - \left\lfloor x \right\rfloor \\ \iff & 1 \le n - \left\lfloor x \right\rfloor \\ \iff & \left\lfloor x \right\rfloor + 1 \le n \\ \iff & \left\lceil x \right\rceil \le n\end{align*}$$
 
 The others are proven in a similar fashion. Read more about this on [Wikipedia's "Equivalences" for floor and ceiling](https://en.wikipedia.org/wiki/Floor_and_ceiling_functions#Equivalences). These are standard properties but I insisted on writing them here as a "note to self" since I've confused myself and applied them wrong way too many times. I probably know that Wikipedia page now by heart.
 
