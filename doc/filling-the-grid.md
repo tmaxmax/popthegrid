@@ -407,7 +407,7 @@ $$\begin{align*}
 P_r \ge d(S) = \lim_{n \to \infin}\frac{\left|\Set{C_r(k) : k \in [n]} \cap [\frac{1}{2r}, 1]\right|}{n} = 1 - \frac{1}{2r}
 \end{align*}$$
 
-As a final note, attempting to exclude points where $C_r(n) = 0$, i.e. $\sqrt{\frac{n}{r}} \in \N$, would've not influenced the result. $\frac{n}{r} \in A$, where $A = \Set{ p^2 | p \in \N }$ the set of all squares, and since $|A \cap [n]| \le \mathcal{O}(\sqrt{n})$, $d(A) = 0$. Our set of points is a subset of that, so it must also be density-zero. By other means one could strengthen the bound to $1 - \frac{1}{4r}$ for $r \in \R \setminus \mathbb{Q}$, and to $p \in [1 - \frac{1}{2r}, 1]$ otherwise (with $p = 1$ for $r \in \N$).
+As a final note, attempting to exclude points where $C_r(n) = 0$, i.e. $\sqrt{\frac{n}{r}} \in \N$, would've not influenced the result. $\frac{n}{r} \in A$, where $A = \Set{ p^2 | p \in \N }$ the set of all squares, and since $|A \cap [n]| \le \mathcal{O}(\sqrt{n})$, $d(A) = 0$. Our set of points is a subset of that, so it must also be density-zero.
 
 Thus, for the examples above $P_1 \ge 0.5$ and $P_3 \ge 0.833$. [Desmos for the graph here.][2]
 
