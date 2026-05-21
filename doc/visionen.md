@@ -4,17 +4,37 @@ Six years ago while building a goofy side project I faced the following problem:
 
 There was only code – no correctness proof, no complexity analysis. Having just repeated and passed the first Basisprüfungsblock (finally), I learned with pain that this does not fly at ETH. Using my new hard earned knowledge I set out to make them myself, procrastinating this time on my math homework with… math.
 
-Let's state the problem: find a $b \times a \in \N$ grid (rows x columns) into a $w \times h \in \R^{+}$ rectangle which fits $n \in \N$ squares such that the side length of the squares $s \in \R^{+}$ is maximized and the grid does not overflow the rectangle. Since the side length is maximized, the grid will fit in the rectangle's full width or height, or both if a perfect fit is possible. Formally:
+Let's state the problem: place a $b \times a \in \N$ grid (rows x columns) into a $w \times h \in \R^{+}$ rectangle which fits $n \in \N$ squares such that the side length of the squares $s \in \R^{+}$ is maximized and the grid does not overflow the rectangle. Since the side length is maximized, the grid will fit in the rectangle's full width or height, or both if a perfect fit is possible. Formally:
 
 $$\begin{gathered}
-s_w \coloneqq \max \Set{ s \in \R^{+} | \exist a, b \in \N \text{ . } n \le ab \land as = w \land bs \le h } \\
-s_h \coloneqq \max \Set{ s \in \R^{+} | \exist a, b \in \N \text{ . } n \le ab \land as \le h \land bs = h } \\
-s \coloneqq \max \Set{ s_w, s_h }.
+S_w \coloneqq \Set{ s \in \R^{+} | \exist a, b \in \N \text{ . } n \le ab \land as = w \land bs \le h } \\
+S_h \coloneqq \Set{ s \in \R^{+} | \exist a, b \in \N \text{ . } n \le ab \land as \le h \land bs = h } \\
+s \coloneqq \max (S_w \cup S_h)
 \end{gathered}$$
 
-$s_w$ is the _fit-width_ solution, $s_h$ the _fit-height_ solution. The final solution $s$ is the desired maximal side length. Our target is to build an algorithm to find $s$.
+$s_w \in S_w$ is a _fit-width_ solution, $s_h \in S_h$ a _fit-height_ solution. The final solution $s$ is the desired maximal side length. Our target is to build an algorithm to find $s$.
 
+Observe that for any fixed $b$ we can always take $a = \left\lceil \frac{n}{b} \right\rceil$ to obtain a grid which fits $n$ squares, since clearly $n \le ab$. For this grid $(a, b)$ let $s' = \min \Set{ \frac{w}{a}, \frac{h}{b}}$ its corresponding side length; it's easy to see that $s' \in S_w \cup S_h$. We can just test all $1 \le b \le n$ and pick the maximum $s'$ to obtain the solution $s$:
 
+```javascript
+function fillGrid(n, w, h) {
+    let s = 0;
+    for (let b = 1; b <= n; b++) {
+        s = Math.max(s, Math.min(w / Math.ceil(n / b), h / b))
+    }
+    return s
+}
+```
+
+Used Javascript so someone's offended, golfed the code so the article fits, asymptotic complexity is $\mathcal{O}(n)$. To improve this, let $k = \left\lceil \frac{n}{a} \right\rceil$. If $k \le \sqrt{n}$ there are obviously $\mathcal{O}(\sqrt{n})$ distinct values of $k$. If $k > \sqrt{n}$:
+
+$$
+\left\lceil \frac{n}{a} \right\rceil > \sqrt{n} \implies \frac{n}{a} + 1 > \sqrt{n} \implies a < \sqrt{n} + \frac{1}{\sqrt{n}} \le \mathcal{O}(\sqrt{n}).
+$$
+
+Therefore there are $\mathcal{O}(\sqrt{n})$ distinct values of $\left\lceil \frac{n}{a} \right\rceil$, meaning with clever incrementing of $b$ we could achieve $\mathcal{O}(\sqrt{n})$ complexity. But for my grid with $n = 10^{20}$ squares this isn't good enough, so...
+
+ _Geht es besser?_
 
 The solution statement as it stands juggles a lot of variables. We can rewrite the grid dimension constraints using only $a, b, w, h$: 
 
@@ -23,7 +43,7 @@ as_w = w \land bs_w \le h \iff a \ge \frac{w}{h}b \land s_w = \frac{w}{a} \\
 bs_h = h \land as_h \le w \iff b \ge \frac{h}{w}a \land s_h = \frac{h}{b}.
 \end{gathered}$$
 
-$s$ is now dependent on the grid and rectangle dimensions. Using $r \coloneqq \frac{w}{h}$, the rectangle's ratio:
+$s$ is now dependent on the grid and rectangle dimensions. Using $r \coloneqq \frac{w}{h}$, the rectangle's aspect ratio:
 
 $$\begin{gathered}
 a_w \coloneqq \min \Set{a \in \N | \exist b \in \N \text{ . } n \le ab \land a \ge rb} \\
@@ -33,7 +53,7 @@ s = \max \Set{ \frac{w}{a_w}, \frac{h}{b_h}}.
 
 $a_w$ is the column count of the _fit-width_ grid, $b_h$ the row count of the _fit-height_ grid. They are minimized since the side length is inversely proportional. The side length is a trivial result of the grid dimensions; only the algorithm for finding $a_w$ and $b_h$ remains to be developed.
 
-Let's take a look at a fit-width grid with dimensions $(a_w, b_w) \in \N^2$. The row count $b_w$ can be abstracted away, too:
+Let's take a look at a fit-width grid with dimensions $(a_w, b_w) \in \N^2$. $b_w$ can be abstracted away:
 
 $$\begin{split}
 n \le a_wb_w \land a_w \ge rb_w \iff &\frac{n}{a_w} \le b_w \le \frac{a_w}{r} \\
@@ -47,13 +67,13 @@ $$
 a_w = \min \Set{ a \in \N | a \ge r \left\lceil \frac{n}{a} \right\rceil }, \quad b_h = \min \Set{ b \in \N | rb \ge \left\lceil \frac{n}{b} \right\rceil }.
 $$
 
-Since the second comparison term is non-increasing in $a$ (respectively in $b$), it follows that every $a > a_w$ (and $b > b_h$) would satisfy the solution condition. The algorithm idea is therefore the following: starting from an initial guess $a_0 \le a_w$ (and $b_0 \le b_h$) test every value until the solution condition holds, i.e. loop while:
+Since the second comparison term is non-increasing in $a$ (respectively in $b$), it follows that every $a > a_w$ (and $b > b_h$) would satisfy the solution condition. The algorithm idea is thus the following: starting from an initial guess $a_0 \le a_w$ (and $b_0 \le b_h$) test every value until the solution condition holds, i.e. loop while:
 
 $$
 a < r \left\lceil \frac{n}{a} \right\rceil, \quad rb < \left\lceil \frac{n}{b} \right\rceil
 $$
 
-Only the initial guesses $a_0$ and $b_0$ must be established. From the solution condition of $a_w$:
+Only the initial guesses $a_0$ and $b_0$ remain to be made. From the solution condition of $a_w$:
 
 $$
 a_w \ge r \left\lceil \frac{n}{a_w} \right\rceil \implies {a_w}^2 \ge rn \implies a_w \ge \sqrt{rn}
@@ -66,20 +86,16 @@ function fillGrid(n, w, h) {
     const r = w / h
 
     let a = Math.ceil(Math.sqrt(r * n))
-    while (a < r * Math.ceil(n / a)) {
-        a++
-    }
+    for (; a < r * Math.ceil(n / a); a++);
 
     let b = Math.ceil(Math.sqrt(n / r))
-    while (r * b < Math.ceil(n / b)) {
-        b++
-    }
+    for (; r * b < Math.ceil(n / b); b++);
 
     return Math.max(w / a, h / b)
 }
 ```
 
-Correctness is proven in the construction process above. To analyze the runtime complexity, observe that since $a_0 \le a < r\left\lceil{\frac{n}{a}}\right\rceil$, $a$ will be incremented at most $\left\lceil{r\left\lceil{\frac{n}{a}}\right\rceil - a_0}\right\rceil$ times. Moreover, since $a$ increases, $\left\lceil{\frac{n}{a}}\right\rceil \le \left\lceil{\frac{n}{a_0}}\right\rceil $. Hence an upper bound on the iteration count is:
+To analyze the runtime complexity, observe that since $a_0 \le a < r\left\lceil{\frac{n}{a}}\right\rceil$, $a$ will be incremented at most $\left\lceil{r\left\lceil{\frac{n}{a}}\right\rceil - a_0}\right\rceil$ times. Moreover, since $a$ increases, $\left\lceil{\frac{n}{a}}\right\rceil \le \left\lceil{\frac{n}{a_0}}\right\rceil $. Hence an upper bound on the iteration count is:
 
 $$\begin{align*}
 \left\lceil{r\left\lceil{\frac{n}{a}}\right\rceil - a_0}\right\rceil &< r \left\lceil{\frac{n}{a_0}}\right\rceil - a_0 + 1 \\
@@ -89,27 +105,54 @@ $$\begin{align*}
     &= r + 1
 \end{align*}$$
 
-This means at most $\left\lfloor r \right\rfloor + 1$ iterations and a runtime of $\mathcal{O}(r)$, dependent only on the aspect ratio of the grid. This bound is tight: for $n = 33, r = \frac{1}{8.3}$ the fit-width loop does $1 = \lfloor r \rfloor + 1$ iteration, reaching the upper bound.
+This means at most $\left\lfloor r \right\rfloor + 1$ iterations and a runtime of $\mathcal{O}(r)$, dependent only on the aspect ratio of the rectangle. This bound is tight: for $n = 33, r = \frac{1}{8.3}$ the fit-width loop does $1 = \lfloor r \rfloor + 1$ iteration, reaching the upper bound. Since this also proves that $a_0 \le a \le a_0 + \lfloor r \rfloor + 1$, one could binary search over that interval to reduce complexity to $\mathcal{O}(\log r)$.
 
-Lastly, _geht es besser?_ Yes – the algorithm can be adapted to use binary search, achieving $\mathcal{O}(\log r)$ (how? left to the reader). _Geht es (noch) besser?_ Probably not. This problem is a particular case of _integer programming_: find minimal/maximal integer solution to a problem satisfying constraints. It is an NP-hard problem, with state of the art algorithms having complexity $(\log n)^{\mathcal{O}(n)} \cdot (m \cdot \log V)^{\mathcal{O}(1)}$, where:
-- $n$ is the number of variables,
-- $m$ the number of constraints,
-- $V$ the maximum absolute value of the solution.
+My $n = 10^{20}$ grid is a piece of cake now, but my $r = 2 \uarr \uarr 6$ grid still requires around $10^{19700}$ iterations. There are $10^{80}$ atoms in the observable universe. _Geht es besser?_ 
 
-For our algorithm we'd solve for the fit-width and fit-height solution separately. Handling fit-width: $n = 1$ since we just solve for $a_w$, $m = 2$ and $V = r$ since by the upper bound above $a_0 \le a \le a_0 + r$. Plugging in the formula above, we'd get a runtime of $(2\log r)^{\mathcal{O}(1)}$, which is not asymptotically better than the binary search solution. The solution developed here is heuristics-based: it does a local search on the solution space, exploiting characteristics unique to this particular problem. The only way to reduce the asymptotic runtime is with a better heuristic.
+This problem is a particular case of _integer programming_: find minimal/maximal integer solution to a problem satisfying constraints. It is an NP-complete problem, so there are two ways to solve it: heuristics or exact algorithms. Up until now we've tried two heuristic methods, one giving $\mathcal{O}(\sqrt{n})$, another $\mathcal{O}(\log n)$. Our problem is very simple – just one variable (either the fit-width or the fit-height solution) and two constraints – meaning the complexity of the exact algorithms remains low. Sadly they don't help: any such algorithm (e.g. Lenstra's) give us $\mathcal{O}((\log r)^{\mathcal{O}(1)})$, which isn't asymptotically better than what we already have. Could we find a better heuristic?
 
-We have a correct and optimal algorithm, therefore this presentation concludes here.
+Let's return to the initial algorithm: iterate through all possible $b$. Can we further restrict the range of $b$? For a fit-height solution $s_h$ we know that the minimum $b_h$ is greater than $b_0 = \left\lceil \sqrt{\frac{n}{r}} \right\rceil$. Suppose now that $r \ge 1$ and that $b_h = b_0 + 1$ is _not_ a fit-height solution. This means the loop condition from above is true, which implies:
 
-But there is more to explore:
-- can a better heuristic be derived (perhaps even $\mathcal{O}(1)$)?
-- can one find geometric intuition behind all this?
-- are the grid dimensions unique for the optimal solution? (also an exercise for the reader [WIP: LINK][1])
-- as $r$ changes, when are $a_w$ and $b_h$ equal to $a_0$ and $b_0$ and when does the algorithm iterate instead?
+$$\begin{align*}
+rb_h < \left\lceil \frac{n}{b_h} \right\rceil \implies &rb_0 + 1 \le r(b_0 + 1) < \left\lceil \frac{n}{b_0 + 1} \right\rceil \\
+    \implies &rb_0 + 1 < \frac{n}{b_0 + 1} + 1 \\
+    \implies &\sqrt{{b_0}^2 + b_0} < \sqrt{\frac{n}{r}} \le b_0
+\end{align*}$$
 
-For the curious I've prepared a deep dive into all of the above in this nice document [WIP: LINK][2]. Alternatively, [archive.quateo.com/grid/][3] hosts all referenced files.
+A contradiction. It follows that for $r \ge 1$ the minimal $b_h \in \Set{b_0, b_0 + 1}$. Looking at the fit-width solutions now, one such solution is better than a fit-height one if and only if:
 
-Thank you for reading!
+$$
+s_w > s_h \iff \frac{w}{a_w} > \frac{h}{b_h} \iff a_w < rb_h
+$$
 
-[1]: about:blank
-[2]: about:blank
-[3]: https://archive.quateo.com/grid/
+Let now $b_w = b_h - 1$ and $a_w = \left\lceil \frac{n}{b_w} \right\rceil$. Since $n \le a_wb_w$ but $b_w < b_h$ by minimality of $b_h$ it must be that $a_w > rb_w$, meaning $(a_w, b_w)$ is a fit-width solution. For any other solution $(a, b)$, if $a < a_w$:
+
+$$
+a < \left\lceil \frac{n}{b_h - 1} \right\rceil \le \left\lceil \frac{ab}{b_h - 1} \right\rceil \implies a < \frac{ab}{b_h - 1} \implies b \ge b_h
+$$
+
+If $(a, b)$ is fit-width, it's not better than $(a_h, b_h)$. Hence the only useful fit-width solution is $b_w = b_h - 1 \in \Set{b_0 - 1, b_0}$. If $(a, b)$ is fit-height, $b \le b_0 + 1$ still, no new values. In conclusion for $r \ge 1$ the optimal solution $s$ will _always_ correspond to a grid with $b \in \Set{b_0 - 1, b_0, b_0 + 1}$ rows.
+
+Lastly, notice the symmetry of the problem with respect to $r$. If one takes $r' \coloneqq \frac{1}{r}$ intuitively this just rotates the original rectangle $90^\circ$. Anything proven for $r \ge 1$ applies to $r < 1$ with flipped dimensions. Using the result above, for $r < 1$ the optimal grid $(a, b)$ must have $a \in \Set{a_0 - 1, a_0, a_0 + 1}$ and $(a, b) = (b', a')$, where $(a', b')$ is the optimal grid for $r'$.
+
+With this we have exhaustively covered the input domain. The $\mathcal{O}(1)$ algorithm we've all been waiting for is...
+
+```javascript
+function fillGrid(n, w, h) {
+    const r = w / h
+    if (r < 1) {
+        return fillGrid(n, h, w)
+    }
+    const s = (b) => Math.min(w / Math.ceil(n / b), h / b)
+    const b0 = Math.ceil(Math.sqrt(n / r))
+    return Math.max(s(b0 - 1), s(b0), s(b0 + 1))
+}
+```
+
+_Besser geht es nicht._
+
+<hr/>
+
+If you've found the proofs hard to follow, a geometric representation helps: plot the functions $\frac{n}{x}$ and $\frac{x}{r}$ and the solution points $(a, b)$ and use the graph for interpretation. Here's a Desmos: [desmos.com/calculator/z0ubu4uih8][1]. 
+
+[1]: https://www.desmos.com/calculator/z0ubu4uih8
