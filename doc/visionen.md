@@ -56,21 +56,21 @@ $a_w$ is the column count of the _fit-width_ grid, $b_h$ the row count of the _f
 Let's take a look at a fit-width grid with dimensions $(a_w, b_w) \in \N^2$. $b_w$ can be abstracted away:
 
 $$\begin{split}
-n \le a_wb_w \land a_w \ge rb_w \iff &\frac{n}{a_w} \le b_w \le \frac{a_w}{r} \\
-\iff &\left\lceil \frac{n}{a_w} \right\rceil \le \frac{a_w}{r} \\
-\iff &a_w \ge r \left\lceil \frac{n}{a_w} \right\rceil.
+n \le a_wb_w \land a_w \ge rb_w \iff &\frac{n}{a_w} \le b_w \le \frac{a_w}{r} 
+\iff \left\lceil \frac{n}{a_w} \right\rceil \le \left\lfloor \frac{a_w}{r} \right\rfloor
 \end{split}$$
 
-With an analogous derivation for $b_h$, we get:
+This is a range for all $b_w$ corresponding to $a_w$. With an analogous derivation for $b_h$, we get:
 
 $$
-a_w = \min \Set{ a \in \N | a \ge r \left\lceil \frac{n}{a} \right\rceil }, \quad b_h = \min \Set{ b \in \N | rb \ge \left\lceil \frac{n}{b} \right\rceil }.
+a_w = \min \Set{ a \in \N | \left\lfloor \frac{a}{r} \right\rfloor \ge \left\lceil \frac{n}{a} \right\rceil }, \quad b_h = \min \Set{ b \in \N | \left\lfloor rb \right\rfloor \ge \left\lceil \frac{n}{b} \right\rceil }.
 $$
 
 Since the second comparison term is non-increasing in $a$ (respectively in $b$), it follows that every $a > a_w$ (and $b > b_h$) would satisfy the solution condition. The algorithm idea is thus the following: starting from an initial guess $a_0 \le a_w$ (and $b_0 \le b_h$) test every value until the solution condition holds, i.e. loop while:
 
 $$
-a < r \left\lceil \frac{n}{a} \right\rceil, \quad rb < \left\lceil \frac{n}{b} \right\rceil.
+ \left\lfloor \frac{a}{r} \right\rfloor < \left\lceil \frac{n}{a} \right\rceil \iff a < r \left\lceil \frac{n}{a} \right\rceil,
+ \quad \left\lfloor rb \right\rfloor < \left\lceil \frac{n}{b} \right\rceil \iff rb < \left\lceil \frac{n}{b} \right\rceil.
 $$
 
 Only the initial guesses $a_0$ and $b_0$ remain to be made. From the solution condition of $a_w$:
@@ -109,17 +109,19 @@ This means at most $\left\lfloor r \right\rfloor + 1$ iterations. This bound is 
 
 My $n = 10^{20}$ grid is a piece of cake now, but my $r = 2 \uarr \uarr 6$ grid still requires around $10^{19700}$ iterations. There are $10^{80}$ atoms in the observable universe. _Geht es besser?_ 
 
-This problem is a particular case of _integer programming_: find minimal/maximal integer solution to a problem satisfying constraints. Up until now by exploiting characteristics particular to our problem we've built $\mathcal{O}(\sqrt{n})$ and $\mathcal{O}(\log R)$ algorithms. Perhaps a generic integer programming algorithm is asymptotically better? This problem is very simple – just one variable (either the fit-width or the fit-height solution) and two constraints – which gives low complexity, despite integer programming being NP-complete. Sadly it's not lower than what we already have: any such algorithm (e.g. Lenstra's) gives $\mathcal{O}((\log R)^{\mathcal{O}(1)})$.
+Let's return to the initial algorithm: iterate through all possible $b$. Can we further restrict the range of $b$? For the maximal fit-height solution $s_h$ we know that the corresponding $b_h \ge b_0 = \left\lceil \sqrt{\frac{n}{r}} \right\rceil$. Next, observe that any $b$ is fit-height if $ rb \ge \frac{n}{b} + 1 > \left\lceil \frac{n}{b} \right\rceil$. For which $b$ does this hold?
 
-Let's return to the initial algorithm: iterate through all possible $b$. Can we further restrict the range of $b$? For a fit-height solution $s_h$ we know that the minimum $b_h$ is greater than or equal to $b_0 = \left\lceil \sqrt{\frac{n}{r}} \right\rceil$. Suppose now that $r \ge 1$ and that $b_0 + 1$ is _not_ a fit-height solution. Then, by the above loop condition:
+$$
+rb \ge \frac{n}{b} + 1\iff rb^2 - b - n \ge 0 \iff b \ge \frac{1}{2r} + \sqrt{\frac{1}{4r^2} + \frac{n}{r}}
+$$
 
-$$\begin{align*}
-r(b_0 + 1) < \left\lceil \frac{n}{b_0 + 1} \right\rceil
-    \implies &rb_0 + 1 < \frac{n}{b_0 + 1} + 1 \\
-    \implies &\sqrt{{b_0}^2 + b_0} < \sqrt{\frac{n}{r}} \le b_0.
-\end{align*}$$
+When $r \ge 1$ it suffices that $b = b_0 + 1$:
 
-A contradiction. It follows that for $r \ge 1$ the minimal $b_h \in \Set{b_0, b_0 + 1}$. Let now $b_w = b_h - 1$ and $a_w = \left\lceil \frac{n}{b_w} \right\rceil$. Since $n \le a_wb_w$ but $b_w < b_h$, by minimality of $b_h$ it must be that $a_w > rb_w$, meaning $(a_w, b_w)$ is a fit-width solution. For any other fit-width solution $(a, b)$ with $a < a_w$ and side length $s = \frac{w}{a}$:
+$$
+\frac{1}{2r} + \sqrt{\frac{1}{4r^2} + \frac{n}{r}} \le \frac{1}{2} + \sqrt{\left(\frac{1}{2} + \sqrt{\frac{n}{r}}\right)^2} \le b_0 + 1
+$$
+
+Since $s_h$ is maximal, $b_h$ is minimal, thus $b_h \in \Set{b_0, b_0 + 1}$ always for $r \ge 1$. Let now $b_w = b_h - 1$ and $a_w = \left\lceil \frac{n}{b_w} \right\rceil$. Since $n \le a_wb_w$ but $b_w < b_h$, by minimality of $b_h$ it must be that $a_w > rb_w$, meaning $(a_w, b_w)$ is a fit-width solution. For any other fit-width solution $(a, b)$ with $a < a_w$ and side length $s = \frac{w}{a}$:
 
 $$\begin{align*}
 a < \left\lceil \frac{n}{b_h - 1} \right\rceil \le \left\lceil \frac{ab}{b_h - 1} \right\rceil \implies &a < \frac{ab}{b_h - 1} \implies b \ge b_h \\
@@ -147,8 +149,7 @@ function fillGrid(n, w, h) {
 
 _Besser geht es nicht._
 
-<hr/>
-
-If you've found the proofs hard to follow, a geometric representation helps: plot the functions $\frac{n}{x}$ and $\frac{x}{r}$ and the solution points $(a, b)$ and use the graph for interpretation. Here's a Desmos: [desmos.com/calculator/z0ubu4uih8][1]. 
+If you've found the proofs hard to follow, use a graph: plot the functions $\frac{n}{x}$ and $\frac{x}{r}$ and the solution points $(a, b)$ and interpret geometrically. Here's Desmos: [desmos.com/calculator/z0ubu4uih8][1]. This problem is an _integer programming_ one. There exist general algorithms but the best time complexity they can achieve here is still $\mathcal{O}(\log R)$. Lastly, a challenge! Prove that when a fit-width solution $(a_w, b_w)$ is the best, i.e. $s_w > s_h$ for all $(a_h, b_h)$ fit-height, there is no $b \ne b_w$ such that $(a_w, b)$ is fit-height. Check [archive.quateo.com/grid/unique.pdf][2] if you get stuck.
 
 [1]: https://www.desmos.com/calculator/z0ubu4uih8
+[2]: https://archive.quateo.com/grid/unique.pdf
