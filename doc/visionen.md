@@ -55,10 +55,10 @@ $a_w$ is the column count of the _fit-width_ grid, $b_h$ the row count of the _f
 
 Let's take a look at a fit-width grid with dimensions $(a_w, b_w) \in \N^2$. $b_w$ can be abstracted away:
 
-$$\begin{split}
-n \le a_wb_w \land a_w \ge rb_w \iff &\frac{n}{a_w} \le b_w \le \frac{a_w}{r} 
-\iff \left\lceil \frac{n}{a_w} \right\rceil \le \left\lfloor \frac{a_w}{r} \right\rfloor
-\end{split}$$
+$$
+n \le a_wb_w \land a_w \ge rb_w \iff \frac{n}{a_w} \le b_w \le \frac{a_w}{r} 
+\iff \left\lceil \frac{n}{a_w} \right\rceil \le \left\lfloor \frac{a_w}{r} \right\rfloor.
+$$
 
 This is a range for all $b_w$ corresponding to $a_w$. With an analogous derivation for $b_h$, we get:
 
@@ -112,13 +112,13 @@ My $n = 10^{20}$ grid is a piece of cake now, but my $r = 2 \uarr \uarr 6$ grid 
 Let's return to the initial algorithm: iterate through all possible $b$. Can we further restrict the range of $b$? For the maximal fit-height solution $s_h$ we know that the corresponding $b_h \ge b_0 = \left\lceil \sqrt{\frac{n}{r}} \right\rceil$. Next, observe that any $b$ is fit-height if $ rb \ge \frac{n}{b} + 1 > \left\lceil \frac{n}{b} \right\rceil$. For which $b$ does this hold?
 
 $$
-rb \ge \frac{n}{b} + 1\iff rb^2 - b - n \ge 0 \iff b \ge \frac{1}{2r} + \sqrt{\frac{1}{4r^2} + \frac{n}{r}}
+rb \ge \frac{n}{b} + 1\iff rb^2 - b - n \ge 0 \iff b \ge \frac{1}{2r} + \sqrt{\frac{1}{4r^2} + \frac{n}{r}}.
 $$
 
 When $r \ge 1$ it suffices that $b = b_0 + 1$:
 
 $$
-\frac{1}{2r} + \sqrt{\frac{1}{4r^2} + \frac{n}{r}} \le \frac{1}{2} + \sqrt{\left(\frac{1}{2} + \sqrt{\frac{n}{r}}\right)^2} \le b_0 + 1
+\frac{1}{2r} + \sqrt{\frac{1}{4r^2} + \frac{n}{r}} \le \frac{1}{2} + \sqrt{\left(\frac{1}{2} + \sqrt{\frac{n}{r}}\right)^2} \le b_0 + 1.
 $$
 
 Since $s_h$ is maximal, $b_h$ is minimal, thus $b_h \in \Set{b_0, b_0 + 1}$ always for $r \ge 1$. Let now $b_w = b_h - 1$ and $a_w = \left\lceil \frac{n}{b_w} \right\rceil$. Since $n \le a_wb_w$ but $b_w < b_h$, by minimality of $b_h$ it must be that $a_w > rb_w$, meaning $(a_w, b_w)$ is a fit-width solution. For any other fit-width solution $(a, b)$ with $a < a_w$ and side length $s = \frac{w}{a}$:
@@ -149,7 +149,7 @@ function fillGrid(n, w, h) {
 
 _Besser geht es nicht._
 
-If you've found the proofs hard to follow, use a graph: plot the functions $\frac{n}{x}$ and $\frac{x}{r}$ and the solution points $(a, b)$ and interpret geometrically. Here's Desmos: [desmos.com/calculator/z0ubu4uih8][1]. This problem is an _integer programming_ one. There exist general algorithms but the best time complexity they can achieve here is still $\mathcal{O}(\log R)$. Lastly, a challenge! Prove that when a fit-width solution $(a_w, b_w)$ is the best, i.e. $s_w > s_h$ for all $(a_h, b_h)$ fit-height, there is no $b \ne b_w$ such that $(a_w, b)$ is fit-height. Check [archive.quateo.com/grid/unique.pdf][2] if you get stuck.
+If you've found the proofs hard to follow, use a graph: plot the functions $\frac{n}{x}$ and $\frac{x}{r}$ and the solution points $(a, b)$ and interpret geometrically. Here's Desmos: [desmos.com/calculator/z0ubu4uih8][1]. This problem is an _integer programming_ one. There exist general algorithms but the best time complexity they can achieve here is still $\mathcal{O}(\log R)$. Lastly, a challenge! Prove that when a fit-width solution $(a_w, b_w)$ is the best, i.e. $s_w > s_h$ for all $(a_h, b_h)$ fit-height, there is no $b \ne b_w$ such that $(a_w, b)$ is fit-width. Check [archive.quateo.com/grid/unique.pdf][2] if you get stuck.
 
 [1]: https://www.desmos.com/calculator/z0ubu4uih8
 [2]: https://archive.quateo.com/grid/unique.pdf
