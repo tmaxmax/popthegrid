@@ -26,13 +26,13 @@ function fillGrid(n, w, h) {
 }
 ```
 
-Used Javascript so someone's offended, golfed the code so the article fits, asymptotic complexity is $\mathcal{O}(n)$. To improve this, let $a = \left\lceil \frac{n}{b} \right\rceil$. If $a \le \sqrt{n}$ there are obviously $\mathcal{O}(\sqrt{n})$ distinct values of $a$. If $a > \sqrt{n}$:
+Used JavaScript so someone's offended, golfed the code so the article fits, asymptotic complexity is $\mathcal{O}(n)$. To improve this, notice that if $a \le \sqrt{n}$ there are obviously $\mathcal{O}(\sqrt{n})$ distinct values of $a$. If $a > \sqrt{n}$:
 
 $$
-\left\lceil \frac{n}{b} \right\rceil > \sqrt{n} \implies \frac{n}{b} + 1 > \sqrt{n} \implies b < \frac{n}{\sqrt{n} - 1} = \sqrt{n} + 1 + o(1) \le \mathcal{O}(\sqrt{n}).
+\left\lceil \frac{n}{b} \right\rceil > \sqrt{n} \implies \frac{n}{b} + 1 > \sqrt{n} \implies b < \frac{n}{\sqrt{n} - 1} = \sqrt{n} + 1 + \frac{1}{\sqrt{n} - 1}.
 $$
 
-Therefore there are $\mathcal{O}(\sqrt{n})$ distinct column values, meaning with clever incrementing of rows we could achieve $\mathcal{O}(\sqrt{n})$ complexity. But for my grid with $n = 10^{20}$ squares this isn't good enough, so...
+Therefore $a > \sqrt{n} \implies b \le \mathcal{O}(\sqrt{n})$, so in all cases there are $\mathcal{O}(\sqrt{n})$ distinct $a$ values. Clever incrementing of $b$ could then achieve complexity $\mathcal{O}(\sqrt{n})$. But for my grid with $n = 10^{20}$ squares this isn't good enough, so...
 
  _Geht es besser?_
 
@@ -109,12 +109,12 @@ This means at most $\left\lfloor r \right\rfloor + 1$ iterations. This bound is 
 
 My $n = 10^{20}$ grid is a piece of cake now, but my $r = 2 \uarr \uarr 6$ grid still requires around $10^{19700}$ iterations. There are $10^{80}$ atoms in the observable universe. _Geht es besser?_ 
 
-This problem is a particular case of _integer programming_: find minimal/maximal integer solution to a problem satisfying constraints. Up until now by exploiting characteristics particular to our problem we've built $\mathcal{O}(\sqrt{n})$ and $\mathcal{O}(\log R)$ algorithms. Perhaps a generic integer programming algorithm is asymptotically better? This problem is very simple – just one variable (either the fit-width or the fit-height solution) and two constraints – which gives low complexity, despite integer programming being NP-complete. Sadly it's not lower than what we already have: any such algorithm (e.g. Lenstra's) gives $\mathcal{O}((\log R)^{\mathcal{O}(1)})$. We're left to further explore our problem.
+This problem is a particular case of _integer programming_: find minimal/maximal integer solution to a problem satisfying constraints. Up until now by exploiting characteristics particular to our problem we've built $\mathcal{O}(\sqrt{n})$ and $\mathcal{O}(\log R)$ algorithms. Perhaps a generic integer programming algorithm is asymptotically better? This problem is very simple – just one variable (either the fit-width or the fit-height solution) and two constraints – which gives low complexity, despite integer programming being NP-complete. Sadly it's not lower than what we already have: any such algorithm (e.g. Lenstra's) gives $\mathcal{O}((\log R)^{\mathcal{O}(1)})$.
 
-Let's return to the initial algorithm: iterate through all possible $b$. Can we further restrict the range of $b$? For a fit-height solution $s_h$ we know that the minimum $b_h$ is greater than or equal to $b_0 = \left\lceil \sqrt{\frac{n}{r}} \right\rceil$. Suppose now that $r \ge 1$ and that $b_h = b_0 + 1$ is _not_ a fit-height solution. This means that the loop condition from above is true, which implies:
+Let's return to the initial algorithm: iterate through all possible $b$. Can we further restrict the range of $b$? For a fit-height solution $s_h$ we know that the minimum $b_h$ is greater than or equal to $b_0 = \left\lceil \sqrt{\frac{n}{r}} \right\rceil$. Suppose now that $r \ge 1$ and that $b_0 + 1$ is _not_ a fit-height solution. Then, by the above loop condition:
 
 $$\begin{align*}
-rb_h < \left\lceil \frac{n}{b_h} \right\rceil \implies &rb_0 + 1 \le r(b_0 + 1) < \left\lceil \frac{n}{b_0 + 1} \right\rceil \\
+r(b_0 + 1) < \left\lceil \frac{n}{b_0 + 1} \right\rceil
     \implies &rb_0 + 1 < \frac{n}{b_0 + 1} + 1 \\
     \implies &\sqrt{{b_0}^2 + b_0} < \sqrt{\frac{n}{r}} \le b_0.
 \end{align*}$$
