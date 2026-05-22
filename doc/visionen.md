@@ -1,8 +1,8 @@
 # Filling the grid
 
-Six years ago while building a goofy side project I faced the following problem: how do I fit 48 squares on a screen so that they’re as big as possible? I had just started high school and was programming to procrastinate on my math homework, hence I shamelessly copied a (partly wrong) solution off of StackOverflow and moved on.
+Six years ago while building a goofy side project I faced the following problem: how do I fit 48 squares on a screen so that they’re as big as possible? I had just started high school and was programming to procrastinate on my math homework, hence I shamelessly copied a (partly wrong) solution off of Stack Overflow and moved on.
 
-There was only code – no correctness proof, no complexity analysis. Having just repeated and passed the first Basisprüfungsblock (finally), I learned with pain that this does not fly at ETH. Using my new hard earned knowledge I set out to make them myself, procrastinating this time on my math homework with… math.
+There was only code – no correctness proof, no complexity analysis. Having just repeated and passed the first Basisprüfungsblock (finally), I learned with pain that this does not fly at ETH. Using my new hard-earned knowledge I set out to make them myself, procrastinating this time on my math homework with… math.
 
 Let's state the problem: place a $b \times a \in \N$ grid (rows x columns) into a $w \times h \in \R^{+}$ rectangle which fits $n \in \N$ squares such that the side length of the squares $s \in \R^{+}$ is maximized and the grid does not overflow the rectangle. Since the side length is maximized, the grid will fit in the rectangle's full width or height, or both if a perfect fit is possible. Formally:
 
@@ -26,13 +26,13 @@ function fillGrid(n, w, h) {
 }
 ```
 
-Used Javascript so someone's offended, golfed the code so the article fits, asymptotic complexity is $\mathcal{O}(n)$. To improve this, let $k = \left\lceil \frac{n}{a} \right\rceil$. If $k \le \sqrt{n}$ there are obviously $\mathcal{O}(\sqrt{n})$ distinct values of $k$. If $k > \sqrt{n}$:
+Used Javascript so someone's offended, golfed the code so the article fits, asymptotic complexity is $\mathcal{O}(n)$. To improve this, let $a = \left\lceil \frac{n}{b} \right\rceil$. If $a \le \sqrt{n}$ there are obviously $\mathcal{O}(\sqrt{n})$ distinct values of $a$. If $a > \sqrt{n}$:
 
 $$
-\left\lceil \frac{n}{a} \right\rceil > \sqrt{n} \implies \frac{n}{a} + 1 > \sqrt{n} \implies a < \sqrt{n} + \frac{1}{\sqrt{n}} \le \mathcal{O}(\sqrt{n}).
+\left\lceil \frac{n}{b} \right\rceil > \sqrt{n} \implies \frac{n}{b} + 1 > \sqrt{n} \implies b < \frac{n}{\sqrt{n} - 1} = \sqrt{n} + 1 + o(1) \le \mathcal{O}(\sqrt{n}).
 $$
 
-Therefore there are $\mathcal{O}(\sqrt{n})$ distinct values of $\left\lceil \frac{n}{a} \right\rceil$, meaning with clever incrementing of $b$ we could achieve $\mathcal{O}(\sqrt{n})$ complexity. But for my grid with $n = 10^{20}$ squares this isn't good enough, so...
+Therefore there are $\mathcal{O}(\sqrt{n})$ distinct column values, meaning with clever incrementing of rows we could achieve $\mathcal{O}(\sqrt{n})$ complexity. But for my grid with $n = 10^{20}$ squares this isn't good enough, so...
 
  _Geht es besser?_
 
@@ -95,10 +95,10 @@ function fillGrid(n, w, h) {
 }
 ```
 
-To analyze the runtime complexity, observe that since $a_0 \le a < r\left\lceil{\frac{n}{a}}\right\rceil$, $a$ will be incremented at most $\left\lceil{r\left\lceil{\frac{n}{a}}\right\rceil - a_0}\right\rceil$ times. Moreover, since $a$ increases, $\left\lceil{\frac{n}{a}}\right\rceil \le \left\lceil{\frac{n}{a_0}}\right\rceil $. Hence an upper bound on the iteration count is:
+To analyze the runtime complexity, observe that since $a_0 \le a < r\left\lceil{\frac{n}{a}}\right\rceil \le r \left\lceil \frac{n}{a_0} \right\rceil$, $a$ is incremented at most $\left\lceil{r\left\lceil{\frac{n}{a_0}}\right\rceil - a_0}\right\rceil$ times. An upper bound on the iteration count is:
 
 $$\begin{align*}
-\left\lceil{r\left\lceil{\frac{n}{a}}\right\rceil - a_0}\right\rceil &< r \left\lceil{\frac{n}{a_0}}\right\rceil - a_0 + 1 \\
+\left\lceil{r\left\lceil{\frac{n}{a_0}}\right\rceil - a_0}\right\rceil &< r \left\lceil{\frac{n}{a_0}}\right\rceil - a_0 + 1 \\
     &< r \frac{n}{a_0} + r -a_0 + 1 \\
     &= r\frac{n}{\left\lceil \sqrt{rn} \right\rceil} + r - \left\lceil\sqrt{rn}\right\rceil + 1 \\
     &< \frac{rn}{\sqrt{rn}} + r - \sqrt{rn} + 1 \\
@@ -109,9 +109,9 @@ This means at most $\left\lfloor r \right\rfloor + 1$ iterations. This bound is 
 
 My $n = 10^{20}$ grid is a piece of cake now, but my $r = 2 \uarr \uarr 6$ grid still requires around $10^{19700}$ iterations. There are $10^{80}$ atoms in the observable universe. _Geht es besser?_ 
 
-This problem is a particular case of _integer programming_: find minimal/maximal integer solution to a problem satisfying constraints. It is an NP-complete problem, so there are two ways to solve it: heuristics or exact algorithms. Up until now we've tried two heuristic methods, one giving $\mathcal{O}(\sqrt{n})$, another $\mathcal{O}(\log n)$. Our problem is very simple – just one variable (either the fit-width or the fit-height solution) and two constraints – meaning the complexity of the exact algorithms remains low. Sadly they don't help: any such algorithm (e.g. Lenstra's) give us $\mathcal{O}((\log R)^{\mathcal{O}(1)})$, which isn't asymptotically better than what we already have. Could we find a better heuristic?
+This problem is a particular case of _integer programming_: find minimal/maximal integer solution to a problem satisfying constraints. Up until now by exploiting characteristics particular to our problem we've built $\mathcal{O}(\sqrt{n})$ and $\mathcal{O}(\log R)$ algorithms. Perhaps a generic integer programming algorithm is asymptotically better? This problem is very simple – just one variable (either the fit-width or the fit-height solution) and two constraints – which gives low complexity, despite integer programming being NP-complete. Sadly it's not lower than what we already have: any such algorithm (e.g. Lenstra's) gives $\mathcal{O}((\log R)^{\mathcal{O}(1)})$. We're left to further explore our problem.
 
-Let's return to the initial algorithm: iterate through all possible $b$. Can we further restrict the range of $b$? For a fit-height solution $s_h$ we know that the minimum $b_h$ is greater than $b_0 = \left\lceil \sqrt{\frac{n}{r}} \right\rceil$. Suppose now that $r \ge 1$ and that $b_h = b_0 + 1$ is _not_ a fit-height solution. This means the loop condition from above is true, which implies:
+Let's return to the initial algorithm: iterate through all possible $b$. Can we further restrict the range of $b$? For a fit-height solution $s_h$ we know that the minimum $b_h$ is greater than or equal to $b_0 = \left\lceil \sqrt{\frac{n}{r}} \right\rceil$. Suppose now that $r \ge 1$ and that $b_h = b_0 + 1$ is _not_ a fit-height solution. This means that the loop condition from above is true, which implies:
 
 $$\begin{align*}
 rb_h < \left\lceil \frac{n}{b_h} \right\rceil \implies &rb_0 + 1 \le r(b_0 + 1) < \left\lceil \frac{n}{b_0 + 1} \right\rceil \\
@@ -119,7 +119,7 @@ rb_h < \left\lceil \frac{n}{b_h} \right\rceil \implies &rb_0 + 1 \le r(b_0 + 1) 
     \implies &\sqrt{{b_0}^2 + b_0} < \sqrt{\frac{n}{r}} \le b_0.
 \end{align*}$$
 
-A contradiction. It follows that for $r \ge 1$ the minimal $b_h \in \Set{b_0, b_0 + 1}$. Let now $b_w = b_h - 1$ and $a_w = \left\lceil \frac{n}{b_w} \right\rceil$. Since $n \le a_wb_w$ but $b_w < b_h$ by minimality of $b_h$ it must be that $a_w > rb_w$, meaning $(a_w, b_w)$ is a fit-width solution. For any other fit-width solution $(a, b)$ with $a < a_w$ and side length $s = \frac{w}{a}$:
+A contradiction. It follows that for $r \ge 1$ the minimal $b_h \in \Set{b_0, b_0 + 1}$. Let now $b_w = b_h - 1$ and $a_w = \left\lceil \frac{n}{b_w} \right\rceil$. Since $n \le a_wb_w$ but $b_w < b_h$, by minimality of $b_h$ it must be that $a_w > rb_w$, meaning $(a_w, b_w)$ is a fit-width solution. For any other fit-width solution $(a, b)$ with $a < a_w$ and side length $s = \frac{w}{a}$:
 
 $$\begin{align*}
 a < \left\lceil \frac{n}{b_h - 1} \right\rceil \le \left\lceil \frac{ab}{b_h - 1} \right\rceil \implies &a < \frac{ab}{b_h - 1} \implies b \ge b_h \\
@@ -129,7 +129,7 @@ a < \left\lceil \frac{n}{b_h - 1} \right\rceil \le \left\lceil \frac{ab}{b_h - 1
 
 No such fit-width $(a, b)$ is better than the fit-height $(a_h, b_h)$. Hence the only useful fit-width solution is $b_w = b_h - 1 \in \Set{b_0 - 1, b_0}$. In conclusion for $r \ge 1$ the optimal solution $s$ will _always_ correspond to a grid with $b \in \Set{b_0 - 1, b_0, b_0 + 1}$ rows.
 
-Lastly, notice the symmetry of the problem with respect to $r$. If one takes $r' \coloneqq \frac{1}{r}$ intuitively this just rotates the original rectangle $90^\circ$. Anything proven for $r \ge 1$ applies to $r < 1$ with flipped dimensions. Using the result above, for $r < 1$ the optimal grid $(a, b)$ must have $a \in \Set{a_0 - 1, a_0, a_0 + 1}$ and $(a, b) = (b', a')$, where $(a', b')$ is the optimal grid for $r'$.
+Lastly, notice the symmetry of the problem with respect to $r$. Taking $r' \coloneqq \frac{1}{r}$ just rotates the original rectangle by $90^\circ$. Anything proven for $r \ge 1$ applies to $r < 1$ with flipped dimensions. Using the result above, for $r < 1$ the optimal grid $(a, b)$ must have $a \in \Set{a_0 - 1, a_0, a_0 + 1}$ and $(a, b) = (b', a')$, where $(a', b')$ is the optimal grid for $r'$.
 
 With this we have exhaustively covered the input domain. The $\mathcal{O}(1)$ algorithm we've all been waiting for is...
 
