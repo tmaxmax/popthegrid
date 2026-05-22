@@ -9,7 +9,7 @@ Let's state the problem: place a $b \times a \in \N$ grid (rows x columns) into 
 $$\begin{gathered}
 S_w \coloneqq \Set{ s \in \R^{+} | \exist a, b \in \N \text{ . } n \le ab \land as = w \land bs \le h } \\
 S_h \coloneqq \Set{ s \in \R^{+} | \exist a, b \in \N \text{ . } n \le ab \land as \le h \land bs = h } \\
-s \coloneqq \max (S_w \cup S_h)
+s \coloneqq \max (S_w \cup S_h).
 \end{gathered}$$
 
 $s_w \in S_w$ is a _fit-width_ solution, $s_h \in S_h$ a _fit-height_ solution. The final solution $s$ is the desired maximal side length. Our target is to build an algorithm to find $s$.
@@ -70,13 +70,13 @@ $$
 Since the second comparison term is non-increasing in $a$ (respectively in $b$), it follows that every $a > a_w$ (and $b > b_h$) would satisfy the solution condition. The algorithm idea is thus the following: starting from an initial guess $a_0 \le a_w$ (and $b_0 \le b_h$) test every value until the solution condition holds, i.e. loop while:
 
 $$
-a < r \left\lceil \frac{n}{a} \right\rceil, \quad rb < \left\lceil \frac{n}{b} \right\rceil
+a < r \left\lceil \frac{n}{a} \right\rceil, \quad rb < \left\lceil \frac{n}{b} \right\rceil.
 $$
 
 Only the initial guesses $a_0$ and $b_0$ remain to be made. From the solution condition of $a_w$:
 
 $$
-a_w \ge r \left\lceil \frac{n}{a_w} \right\rceil \implies {a_w}^2 \ge rn \implies a_w \ge \sqrt{rn}
+a_w \ge r \left\lceil \frac{n}{a_w} \right\rceil \implies {a_w}^2 \ge rn \implies a_w \ge \sqrt{rn}.
 $$
 
 Since $a_w \in \N$ it can therefore be no smaller than $a_0 = \left\lceil \sqrt{rn} \right\rceil$. Likewise, $b_w \ge b_0 = \left\lceil \sqrt{\frac{n}{r}} \right\rceil$. Using the loop condition above, an algorithm can finally be built:
@@ -102,36 +102,32 @@ $$\begin{align*}
     &< r \frac{n}{a_0} + r -a_0 + 1 \\
     &= r\frac{n}{\left\lceil \sqrt{rn} \right\rceil} + r - \left\lceil\sqrt{rn}\right\rceil + 1 \\
     &< \frac{rn}{\sqrt{rn}} + r - \sqrt{rn} + 1 \\
-    &= r + 1
+    &= r + 1.
 \end{align*}$$
 
-This means at most $\left\lfloor r \right\rfloor + 1$ iterations and a runtime of $\mathcal{O}(r)$, dependent only on the aspect ratio of the rectangle. This bound is tight: for $n = 33, r = \frac{1}{8.3}$ the fit-width loop does $1 = \lfloor r \rfloor + 1$ iteration, reaching the upper bound. Since this also proves that $a_0 \le a \le a_0 + \lfloor r \rfloor + 1$, one could binary search over that interval to reduce complexity to $\mathcal{O}(\log r)$.
+This means at most $\left\lfloor r \right\rfloor + 1$ iterations. This bound is tight: for $n = 33, r = \frac{1}{8.3}$ the fit-width loop does $1 = \lfloor r \rfloor + 1$ iteration, reaching the upper bound. Similarly for the second loop we get a tight upper bound of $\left\lfloor \frac{1}{r} \right\rfloor + 1$ iterations. The runtime is therefore $\mathcal{O}(R)$ with $R = \max \Set{r, \frac{1}{r}}$. One could binary search over $\left[a_0, a_0 + \lfloor r \rfloor + 1\right]$ and $\left[b_0, b_0 + \left\lfloor \frac{1}{r} \right\rfloor + 1\right]$ to reduce complexity to $\mathcal{O}(\log R)$.
 
 My $n = 10^{20}$ grid is a piece of cake now, but my $r = 2 \uarr \uarr 6$ grid still requires around $10^{19700}$ iterations. There are $10^{80}$ atoms in the observable universe. _Geht es besser?_ 
 
-This problem is a particular case of _integer programming_: find minimal/maximal integer solution to a problem satisfying constraints. It is an NP-complete problem, so there are two ways to solve it: heuristics or exact algorithms. Up until now we've tried two heuristic methods, one giving $\mathcal{O}(\sqrt{n})$, another $\mathcal{O}(\log n)$. Our problem is very simple – just one variable (either the fit-width or the fit-height solution) and two constraints – meaning the complexity of the exact algorithms remains low. Sadly they don't help: any such algorithm (e.g. Lenstra's) give us $\mathcal{O}((\log r)^{\mathcal{O}(1)})$, which isn't asymptotically better than what we already have. Could we find a better heuristic?
+This problem is a particular case of _integer programming_: find minimal/maximal integer solution to a problem satisfying constraints. It is an NP-complete problem, so there are two ways to solve it: heuristics or exact algorithms. Up until now we've tried two heuristic methods, one giving $\mathcal{O}(\sqrt{n})$, another $\mathcal{O}(\log n)$. Our problem is very simple – just one variable (either the fit-width or the fit-height solution) and two constraints – meaning the complexity of the exact algorithms remains low. Sadly they don't help: any such algorithm (e.g. Lenstra's) give us $\mathcal{O}((\log R)^{\mathcal{O}(1)})$, which isn't asymptotically better than what we already have. Could we find a better heuristic?
 
 Let's return to the initial algorithm: iterate through all possible $b$. Can we further restrict the range of $b$? For a fit-height solution $s_h$ we know that the minimum $b_h$ is greater than $b_0 = \left\lceil \sqrt{\frac{n}{r}} \right\rceil$. Suppose now that $r \ge 1$ and that $b_h = b_0 + 1$ is _not_ a fit-height solution. This means the loop condition from above is true, which implies:
 
 $$\begin{align*}
 rb_h < \left\lceil \frac{n}{b_h} \right\rceil \implies &rb_0 + 1 \le r(b_0 + 1) < \left\lceil \frac{n}{b_0 + 1} \right\rceil \\
     \implies &rb_0 + 1 < \frac{n}{b_0 + 1} + 1 \\
-    \implies &\sqrt{{b_0}^2 + b_0} < \sqrt{\frac{n}{r}} \le b_0
+    \implies &\sqrt{{b_0}^2 + b_0} < \sqrt{\frac{n}{r}} \le b_0.
 \end{align*}$$
 
-A contradiction. It follows that for $r \ge 1$ the minimal $b_h \in \Set{b_0, b_0 + 1}$. Looking at the fit-width solutions now, one such solution is better than a fit-height one if and only if:
+A contradiction. It follows that for $r \ge 1$ the minimal $b_h \in \Set{b_0, b_0 + 1}$. Let now $b_w = b_h - 1$ and $a_w = \left\lceil \frac{n}{b_w} \right\rceil$. Since $n \le a_wb_w$ but $b_w < b_h$ by minimality of $b_h$ it must be that $a_w > rb_w$, meaning $(a_w, b_w)$ is a fit-width solution. For any other fit-width solution $(a, b)$ with $a < a_w$ and side length $s = \frac{w}{a}$:
 
-$$
-s_w > s_h \iff \frac{w}{a_w} > \frac{h}{b_h} \iff a_w < rb_h
-$$
+$$\begin{align*}
+a < \left\lceil \frac{n}{b_h - 1} \right\rceil \le \left\lceil \frac{ab}{b_h - 1} \right\rceil \implies &a < \frac{ab}{b_h - 1} \implies b \ge b_h \\
+    \implies &a \ge rb \ge rb_h \implies \frac{w}{a} \le \frac{h}{b_h} \\
+    \implies &s \le s_h.
+\end{align*}$$
 
-Let now $b_w = b_h - 1$ and $a_w = \left\lceil \frac{n}{b_w} \right\rceil$. Since $n \le a_wb_w$ but $b_w < b_h$ by minimality of $b_h$ it must be that $a_w > rb_w$, meaning $(a_w, b_w)$ is a fit-width solution. For any other solution $(a, b)$, if $a < a_w$:
-
-$$
-a < \left\lceil \frac{n}{b_h - 1} \right\rceil \le \left\lceil \frac{ab}{b_h - 1} \right\rceil \implies a < \frac{ab}{b_h - 1} \implies b \ge b_h
-$$
-
-If $(a, b)$ is fit-width, it's not better than $(a_h, b_h)$. Hence the only useful fit-width solution is $b_w = b_h - 1 \in \Set{b_0 - 1, b_0}$. If $(a, b)$ is fit-height, $b \le b_0 + 1$ still, no new values. In conclusion for $r \ge 1$ the optimal solution $s$ will _always_ correspond to a grid with $b \in \Set{b_0 - 1, b_0, b_0 + 1}$ rows.
+No such fit-width $(a, b)$ is better than the fit-height $(a_h, b_h)$. Hence the only useful fit-width solution is $b_w = b_h - 1 \in \Set{b_0 - 1, b_0}$. In conclusion for $r \ge 1$ the optimal solution $s$ will _always_ correspond to a grid with $b \in \Set{b_0 - 1, b_0, b_0 + 1}$ rows.
 
 Lastly, notice the symmetry of the problem with respect to $r$. If one takes $r' \coloneqq \frac{1}{r}$ intuitively this just rotates the original rectangle $90^\circ$. Anything proven for $r \ge 1$ applies to $r < 1$ with flipped dimensions. Using the result above, for $r < 1$ the optimal grid $(a, b)$ must have $a \in \Set{a_0 - 1, a_0, a_0 + 1}$ and $(a, b) = (b', a')$, where $(a', b')$ is the optimal grid for $r'$.
 
