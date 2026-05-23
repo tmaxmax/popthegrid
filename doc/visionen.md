@@ -6,11 +6,13 @@ There was only code – no correctness proof, no complexity analysis. Having jus
 
 Let's state the problem: place a $b \times a \in \N$ grid (rows x columns) into a $w \times h \in \R^{+}$ rectangle which fits $n \in \N$ squares such that the side length of the squares $s \in \R^{+}$ is maximized and the grid does not overflow the rectangle. Since the side length is maximized, the grid will fit in the rectangle's full width or height, or both if a perfect fit is possible. Formally:
 
-$$\begin{gathered}
+$$
+\begin{gathered}
 S_w \coloneqq \Set{ s \in \R^{+} | \exist a, b \in \N \text{ . } n \le ab \land as = w \land bs \le h } \\
 S_h \coloneqq \Set{ s \in \R^{+} | \exist a, b \in \N \text{ . } n \le ab \land as \le h \land bs = h } \\
 s \coloneqq \max (S_w \cup S_h).
-\end{gathered}$$
+\end{gathered}
+$$
 
 $s_w \in S_w$ is a _fit-width_ solution, $s_h \in S_h$ a _fit-height_ solution. The final solution $s$ is the desired maximal side length. Our target is to build an algorithm to find $s$.
 
@@ -38,18 +40,22 @@ Therefore $a > \sqrt{n} \implies b \le \mathcal{O}(\sqrt{n})$, so in all cases t
 
 The solution statement as it stands juggles a lot of variables. We can rewrite the grid dimension constraints using only $a, b, w, h$: 
 
-$$\begin{gathered}
+$$
+\begin{gathered}
 as_w = w \land bs_w \le h \iff a \ge \frac{w}{h}b \land s_w = \frac{w}{a} \\
 bs_h = h \land as_h \le w \iff b \ge \frac{h}{w}a \land s_h = \frac{h}{b}.
-\end{gathered}$$
+\end{gathered}
+$$
 
 $s$ is now dependent on the grid and rectangle dimensions. Using $r \coloneqq \frac{w}{h}$, the rectangle's aspect ratio:
 
-$$\begin{gathered}
+$$
+\begin{gathered}
 a_w \coloneqq \min \Set{a \in \N | \exist b \in \N \text{ . } n \le ab \land a \ge rb} \\
 b_h \coloneqq \min \Set{b \in \N | \exist a \in \N \text{ . } n \le ab \land b \ge \frac{a}{r}} \\
 s = \max \Set{ \frac{w}{a_w}, \frac{h}{b_h}}.
-\end{gathered}$$
+\end{gathered}
+$$
 
 $a_w$ is the column count of the _fit-width_ grid, $b_h$ the row count of the _fit-height_ grid. They are minimized since the side length is inversely proportional. The side length is a trivial result of the grid dimensions; only the algorithm for finding $a_w$ and $b_h$ remains to be developed.
 
@@ -97,13 +103,15 @@ function fillGrid(n, w, h) {
 
 To analyze the runtime complexity, observe that since $a_0 \le a < r\left\lceil{\frac{n}{a}}\right\rceil \le r \left\lceil \frac{n}{a_0} \right\rceil$, $a$ is incremented at most $\left\lceil{r\left\lceil{\frac{n}{a_0}}\right\rceil - a_0}\right\rceil$ times. An upper bound on the iteration count is:
 
-$$\begin{align*}
+$$
+\begin{align*}
 \left\lceil{r\left\lceil{\frac{n}{a_0}}\right\rceil - a_0}\right\rceil &< r \left\lceil{\frac{n}{a_0}}\right\rceil - a_0 + 1 \\
     &< r \frac{n}{a_0} + r -a_0 + 1 \\
     &= r\frac{n}{\left\lceil \sqrt{rn} \right\rceil} + r - \left\lceil\sqrt{rn}\right\rceil + 1 \\
     &< \frac{rn}{\sqrt{rn}} + r - \sqrt{rn} + 1 \\
     &= r + 1.
-\end{align*}$$
+\end{align*}
+$$
 
 This means at most $\left\lfloor r \right\rfloor + 1$ iterations. This bound is tight: for $n = 33, r = \frac{1}{8.3}$ the fit-width loop does $1 = \lfloor r \rfloor + 1$ iteration, reaching the upper bound. Similarly for the second loop we get a tight upper bound of $\left\lfloor \frac{1}{r} \right\rfloor + 1$ iterations. The runtime is therefore $\mathcal{O}(R)$ with $R = \max \Set{r, \frac{1}{r}}$. One could binary search over $\left[a_0, a_0 + \lfloor r \rfloor + 1\right]$ and $\left[b_0, b_0 + \left\lfloor \frac{1}{r} \right\rfloor + 1\right]$ to reduce complexity to $\mathcal{O}(\log R)$.
 
@@ -123,11 +131,13 @@ $$
 
 Since $s_h$ is maximal, $b_h$ is minimal, thus $b_h \in \Set{b_0, b_0 + 1}$ always for $r \ge 1$. Let now $b_w = b_h - 1$ and $a_w = \left\lceil \frac{n}{b_w} \right\rceil$. Since $n \le a_wb_w$ but $b_w < b_h$, by minimality of $b_h$ it must be that $a_w > rb_w$, meaning $(a_w, b_w)$ is a fit-width solution. For any other fit-width solution $(a, b)$ with $a < a_w$ and side length $s = \frac{w}{a}$:
 
-$$\begin{align*}
+$$
+\begin{align*}
 a < \left\lceil \frac{n}{b_h - 1} \right\rceil \le \left\lceil \frac{ab}{b_h - 1} \right\rceil \implies &a < \frac{ab}{b_h - 1} \implies b \ge b_h \\
     \implies &a \ge rb \ge rb_h \implies \frac{w}{a} \le \frac{h}{b_h} \\
     \implies &s \le s_h.
-\end{align*}$$
+\end{align*}
+$$
 
 No such fit-width $(a, b)$ is better than the fit-height $(a_h, b_h)$. Hence the only useful fit-width solution is $b_w = b_h - 1 \in \Set{b_0 - 1, b_0}$. In conclusion for $r \ge 1$ the optimal solution $s$ will _always_ correspond to a grid with $b \in \Set{b_0 - 1, b_0, b_0 + 1}$ rows.
 
@@ -149,7 +159,11 @@ function fillGrid(n, w, h) {
 
 _Besser geht es nicht._
 
-If you've found the proofs hard to follow, use a graph: plot the functions $\frac{n}{x}$ and $\frac{x}{r}$ and the solution points $(a, b)$ and interpret geometrically. Here's Desmos: [desmos.com/calculator/z0ubu4uih8][1]. This problem is an _integer programming_ one. There exist general algorithms but the best time complexity they can achieve here is still $\mathcal{O}(\log R)$. Lastly, a challenge! Prove that when a fit-width solution $(a_w, b_w)$ is the best, i.e. $s_w > s_h$ for all $(a_h, b_h)$ fit-height, there is no $b \ne b_w$ such that $(a_w, b)$ is fit-width. Check [archive.quateo.com/grid/unique.pdf][2] if you get stuck.
+If you've found the proofs hard to follow, use a graph: plot the functions $\frac{n}{x}$ and $\frac{x}{r}$ and the solution points $(a, b)$ and interpret geometrically. Here's Desmos: [desmos.com/calculator/z0ubu4uih8][1].
+
+For additional context, this problem is a particular case of _integer programming_. There exist general algorithms to solve such problems but the best time complexity they can achieve here is still $\mathcal{O}(\log R)$.
+
+Lastly, a challenge! Prove that when a fit-width solution $(a_w, b_w)$ is the best, i.e. $s_w > s_h$ for all $(a_h, b_h)$ fit-height, there is no $b \ne b_w$ such that $(a_w, b)$ is fit-width. Check [archive.quateo.com/grid/unique.html][2] if you get stuck.
 
 [1]: https://www.desmos.com/calculator/z0ubu4uih8
-[2]: https://archive.quateo.com/grid/unique.pdf
+[2]: https://archive.quateo.com/grid/unique.html

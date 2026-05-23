@@ -1,18 +1,23 @@
 # Uniqueness of fit-width solution
 
-Let $(a, b)$ be a minimal fit-width point. **Prove** there is no $b' \ne b$ such that $(a, b')$ is a fit-width point when $r \ge 1$ and $(a, b)$ corresponds to the best solution, meaning that $s_w > s_h$ for all $(a_h, b_h)$ fit-width points.
+Define a fit-width/fit-height "point" to be the coordinates $(a, b)$ corresponding to a solution side-length $s$.
 
-If you didn't read the main document, here's a self-contained problem statement:
+Let $(a, b)$ a fit-width point with minimal $a$. **Prove** there is no $b' \ne b$ such that $(a, b')$ is a fit-width point when $r \ge 1$ and $(a, b)$ corresponds to the best solution, meaning that $s_w > s_h$ for all $(a_h, b_h)$ fit-width points.
+
+Here's a self-contained problem statement:
 
 Let: $r \in [1, \infin)$, <br>
 $\quad n \in \N$ (for this task $\N$ does not include $0$),<br>
-$\quad W = \Set{ (a, b) \in \N^2 | n \le ab \land a \ge rb }$ (the "fit-width" points),<br>
-$\quad H = \Set{ (a, b) \in \N^2 | n \le ab \land rb \ge a }$ (the "fit-height" points),<br>
+$\quad W = \Set{ (a, b) \in \N^2 | n \le ab \land a \ge rb }$,<br>
+$\quad H = \Set{ (a, b) \in \N^2 | n \le ab \land rb \ge a }$,<br>
 $\quad (a, b) = \argmin_{(a, b) \in W} a$. <br>
 Assume $\forall b_h \in H : a < rb_h$. <br>
 Prove there exists no $b' \ne b$ such that $(a, b') \in W$.
 
-_Three hints are provided in case you get stuck; attempt to solve without them first, then try again, one more hint at a time. Don't jump to the end directly. Reading the [main document][6] may help; **do not** read its appendix section, it spoils the solution._
+_Three hints are provided in case you get stuck; attempt to solve without them first, then try again, one more hint at a time. Don't jump to the end directly._
+
+<details>
+<summary>Reveal first hint</summary>
 
 ## Hint 1
 
@@ -25,11 +30,25 @@ Here are graphs for $n = 8, r = 5$ and $n = 23, r = 3.9$ (graphs A and C in the 
 
 How do the fit-width and fit-height points compare in each of them?
 
+</details>
+
+<br />
+
+<details>
+<summary>Reveal second hint</summary>
+
 ## Hint 2
 
 By hint 1 a viable proof path is to show that if such a $b'$ exists then one can find a point $(a', b')$ which is fit-height.
 
 Try to prove that if $b'$ exists then specifically $(a - 1, b')$ is fit-height.
+
+</details>
+
+<br />
+
+<details>
+<summary>Reveal third hint</summary>
 
 ## Hint 3
 
@@ -272,11 +291,49 @@ Assume the fit‑width solution $(a,b)$ is strictly optimal, meaning its square 
 #### Why the converse (alternative grids) cannot happen under strict optimality
 If a $b' > b$ existed with $b' \le a/r$, then $b+1 \le \lfloor a/r \rfloor$. One can show this forces the existence of a fit‑height solution with side $\ge w/a$, contradicting strict optimality. In practice, however, the simpler box argument above already forbids the existence of any such $b'$ when $r>1$.
 
+</details>
+
+<br />
+<br />
+
+<details>
+<summary>Reveal solution</summary>
+
+## My proof
+
+Assume towards a contradiction there exists $b' \ne b$ such that $(a, b')$ is a fit-width point. Without loss of generality, we can further assume $b < b'$. From $\text{(14)}$ and the minimality of $a$ we can write $a$ in terms of $b'$:
+
+$$
+n \le ab' \land a \ge rb'
+\implies a \ge \left\lceil \frac{n}{b'} \right\rceil \land a \ge \left\lceil rb' \right\rceil
+     \implies a = \max \Set{ \left\lceil \frac{n}{b'} \right\rceil, \left\lceil rb' \right\rceil }
+$$
+
+Suppose that $a = \left\lceil \frac{n}{b'} \right\rceil$. Since we have $n \le ab$ from $\text{(14)}$, $b < b'$ and $r \ge 1$:
+
+$$
+a - 1 < \frac{n}{b'} \implies b'(a - 1) < ab \implies (b' - b)a < b' \implies a < rb'
+$$
+
+But $a \ge rb'$ so we've reached a contradiction. Therefore, together with the first result:
+
+$$
+a \ne \left\lceil \frac{n}{b'} \right\rceil \implies \left\lceil \frac{n}{b'} \right\rceil < \left\lceil rb' \right\rceil = a \implies \left\lceil \frac{n}{b'} \right\rceil \le \left\lfloor rb' \right\rfloor 
+$$
+
+By $\text{(14)}$ this means for integer $\left\lceil \frac{n}{b'} \right\rceil \le a' \le \left\lfloor rb' \right\rfloor$ the point $(a', b')$ is fit-height (real example in [graph C](#graph-c)). But then, since for this one fit-height point $s_h = \frac{h}{b'}$:
+
+$$\begin{align*}
+    a \ge rb' \implies s_w \le s_h
+\end{align*}$$
+
+In conclusion, $b' \ne b$ contradicts $s_w > s_h$, thus $b'$ can't exist and $(a, b)$ is unique.
+
 ## Thoughts on the LLMs' performance
 
 Using the prompt in a fresh conversation:
 
-> let r in [1, inf). <br> let n natural non-zero. <br> let W = { (a,b) in N² | n <= ab and a >= rb }. <br> let H = { (a,b) in N² | n <= ab and rb >= a }. <br> let (a_w, b_w) = \argmin_{(a,b) in W} a. <br> let (a_h, b_h) = \argmin_{(a,b) in H} b. <br> assume a_w < rb_h. <br> prove that there exists no other b ≠ b_w such that (a_w, b) is in W.
+> let r in [1, inf). <br> let n natural non-zero. <br> let W = { (a,b) in N² | n <= ab and a >= rb }. <br> let H = { (a,b) in N² | n <= ab and rb >= a }. <br> let (a_w, b_w) = \\argmin_{(a,b) in W} a. <br> let (a_h, b_h) = \\argmin_{(a,b) in H} b. <br> assume a_w < rb_h. <br> prove that there exists no other b ≠ b_w such that (a_w, b) is in W.
 
 All current frontier models managed to prove the statement correctly (don't click on links if you didn't solve yet):
 
@@ -297,9 +354,10 @@ I've also tried ChatGPT 5.5 Thinking Mini with the same prompt. After a failed p
 
 Such hubris!
 
-[1]: https://github.com/tmaxmax/popthegrid/blob/alt-uniqueness-proof/doc/ai/gpt-5-5-pro.pdf
-[2]: https://github.com/tmaxmax/popthegrid/blob/alt-uniqueness-proof/doc/ai/claude-opus-4-7.pdf
-[3]: https://github.com/tmaxmax/popthegrid/blob/alt-uniqueness-proof/doc/ai/gemini-3-1-pro.pdf
-[4]: https://github.com/tmaxmax/popthegrid/blob/alt-uniqueness-proof/doc/ai/deepseek-v4.pdf
-[5]: https://github.com/tmaxmax/popthegrid/blob/alt-uniqueness-proof/doc/ai/qed-nano.pdf
-[6]: https://github.com/tmaxmax/popthegrid/blob/main/doc/filling-the-grid.pdf
+</details>
+
+[1]: https://archive.quateo.com/grid/llm/gpt-5-5-pro.pdf
+[2]: https://archive.quateo.com/grid/llm/claude-opus-4-7.pdf
+[3]: https://archive.quateo.com/grid/llm/gemini-3-1-pro.pdf
+[4]: https://archive.quateo.com/grid/llm/deepseek-v4.pdf
+[5]: https://archive.quateo.com/grid/llm/qed-nano.pdf
