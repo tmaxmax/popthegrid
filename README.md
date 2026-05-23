@@ -38,7 +38,7 @@ The [_grid_](src/components/Grid.ts) is comprised of a div containing a bunch of
 
 Each game starts with a fixed number of 48 _squares_ (this may change in the future). This raises the problem: how do you fill the container with 48 squares such that the most area possible is filled while not overflowing?
 
-6 years ago I stole the solution from [this StackExchange thread](https://math.stackexchange.com/questions/466198/). In the meantime my knowledge of mathematics has developed. I've authored [this document](doc/filling-the-grid.pdf) to properly explain how the problem is solved and prove that it works.
+6 years ago I stole the solution from [this StackExchange thread](https://math.stackexchange.com/questions/466198/). In the meantime my knowledge of mathematics has developed. I've authored [this document](archive.quateo.com/grid/article.html) to properly explain how the problem is solved and prove that it works.
 
 ### Game
 
