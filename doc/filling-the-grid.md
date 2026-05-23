@@ -59,6 +59,7 @@ $$\begin{gather*} b = \left\lceil\sqrt{\frac{h}{w}n}\right\rceil \qquad s_b = \b
 Finally, $S = \max \Set{s_a, s_b}$.
 
 Sadly, this algorithm sometimes fails to find the optimal solution. For example, inputs: 
+
 - $w = 10, h = 2, n = 8$ expect $S = 1.25$ but this algorithm gives $S = 1$
 - $w = 7, h = 2, n = 20$ expect $S = 0.7$ but this algorithm gives $S = 0.(6)$
 - and many others
@@ -181,6 +182,7 @@ This means:
 It makes sense intuitively: a fit-height solution stretches the rows fully, a fit-width doesn't; if a fit-width solution has as many rows or more, it must be worse.
 
 We can observe these properties on the graphs above:
+
 - in [graph A](#graph-a) the fit-width solution has less columns: it is the better one
 - in [graph C](#graph-c) the fit-width solution has more columns: it is worse
 
@@ -454,6 +456,7 @@ Upper bound ceiled so interval is open. `left` stores $a_w$. This reduces the as
 ### $\left\lfloor \cdot \right\rfloor$ and $\left\lceil \cdot \right\rceil$ are residuated mappings
 
 This means that, for $\forall x \in \R, n \in \N$:
+
 1. $n \le x \iff n \le \left\lfloor x \right\rfloor$
 1. $x \le n \iff \left\lceil x \right\rceil \le n$
 1. $n < x \iff n < \left\lceil x \right\rceil$
@@ -467,4 +470,4 @@ The others are proven in a similar fashion. Read more about this on [Wikipedia's
 
 [1]: https://www.desmos.com/calculator/8y5xph34oc
 [2]: https://www.desmos.com/calculator/lmc2x29a3i
-[3]: https://github.com/tmaxmax/popthegrid/blob/main/doc/filling-the-grid-uniqueness-proof-exercise.pdf
+[3]: https://archive.quateo.com/grid/unique.html

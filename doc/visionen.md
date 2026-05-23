@@ -20,7 +20,7 @@ Observe that for any fixed $b$ we can always take $a = \left\lceil \frac{n}{b} \
 
 ```javascript
 function fillGrid(n, w, h) {
-    let s = 0;
+    let s = 0
     for (let b = 1; b <= n; b++) {
         s = Math.max(s, Math.min(w / Math.ceil(n / b), h / b))
     }
@@ -92,10 +92,10 @@ function fillGrid(n, w, h) {
     const r = w / h
 
     let a = Math.ceil(Math.sqrt(r * n))
-    for (; a < r * Math.ceil(n / a); a++);
+    for (; a < r * Math.ceil(n / a); a++)
 
     let b = Math.ceil(Math.sqrt(n / r))
-    for (; r * b < Math.ceil(n / b); b++);
+    for (; r * b < Math.ceil(n / b); b++)
 
     return Math.max(w / a, h / b)
 }
@@ -117,7 +117,7 @@ This means at most $\left\lfloor r \right\rfloor + 1$ iterations. This bound is 
 
 My $n = 10^{20}$ grid is a piece of cake now, but my $r = 2 \uarr \uarr 6$ grid still requires around $10^{19700}$ iterations. There are $10^{80}$ atoms in the observable universe. _Geht es besser?_ 
 
-Let's return to the initial algorithm: iterate through all possible $b$. Can we further restrict the range of $b$? For the maximal fit-height solution $s_h$ we know that the corresponding $b_h \ge b_0 = \left\lceil \sqrt{\frac{n}{r}} \right\rceil$. Next, observe that any $b$ is fit-height if $ rb \ge \frac{n}{b} + 1 > \left\lceil \frac{n}{b} \right\rceil$. For which $b$ does this hold?
+Let's return to the initial algorithm: iterate through all possible $b$. Can we further restrict the range of $b$? For the maximal fit-height solution $s_h$ we know that the corresponding $b_h \ge b_0 = \left\lceil \sqrt{\frac{n}{r}} \right\rceil$. Next, observe that any $b$ is fit-height if $rb \ge \frac{n}{b} + 1 > \left\lceil \frac{n}{b} \right\rceil$. For which $b$ does this hold?
 
 $$
 rb \ge \frac{n}{b} + 1\iff rb^2 - b - n \ge 0 \iff b \ge \frac{1}{2r} + \sqrt{\frac{1}{4r^2} + \frac{n}{r}}.
