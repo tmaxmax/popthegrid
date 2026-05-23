@@ -6,6 +6,7 @@ limit_req_zone $cookie_session zone=share_session:50m rate=30r/m;
 server {
 	server_name popthegrid.com;
 	server_tokens off;
+	http2 on;
 
 	location / {
 		proxy_pass http://localhost:3000;
