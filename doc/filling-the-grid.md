@@ -95,7 +95,7 @@ s &= \begin{cases}
 \end{split}
 \end{equation}$$
 
-The problem is reduced to just $a, b$ and $r$. This simplification unlocks a powerful geometric representation in the 2D plane: we're looking for points $(a_w, b_w), (a_h, b_h) \in \N^2$ such that they're on or above the hyperbola $xy = n$ while accounting for their position relative to the line $x = ry$. $x = a$ is used as stand-in for columns in the continuous space, $y = b$ for rows. Take a look (graph A; [full visualizer here][1]):
+The problem is reduced to just $a, b$ and $r$. This simplification unlocks a powerful geometric representation in the 2D plane: we're looking for points $(a_w, b_w), (a_h, b_h) \in \N^2$ such that they're on or above the hyperbola $xy = n$ while accounting for their position relative to the line $x = ry$. $x = a$ is used as stand-in for columns in the continuous space, $y = b$ for rows. Take a look (graph&nbsp;A; [full visualizer here][1]):
 
 <p id="graph-a" align=center><img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/first-graph.png" alt="An introductory graph" width="300" /></p>
 
@@ -103,7 +103,7 @@ This is the graph for the $n = 8, w = 10, h = 2$ example above, with $r = 10/2 =
 
 The symmetry of the problem with respect to ratio can now be directly visualized. For $n = 13$ and $r = 3$, respectively $r = 1/3$, we have:
 
-<p style="display: flex; gap: 1em; justify-content: center">
+<p style="display: flex; gap: 1em; justify-content: center; flex-wrap: wrap">
     <img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/symm-width.png" alt="r > 1 graph to depict symmetry of problem" width="300" />
     <img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/symm-height.png" alt="r < 1 graph to depict symmetry of problem" width="300" />
 </p>
@@ -124,11 +124,11 @@ $$\begin{equation} \tag{13}
 \forall a_w, b_h\text{ . } a_w \ge x_0 \land b_h \ge y_0
 \end{equation}$$
 
-If parameters are "nice" such that $x_0, y_0 \in \N$ the minimal fit-width and fit-height points coincide (graph B):
+If parameters are "nice" such that $x_0, y_0 \in \N$ the minimal fit-width and fit-height points coincide (graph&nbsp;B):
 
 <p id="graph-b" align=center><img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/perfect-solution.png" alt="Parameters where the fit-width and fit-height solutions coincide" width="300" /></p>
 
-Second, when is a point _valid_, i.e. satisfies solution requirements in $\text{(9)}$? Also, can multiple points give the same solution? Consider the following ($n = 23, r = 3.9$, graph C):
+Second, when is a point _valid_, i.e. satisfies solution requirements in $\text{(9)}$? Also, can multiple points give the same solution? Consider the following ($n = 23, r = 3.9$, graph&nbsp;C):
 
 <p id="graph-c" align=center><img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/multiple-points-same-solution.png" alt="" width="300" /></p>
 
@@ -219,7 +219,7 @@ Moreover, for $r \ge 1$ there exists a fit-height solution with $b_h = \left\lce
 
 Let's visualize this on the graphs of the two counterexamples given above ($r = 5, n = 8$ and $r = 3.5, n = 20$):
 
-<p style="display: flex; gap: 1em; justify-content: center">
+<p style="display: flex; gap: 1em; justify-content: center; flex-wrap: wrap;">
     <img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/alg-1-points-1.png" alt="" width="300" />
     <img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/alg-1-points-2.png" alt="" width="300" />
 </p>
@@ -265,7 +265,7 @@ Intuitively, if the loop condition holds there is no valid $(a_w, b_w)$ or $(a_h
 
 $a_0$ and $b_0$ are the starting points, right next to $(x_0, y_0)$. The algorithm "walks down" to $(a_w, b_w)$ and "up" to $(a_h, b_h)$. In fact, in this example, $b_0$ is initialized directly to $(a_h, b_h)$; $a_0$ must be incremented once.
 
-We have convinced ourselves of correctness. To analyze its runtime complexity, let's denote $a_0 = \left\lceil\sqrt{rn}\right\rceil$ the starting value of $a$. Since the loop condition is $a < r\left\lceil{\frac{n}{a}}\right\rceil$, $a$ will be incremented at most $\left\lceil{r\left\lceil{\frac{n}{a}}\right\rceil - a_0}\right\rceil$ times. Since $a$ increases $\left\lceil{\frac{n}{a}}\right\rceil \le \left\lceil{\frac{n}{a_0}}\right\rceil $. We can now count iterations:
+We have convinced ourselves of correctness. To analyze its runtime complexity, let's denote $a_0 = \left\lceil\sqrt{rn}\right\rceil$ the starting value of $a$. Since the loop condition is $a < r\left\lceil{\frac{n}{a}}\right\rceil$, $a$ will be incremented at most $\left\lceil{r\left\lceil{\frac{n}{a}}\right\rceil - a_0}\right\rceil$ times. Since $a$ increases $\left\lceil{\frac{n}{a}}\right\rceil \le \left\lceil{\frac{n}{a_0}}\right\rceil$. We can now count iterations:
 
 $$\begin{equation} \tag{18}
 \begin{split}
@@ -313,7 +313,7 @@ $$
 a \ne \left\lceil \frac{n}{b'} \right\rceil \implies \left\lceil \frac{n}{b'} \right\rceil < \left\lceil rb' \right\rceil = a \implies \left\lceil \frac{n}{b'} \right\rceil \le \left\lfloor rb' \right\rfloor 
 $$
 
-By $\text{(14)}$ this means for integer $\left\lceil \frac{n}{b'} \right\rceil \le a' \le \left\lfloor rb' \right\rfloor$ the point $(a', b')$ is fit-height (real example in [graph C](#graph-c)). But then, since for this one fit-height point $s_h = \frac{h}{b'}$:
+By $\text{(14)}$ this means for integer $\left\lceil \frac{n}{b'} \right\rceil \le a' \le \left\lfloor rb' \right\rfloor$ the point $(a', b')$ is fit-height (real example in [graph&nbsp;C](#graph-c)). But then, since for this one fit-height point $s_h = \frac{h}{b'}$:
 
 $$\begin{align*}
     a \ge rb' \implies s_w \le s_h
@@ -360,7 +360,7 @@ $$\begin{align*}
 
 Let's visualize this:
 
-<p style="display: flex; gap: 1em; justify-content: center">
+<p style="display: flex; gap: 1em; justify-content: center; flex-wrap: wrap;">
     <img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/prob-one.png" width="300" />
     <img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/prob-two.png" width="300"/>
 </p>
