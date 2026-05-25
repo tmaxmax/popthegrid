@@ -129,18 +129,18 @@ $$
 \frac{1}{2r} + \sqrt{\frac{1}{4r^2} + \frac{n}{r}} \le \frac{1}{2} + \sqrt{\left(\frac{1}{2} + \sqrt{\frac{n}{r}}\right)^2} \le b_0 + 1.
 $$
 
-Since $s_h$ is maximal, $b_h$ is minimal, thus $b_h \in \Set{b_0, b_0 + 1}$ always for $r \ge 1$. Let now $b_w = b_h - 1$ and $a_w = \left\lceil \frac{n}{b_w} \right\rceil$. Since $n \le a_wb_w$ but $b_w < b_h$, by minimality of $b_h$ it must be that $a_w > rb_w$, meaning $(a_w, b_w)$ is a fit-width solution. For any other fit-width solution $(a, b)$ with $a < a_w$ and side length $s = \frac{w}{a}$:
+Since $s_h$ is maximal, $b_h$ is minimal, thus $b_h \in \Set{b_0, b_0 + 1}$ always for $r \ge 1$. Let now $b_w = b_h - 1$ and $a_w = \left\lceil \frac{n}{b_w} \right\rceil$. Since $n \le a_wb_w$ but $b_w < b_h$, by minimality of $b_h$ it must be that $a_w > rb_w$, meaning $(a_w, b_w)$ is a fit-width solution. Any fit&#8209;width solution with $a > a_w$ is obviously worse, so suppose there exists one with $a < a_w$:
 
 $$
 \begin{align*}
 a < \left\lceil \frac{n}{b_h - 1} \right\rceil \le \left\lceil \frac{ab}{b_h - 1} \right\rceil \implies &a < \frac{ab}{b_h - 1} \implies b \ge b_h \\
-    \implies &a \ge rb \ge rb_h \implies \frac{w}{a} \le \frac{h}{b_h} \\
-    \implies &s \le s_h.
+    \implies &a_w > a \ge rb \ge rb_h \implies \frac{w}{a_w} < \frac{h}{b_h} \\
+    \implies &s_w < s_h.
 \end{align*}
 $$
 
-No such fit-width $(a, b)$ is better than the fit-height $(a_h, b_h)$. Hence the only useful fit-width solution is $b_w = b_h - 1 \in \Set{b_0 - 1, b_0}$. In conclusion for $r \ge 1$ the optimal solution $s$ will _always_ correspond to a grid with $b \in \Set{b_0 - 1, b_0, b_0 + 1}$ rows.
-
+Its existence implies _all_ fit&#8209;width solutions are worse than the fit&#8209;height ones. Hence if the fit&#8209;width solution is better than the fit-height, i.e. $s_w > s_h$, that solution must be $(a_w, b_w)$ with $b_w = b_h - 1 \in \Set{b_0 - 1, b_0}$. In conclusion for $r \ge 1$ the optimal solution $s$ will _always_ correspond to a grid with $b \in \Set{b_0 - 1, b_0, b_0 + 1}$ rows.
+ 
 Lastly, notice the symmetry of the problem with respect to $r$. Taking $r' \coloneqq \frac{1}{r}$ just rotates the original rectangle by $90^\circ$. Anything proven for $r \ge 1$ applies to $r < 1$ with flipped dimensions. Using the result above, for $r < 1$ the optimal grid $(a, b)$ must have $a \in \Set{a_0 - 1, a_0, a_0 + 1}$ and $(a, b) = (b', a')$, where $(a', b')$ is the optimal grid for $r'$.
 
 With this we have exhaustively covered the input domain. The $\mathcal{O}(1)$ algorithm we've all been waiting for is...
