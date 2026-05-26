@@ -6,7 +6,9 @@
 
 </header>
 
-For $n \in \mathbb{N}$ the number of squares and $r = \frac{w}{h}$ the ratio of the container's dimensions let the sets:
+Given a $w \times h \in \mathbb{R}^{+}$ container and $n \in \mathbb{N}$ squares find the maximum square side length $s \in \mathbb{R}^{+}$ for which a grid $b \times a \in \mathbb{N}$ exists that fits the squares and fits in the container.
+
+Let $r = \frac{w}{h}$ the ratio of the container's dimensions and the sets:
 
 $$
 \begin{gathered}
