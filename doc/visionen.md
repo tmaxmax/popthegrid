@@ -1,3 +1,6 @@
+---
+title: Filling the grid
+---
 # Filling the grid
 
 Six years ago while building a goofy side project I faced the following problem: how do I fit 48 squares on a screen so that they’re as big as possible? I had just started high school and was programming to procrastinate on my math homework, hence I shamelessly copied a (partly wrong) solution off of Stack Overflow and moved on.

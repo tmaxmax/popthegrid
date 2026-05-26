@@ -1,3 +1,6 @@
+---
+title: 'Filling the grid: a rigorous proof'
+---
 <header>
 
 # Filling the grid

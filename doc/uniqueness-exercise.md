@@ -1,3 +1,6 @@
+---
+title: Uniqueness of fit-width solution
+---
 # Uniqueness of fit-width solution
 
 Define a fit-width/fit-height "point" to be the coordinates $(a, b)$ corresponding to a solution side-length $s$.
