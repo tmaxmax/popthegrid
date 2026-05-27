@@ -145,7 +145,7 @@ $$
 
 Under both assumptions about $b$ and $r$ we have $\sqrt{\frac{n}{r}} \le b < \sqrt{\frac{n}{r}} + 1$, thus, simply by definition of the ceiling function, $b = \left\lceil \sqrt{\frac{n}{r}} \right\rceil$. Hence when $r \ge 1$ only $b \in \Set{ \left\lfloor \sqrt{\frac{n}{r}} \right\rfloor, \left\lceil \sqrt{\frac{n}{r}} \right\rceil }$ can ever maximize the side length.
 
-To tackle $r \le 1$, notice the symmetry of the problem with respect to $r$. Taking $r' \coloneqq \frac{1}{r}$ just rotates the original rectangle by $90^\circ$. Anything proven for $r \ge 1$ applies to $r' \le 1$ with flipped dimensions. Using the result above, for $r'$ the optimal grid $(a, b)$ must have $a \in \{ \lfloor \sqrt{r'n} \rfloor, \lceil \sqrt{r'n} \rceil \}$, with $\sqrt{r'n} = \sqrt{\frac{n}{r}}$, and $(a', b') = (b, a)$, where $(a', b')$ is the optimal grid for $r'$.
+To tackle $r \le 1$, notice the symmetry of the problem with respect to $r$. Taking $r' \coloneqq \frac{1}{r}$ just rotates the original rectangle by $90^\circ$ – the side length of the squares remains the same, the number of rows and columns swap. Using the result above, for $r \le 1$ the optimal grid $(a, b)$ must have $a \in \{ \lfloor \sqrt{rn} \rfloor, \lceil \sqrt{rn} \rceil \}$, with $\sqrt{rn} = \sqrt{\frac{n}{r'}}$, and $(a, b) = (b', a')$, where $(a', b')$ is the optimal grid for $r'$.
 
 With this we have exhaustively covered the input domain. The $\mathcal{O}(1)$ algorithm we've all been waiting for is...
 
