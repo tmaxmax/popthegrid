@@ -17,7 +17,7 @@ s \coloneqq \max (S_w \cup S_h).
 \end{gathered}
 $$
 
-$s_w \in S_w$ is a _fit-width_ solution, $s_h \in S_h$ a _fit-height_ solution. The final solution $s$ is the desired maximal side length. Our target is to build an algorithm to find $s$.
+$s_w \in S_w$ is a _fit&#8209;width_ solution, $s_h \in S_h$ a _fit&#8209;height_ solution. The final solution $s$ is the desired maximal side length. Our target is to build an algorithm to find $s$.
 
 Observe that for any fixed $b$ we can always take $a = \left\lceil \frac{n}{b} \right\rceil$ to obtain a grid which fits $n$ squares, since clearly $n \le ab$. For this grid $(a, b)$ let $s' = \min \Set{ \frac{w}{a}, \frac{h}{b}}$ its corresponding side length; it's easy to see that $s' \in S_w \cup S_h$. We can just test all $1 \le b \le n$ and pick the maximum $s'$ to obtain the solution $s$:
 
@@ -60,9 +60,9 @@ s = \max \Set{ \frac{w}{a_w}, \frac{h}{b_h}}.
 \end{gathered}
 $$
 
-$a_w$ is the column count of the _fit-width_ grid, $b_h$ the row count of the _fit-height_ grid. They are minimized since the side length is inversely proportional. The side length is a trivial result of the grid dimensions; only the algorithm for finding $a_w$ and $b_h$ remains to be developed.
+$a_w$ is the column count of the _fit&#8209;width_ grid, $b_h$ the row count of the _fit&#8209;height_ grid. They are minimized since the side length is inversely proportional. The side length is a trivial result of the grid dimensions; only the algorithm for finding $a_w$ and $b_h$ remains to be developed.
 
-Let's take a look at a fit-width grid with dimensions $(a_w, b_w) \in \N^2$. $b_w$ can be abstracted away:
+Let's take a look at a fit&#8209;width grid with dimensions $(a_w, b_w) \in \N^2$. $b_w$ can be abstracted away:
 
 $$
 n \le a_wb_w \land a_w \ge rb_w \iff \frac{n}{a_w} \le b_w \le \frac{a_w}{r} 
@@ -116,7 +116,7 @@ $$
 \end{align*}
 $$
 
-This means at most $\left\lfloor r \right\rfloor + 1$ iterations. This bound is tight: for $n = 33, r = \frac{1}{8.3}$ the fit-width loop does $1 = \lfloor r \rfloor + 1$ iteration, reaching the upper bound. Similarly for the second loop we get a tight upper bound of $\left\lfloor \frac{1}{r} \right\rfloor + 1$ iterations. The runtime is therefore $\mathcal{O}(R)$ with $R = \max \Set{r, \frac{1}{r}}$. One could binary search over $\left[a_0, a_0 + \lfloor r \rfloor + 1\right]$ and $\left[b_0, b_0 + \left\lfloor \frac{1}{r} \right\rfloor + 1\right]$ to reduce complexity to $\mathcal{O}(\log R)$.
+This means at most $\left\lfloor r \right\rfloor + 1$ iterations. This bound is tight: for $n = 33, r = \frac{1}{8.3}$ the fit&#8209;width loop does $1 = \lfloor r \rfloor + 1$ iteration, reaching the upper bound. Similarly for the second loop we get a tight upper bound of $\left\lfloor \frac{1}{r} \right\rfloor + 1$ iterations. The runtime is therefore $\mathcal{O}(R)$ with $R = \max \Set{r, \frac{1}{r}}$. One could binary search over $\left[a_0, a_0 + \lfloor r \rfloor + 1\right]$ and $\left[b_0, b_0 + \left\lfloor \frac{1}{r} \right\rfloor + 1\right]$ to reduce complexity to $\mathcal{O}(\log R)$.
 
 My $n = 10^{20}$ grid is a piece of cake now, but my $r = 2 \uarr \uarr 6$ grid still requires around $10^{19700}$ iterations. There are $10^{80}$ atoms in the observable universe. _Geht es besser?_ 
 
@@ -128,13 +128,13 @@ $$
 b \le \sqrt{\frac{n}{r}} \implies rb \le \frac{n}{b} \le a \implies \frac{h}{b} \ge \frac{w}{a} \implies s' = \frac{w}{\left\lceil \frac{n}{b} \right\rceil}.
 $$
 
-Every solution tested is fit-width and to maximize the side length we must take $b = \left\lfloor \sqrt{\frac{n}{r}} \right\rfloor$. Consider now $b \ge \sqrt{\frac{n}{r}}$:
+Every solution tested is fit&#8209;width and to maximize the side length we must take $b = \left\lfloor \sqrt{\frac{n}{r}} \right\rfloor$. Consider now $b \ge \sqrt{\frac{n}{r}}$:
 
 $$
 b \ge \sqrt{\frac{n}{r}} \implies rb \ge \frac{n}{b} \implies \underbrace{rb > \left\lceil \frac{n}{b} \right\rceil}_{\text{(1)}} \lor \underbrace{\left\lceil \frac{n}{b} \right\rceil \ge rb}_{\text{(2)}}.
 $$
 
-In case $\text{(1)}$ the solution $(a = \left\lceil \frac{n}{b} \right\rceil, b)$ is clearly fit-height, so $s' = \frac{h}{b}$ is maximized when $b \ge \sqrt{\frac{n}{r}}$ by $b = \left\lceil \sqrt{\frac{n}{r}} \right\rceil$. To tackle case $\text{(2)}$ we'll assume that $r \ge 1$; it then follows:
+In case $\text{(1)}$ the solution $(a = \left\lceil \frac{n}{b} \right\rceil, b)$ is clearly fit&#8209;height, so $s' = \frac{h}{b}$ is maximized when $b \ge \sqrt{\frac{n}{r}}$ by $b = \left\lceil \sqrt{\frac{n}{r}} \right\rceil$. To tackle case $\text{(2)}$ we'll assume that $r \ge 1$; it then follows:
 
 $$
 \begin{aligned}
@@ -165,7 +165,7 @@ If you've found the proofs hard to follow, use a graph: plot the functions $\fra
 
 For additional context, this problem is a particular case of _integer programming_. There exist general algorithms to solve such problems but the best time complexity they can achieve here is still $\mathcal{O}(\log R)$.
 
-Lastly, a challenge! Prove that when a fit-width solution $(a_w, b_w)$ is the best, i.e. $s_w > s_h$ for all $(a_h, b_h)$ fit-height, there is no $b \ne b_w$ such that $(a_w, b)$ is fit-width. Check [archive.quateo.com/grid/unique.html][2] if you get stuck.
+Lastly, a challenge! Prove that when a fit&#8209;width solution $(a_w, b_w)$ is the best, i.e. $s_w > s_h$ for all $(a_h, b_h)$ fit&#8209;height, there is no $b \ne b_w$ such that $(a_w, b)$ is fit&#8209;width. Check [archive.quateo.com/grid/unique.html][2] if you get stuck.
 
 [1]: https://www.desmos.com/calculator/z0ubu4uih8
 [2]: https://archive.quateo.com/grid/unique.html
