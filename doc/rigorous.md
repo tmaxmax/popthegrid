@@ -28,7 +28,7 @@ $$
 
 **Proof:** $W \cup H = \left\{ (a, b) \in \mathbb{N}^2 : n \le ab \right\}$, all possible grid configurations.<br>
 For every $(a = \left\lceil \frac{n}{b} \right\rceil, b)$ with $b \le n$ let $s = \min \left\{ \frac{w}{a}, \frac{h}{b} \right\}$. Clearly, $n \le ab$ always, hence
-$s = \frac{w}{a} \le \frac{h}{b} \iff a \ge rb \iff (a, b) \in W$ and similarly $s = \frac{h}{b} \iff (a, b) \in H$. Moreover, $a$ is the minimal choice such that $(a, b) \in W \cup H$.<br>Any $a' > a$ gives $s' = \min \left\{ \frac{w}{a'}, \frac{h}{b} \right\} \le \min \left\{ \frac{w}{a}, \frac{h}{b} \right\} = s$. Any $b' > n$ gives $s' \le \min \left\{ w, \frac{h}{n} \right\}$, which is $s$ for $(a = 1, b = n)$, therefore $s' \le s$ for some $s$ with $b \le n. \blacksquare$
+$s = \frac{w}{a} \le \frac{h}{b} \iff a \ge rb \iff (a, b) \in W$ and similarly $s = \frac{h}{b} \iff (a, b) \in H$. Moreover, $a$ is the minimal choice such that $(a, b) \in W \cup H$.<br>Any $a' > a$ gives $s' = \min \left\{ \frac{w}{a'}, \frac{h}{b} \right\} \le \min \left\{ \frac{w}{a}, \frac{h}{b} \right\} = s$. Any $b' > n$ gives $s' \le \min \left\{ w, \frac{h}{n} \right\}$, which is $s$ for $(a = 1, b = n)$, therefore $s' \le s$ for some $s$ with $b \le n. \thickspace \blacksquare$
 
 **Claim:** If $(a = \left\lceil \frac{n}{b} \right\rceil, b) \in W \cup H$ maximizes $s$ then $b \ge \lfloor b^* \rfloor$, where $b^* = \sqrt{\frac{n}{r}}$.<br>
 **Proof:** For $b \le b^*$:
