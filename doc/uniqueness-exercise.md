@@ -1,11 +1,11 @@
 ---
 title: Uniqueness of fit-width solution
 ---
-# Uniqueness of fit-width solution
+# Uniqueness of fit&#8209;width solution
 
-Define a fit-width/fit-height "point" to be the coordinates $(a, b)$ corresponding to a solution side-length $s$.
+Define a fit&#8209;width/fit&#8209;height "point" to be the coordinates $(a, b)$ corresponding to a solution side-length $s$.
 
-Let $(a, b)$ a fit-width point with minimal $a$. **Prove** there is no $b' \ne b$ such that $(a, b')$ is a fit-width point when $r \ge 1$ and $(a, b)$ corresponds to the best solution, meaning that $s_w > s_h$ for all $(a_h, b_h)$ fit-width points.
+Let $(a, b)$ a fit&#8209;width point with minimal $a$. **Prove** there is no $b' \ne b$ such that $(a, b')$ is a fit&#8209;width point when $r \ge 1$ and $(a, b)$ corresponds to the best solution, meaning that $s_w > s_h$ for all $(a_h, b_h)$ fit&#8209;width points.
 
 Here's a self-contained problem statement:
 
@@ -31,7 +31,7 @@ Here are graphs for $n = 8, r = 5$ and $n = 23, r = 3.9$:
     <img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/multiple-points-same-solution.png" alt="Graph C" width="300" />
 </p>
 
-How do the fit-width and fit-height points compare in each of them?
+How do the fit&#8209;width and fit&#8209;height points compare in each of them?
 
 </details>
 
@@ -42,9 +42,9 @@ How do the fit-width and fit-height points compare in each of them?
 
 ## Hint 2
 
-By hint 1 a viable proof path is to show that if such a $b'$ exists then one can find a point $(a', b')$ which is fit-height.
+By hint 1 a viable proof path is to show that if such a $b'$ exists then one can find a point $(a', b')$ which is fit&#8209;height.
 
-Try to prove that if $b'$ exists then specifically $(a - 1, b')$ is fit-height.
+Try to prove that if $b'$ exists then specifically $(a - 1, b')$ is fit&#8209;height.
 
 </details>
 
@@ -306,7 +306,7 @@ If a $b' > b$ existed with $b' \le a/r$, then $b+1 \le \lfloor a/r \rfloor$. One
 
 ## My proof
 
-Assume towards a contradiction there exists $b' \ne b$ such that $(a, b')$ is a fit-width point. Without loss of generality, we can further assume $b < b'$. Using the definition of a fit-width point and the minimality of $a$ we can write $a$ in terms of $b'$:
+Assume towards a contradiction there exists $b' \ne b$ such that $(a, b')$ is a fit&#8209;width point. Without loss of generality, we can further assume $b < b'$. Using the definition of a fit&#8209;width point and the minimality of $a$ we can write $a$ in terms of $b'$:
 
 $$
 n \le ab' \land a \ge rb'
@@ -326,7 +326,7 @@ $$
 a \ne \left\lceil \frac{n}{b'} \right\rceil \implies \left\lceil \frac{n}{b'} \right\rceil < \left\lceil rb' \right\rceil = a \implies \left\lceil \frac{n}{b'} \right\rceil \le \left\lfloor rb' \right\rfloor 
 $$
 
-Choose any integer $a' \in \left[\left\lceil \frac{n}{b'} \right\rceil, \left\lfloor rb' \right\rfloor\right]$: the point $(a', b')$ is by definition fit-height (real example in second graph from Hint&nbsp;1). But then, since for this one fit-height point $s_h = \frac{h}{b'}$:
+Choose any integer $a' \in \left[\left\lceil \frac{n}{b'} \right\rceil, \left\lfloor rb' \right\rfloor\right]$: the point $(a', b')$ is by definition fit&#8209;height (real example in second graph from Hint&nbsp;1). But then, since for this one fit&#8209;height point $s_h = \frac{h}{b'}$:
 
 $$\begin{align*}
     a \ge rb' \implies s_w \le s_h
