@@ -120,43 +120,42 @@ This means at most $\left\lfloor r \right\rfloor + 1$ iterations. This bound is 
 
 My $n = 10^{20}$ grid is a piece of cake now, but my $r = 2 \uarr \uarr 6$ grid still requires around $10^{19700}$ iterations. There are $10^{80}$ atoms in the observable universe. _Geht es besser?_ 
 
-Let's return to the initial algorithm: iterate through all possible $b$. Can we further restrict the range of $b$? For the maximal fit-height solution $s_h$ we know that the corresponding $b_h \ge b_0 = \left\lceil \sqrt{\frac{n}{r}} \right\rceil$. Next, observe that any $b$ is fit-height if $rb \ge \frac{n}{b} + 1 > \left\lceil \frac{n}{b} \right\rceil$. For which $b$ does this hold?
+Let's return to the initial algorithm. It iterates through all solutions $\left(a = \left\lceil \frac{n}{b} \right\rceil, b\right)$ for $1 \le b \le n$. It must find the optimal $s$: any other $a' > a$ is worse, as at each step the side length $s' = \min \Set{\frac{w}{a'}, \frac{h}{b}} \le \min \Set{\frac{w}{a}, \frac{h}{b}}$, and any other $b' > n$ does not help, since it would correspond to a solution $(1, b')$ with $s' = \min \Set{ w, \frac{h}{b'} } \le \min \Set{ w, \frac{h}{n} }$, with the latter value being the side length of $(1, n)$, a solution that's tested.
+
+Consider what happens when $b \le \sqrt{\frac{n}{r}}$:
 
 $$
-rb \ge \frac{n}{b} + 1\iff rb^2 - b - n \ge 0 \iff b \ge \frac{1}{2r} + \sqrt{\frac{1}{4r^2} + \frac{n}{r}}.
+b \le \sqrt{\frac{n}{r}} \implies rb \le \frac{n}{b} \le a \implies \frac{h}{b} \ge \frac{w}{a} \implies s' = \frac{w}{\left\lceil \frac{n}{b} \right\rceil}.
 $$
 
-When $r \ge 1$ it suffices that $b = b_0 + 1$:
+Every solution tested is fit-width and to maximize the side length we must take $b = \left\lfloor \sqrt{\frac{n}{r}} \right\rfloor$. Consider now $b \ge \sqrt{\frac{n}{r}}$:
 
 $$
-\frac{1}{2r} + \sqrt{\frac{1}{4r^2} + \frac{n}{r}} \le \frac{1}{2} + \sqrt{\left(\frac{1}{2} + \sqrt{\frac{n}{r}}\right)^2} \le b_0 + 1.
+b \ge \sqrt{\frac{n}{r}} \implies rb \ge \frac{n}{b} \implies \underbrace{rb > \left\lceil \frac{n}{b} \right\rceil}_{\text{(1)}} \lor \underbrace{\left\lceil \frac{n}{b} \right\rceil \ge rb}_{\text{(2)}}.
 $$
 
-Since $s_h$ is maximal, $b_h$ is minimal, thus $b_h \in \Set{b_0, b_0 + 1}$ always for $r \ge 1$. Let now $b_w = b_h - 1$ and $a_w = \left\lceil \frac{n}{b_w} \right\rceil$. Since $n \le a_wb_w$ but $b_w < b_h$, by minimality of $b_h$ it must be that $a_w > rb_w$, meaning $(a_w, b_w)$ is a fit-width solution. Any fit&#8209;width solution with $a > a_w$ is obviously worse, so suppose there exists one with $a < a_w$:
+In case $\text{(1)}$ the solution $(a = \left\lceil \frac{n}{b} \right\rceil, b)$ is clearly fit-height, so $s' = \frac{h}{b}$ is maximized when $b \ge \sqrt{\frac{n}{r}}$ by $b = \left\lceil \sqrt{\frac{n}{r}} \right\rceil$. To tackle case $\text{(2)}$ we'll assume that $r \ge 1$; it then follows:
 
 $$
-\begin{align*}
-a < \left\lceil \frac{n}{b_h - 1} \right\rceil \le \left\lceil \frac{ab}{b_h - 1} \right\rceil \implies &a < \frac{ab}{b_h - 1} \implies b \ge b_h \\
-    \implies &a_w > a \ge rb \ge rb_h \implies \frac{w}{a_w} < \frac{h}{b_h} \\
-    \implies &s_w < s_h.
-\end{align*}
+\begin{aligned}
+rb \le \left\lceil \frac{n}{b} \right\rceil < \frac{n}{b} + 1 \implies &rb^2 - b - n < 0 \implies b < \frac{1}{2r}+\sqrt{\frac{1}{4r^2} + \frac{n}{r}} \\
+    \implies &b < \frac{1}{2} + \sqrt{\left(\frac{1}{2} + \sqrt{\frac{n}{r}}\right)^2} = \sqrt{\frac{n}{r}} + 1 \\
+\end{aligned}
 $$
 
-Its existence implies _all_ fit&#8209;width solutions are worse than the fit&#8209;height ones. Hence if the fit&#8209;width solution is better than the fit-height, i.e. $s_w > s_h$, that solution must be $(a_w, b_w)$ with $b_w = b_h - 1 \in \Set{b_0 - 1, b_0}$. In conclusion for $r \ge 1$ the optimal solution $s$ will _always_ correspond to a grid with $b \in \Set{b_0 - 1, b_0, b_0 + 1}$ rows.
- 
-Lastly, notice the symmetry of the problem with respect to $r$. Taking $r' \coloneqq \frac{1}{r}$ just rotates the original rectangle by $90^\circ$. Anything proven for $r \ge 1$ applies to $r < 1$ with flipped dimensions. Using the result above, for $r < 1$ the optimal grid $(a, b)$ must have $a \in \Set{a_0 - 1, a_0, a_0 + 1}$ and $(a, b) = (b', a')$, where $(a', b')$ is the optimal grid for $r'$.
+Under both assumptions about $b$ and $r$ we have $\sqrt{\frac{n}{r}} \le b < \sqrt{\frac{n}{r}} + 1$, thus, simply by definition of the ceiling function, $b = \left\lceil \sqrt{\frac{n}{r}} \right\rceil$. Hence when $r \ge 1$ only $b \in \Set{ \left\lfloor \sqrt{\frac{n}{r}} \right\rfloor, \left\lceil \sqrt{\frac{n}{r}} \right\rceil }$ can ever maximize the side length.
+
+To tackle $r \le 1$, notice the symmetry of the problem with respect to $r$. Taking $r' \coloneqq \frac{1}{r}$ just rotates the original rectangle by $90^\circ$. Anything proven for $r \ge 1$ applies to $r' \le 1$ with flipped dimensions. Using the result above, for $r'$ the optimal grid $(a, b)$ must have $a \in \{ \lfloor \sqrt{r'n} \rfloor, \lceil \sqrt{r'n} \rceil \}$, with $\sqrt{r'n} = \sqrt{\frac{n}{r}}$, and $(a', b') = (b, a)$, where $(a', b')$ is the optimal grid for $r'$.
 
 With this we have exhaustively covered the input domain. The $\mathcal{O}(1)$ algorithm we've all been waiting for is...
 
 ```javascript
 function fillGrid(n, w, h) {
     const r = w / h
-    if (r < 1) {
-        return fillGrid(n, h, w)
-    }
+    if (r < 1) return fillGrid(n, h, w)
     const s = (b) => Math.min(w / Math.ceil(n / b), h / b)
-    const b0 = Math.ceil(Math.sqrt(n / r))
-    return Math.max(s(b0 - 1), s(b0), s(b0 + 1))
+    const b0 = Math.sqrt(n / r)
+    return Math.max(s(Math.floor(b0)), s(Math.ceil(b0)))
 }
 ```
 
