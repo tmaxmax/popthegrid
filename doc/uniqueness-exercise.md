@@ -24,7 +24,7 @@ _Three hints are provided in case you get stuck; attempt to solve without them f
 
 ## Hint 1
 
-Here are graphs for $n = 8, r = 5$ and $n = 23, r = 3.9$ (graphs A and C in the document): 
+Here are graphs for $n = 8, r = 5$ and $n = 23, r = 3.9$: 
 
 <p style="display: flex; gap: 1em; justify-content: center">
     <img src="https://raw.githubusercontent.com/tmaxmax/popthegrid/refs/heads/main/doc/img/first-graph.png" alt="Graph A" width="300" />
@@ -85,6 +85,7 @@ In other words, the feasible interval for $b'$ collapses to a single value $b = 
 
 #### Proof
 Assume, for contradiction, that such a $b'$ exists. Then $b+1 \le \lfloor a/r \rfloor$, so  
+
 $$\begin{gather*}
 a \ge r(b+1). \tag{1}
 \end{gather*}$$
@@ -145,16 +146,16 @@ a \ge rb \iff a \ge \left\lceil rb \right\rceil, \qquad ab \ge n \iff a \ge \lef
 
 Hence $(a,b) \in W$ iff $a \ge f(b)$.
 
-By definition $a_w​=\min_{(a,b) \in W}​a$; therefore  
+By definition $a_w=\min_{(a,b) \in W}a$; therefore  
 
 $$\begin{gather*}
-a_w​=\min_{b \in N}​f(b).
+a_w=\min_{b \in N}f(b).
 \end{gather*}$$
 
-Consequently for the fixed $a_w$​,
+Consequently for the fixed $a_w$,
 
 $$\begin{gather*}
-(a_w​,b) \in W \iff f(b)=a_w​.
+(a_w,b) \in W \iff f(b)=a_w.
 \end{gather*}$$
 
 Thus the set we are interested in is exactly the set of minimizers of $f$.
@@ -166,108 +167,108 @@ Thus the set we are interested in is exactly the set of minimizers of $f$.
 Set  
 
 $$\begin{gather*}
-b_0​=\left\lceil n/a_w ​\right\rceil.
+b_0=\left\lceil n/a_w \right\rceil.
 \end{gather*}$$
 
-Then $b_0​ \ge n/a_w$​, so $a_w​b_0​ \ge n$. <br>
-Because $b_w​ \in W$ we have $b_w​ \ge n/a_w$​; therefore  
+Then $b_0 \ge n/a_w$, so $a_wb_0 \ge n$. <br>
+Because $b_w \in W$ we have $b_w \ge n/a_w$; therefore  
 
 $$\begin{equation} \tag{1}
 b_0 \le b_w.
 \end{equation}$$
 
-From $a_w​ \ge rb_w$​ we obtain $b_w \le a_w​/r$, hence  
+From $a_w \ge rb_w$ we obtain $b_w \le a_w/r$, hence  
 
 $$\begin{equation} \tag{2}
-b_w \le \left\lfloor \frac{a_w}{r}​​ \right\rfloor.
+b_w \le \left\lfloor \frac{a_w}{r} \right\rfloor.
 \end{equation}$$
 
 Together $(1)$ and $(2)$ give  
 
 $$\begin{equation} \tag{3}
-b_0 \le \left\lfloor \frac{a_w}{r}​​ \right\rfloor.
+b_0 \le \left\lfloor \frac{a_w}{r} \right\rfloor.
 \end{equation}$$
 
-The hypothesis $a_w​ < rb_h$​ yields  
+The hypothesis $a_w < rb_h$ yields  
 
 $$\begin{equation} \tag{4}
-\left\lfloor \frac{a_w}{r}​​ \right\rfloor \le b_h​−1.
+\left\lfloor \frac{a_w}{r} \right\rfloor \le b_h−1.
 \end{equation}$$
 
-#### 2. Lower bound for $b_0$​
+#### 2. Lower bound for $b_0$
 
-We prove that $b_0​ \ge b_h​−1$.
+We prove that $b_0 \ge b_h−1$.
 
-Assume, to the contrary, that $b_0 \le b_h​−2$. <br>
-Then $b_0​+1 \le b_h​−1<b_h​$.
+Assume, to the contrary, that $b_0 \le b_h−2$. <br>
+Then $b_0+1 \le b_h−1<b_h$.
 
-Because $a_w$​ is the minimum of $f$, we have $f(b_0​) \ge a_w​$. <br>
-Now $f(b_0​)=\max \Set{\left\lceil rb_0 ​\right\rceil,\left\lceil n/b_0 ​\right\rceil}$. <br>
-Since $n/b_0 \le a_w$​, we get $\left\lceil n/b_0 ​\right\rceil \le a_w$​; therefore the inequality $f(b_0​) \ge a_w$​ forces  
-
-$$\begin{gather*}
-\left\lceil rb_0 ​\right\rceil \ge a_w​.
-\end{gather*}$$
-
-The last inequality implies $rb_0​>a_w​−1$. Adding $r \ge 1$ gives  
+Because $a_w$ is the minimum of $f$, we have $f(b_0) \ge a_w$. <br>
+Now $f(b_0)=\max \Set{\left\lceil rb_0 \right\rceil,\left\lceil n/b_0 \right\rceil}$. <br>
+Since $n/b_0 \le a_w$, we get $\left\lceil n/b_0 \right\rceil \le a_w$; therefore the inequality $f(b_0) \ge a_w$ forces  
 
 $$\begin{gather*}
-r(b_0​+1)=rb_0​+r>a_w​−1+r \ge a_w​.
+\left\lceil rb_0 \right\rceil \ge a_w.
 \end{gather*}$$
 
-Let $k=\left\lfloor r(b_0​+1) \right\rfloor$. Because $r(b_0​+1)>a_w$​, the integer $a_w$​ (which is $<r(b_0​+1)$) cannot exceed the greatest integer $\le r(b_0​+1)$; hence $a_w \le k$. Consequently  
+The last inequality implies $rb_0>a_w−1$. Adding $r \ge 1$ gives  
 
 $$\begin{gather*}
-a_w \le r(b_0​+1).
+r(b_0+1)=rb_0+r>a_w−1+r \ge a_w.
 \end{gather*}$$
 
-Moreover $a_w​(b_0​+1)=a_w​b_0​+a_w​ \ge n+a_w​>n$, so $a_w​(b_0​+1) \ge n$.
+Let $k=\left\lfloor r(b_0+1) \right\rfloor$. Because $r(b_0+1)>a_w$, the integer $a_w$ (which is $<r(b_0+1)$) cannot exceed the greatest integer $\le r(b_0+1)$; hence $a_w \le k$. Consequently  
 
-Thus $(a_w​,b_0​+1)$ satisfies both conditions of $H$; i.e. $(a_w​,b_0​+1) \in H$. <br>
-But $b_0​+1 \le  b_h​−1<b_h​$, contradicting the definition of $b_h$​ as the smallest second coordinate occurring in $H$.
+$$\begin{gather*}
+a_w \le r(b_0+1).
+\end{gather*}$$
+
+Moreover $a_w(b_0+1)=a_wb_0+a_w \ge n+a_w>n$, so $a_w(b_0+1) \ge n$.
+
+Thus $(a_w,b_0+1)$ satisfies both conditions of $H$; i.e. $(a_w,b_0+1) \in H$. <br>
+But $b_0+1 \le  b_h−1<b_h$, contradicting the definition of $b_h$ as the smallest second coordinate occurring in $H$.
 
 Hence our assumption was false, and we must have  
 
 $$\begin{equation} \tag{5}
-b_0​ \ge b_h​−1.
+b_0 \ge b_h−1.
 \end{equation}$$
 
-#### 3. Determining $b_0$​ and $b_w$​
+#### 3. Determining $b_0$ and $b_w$
 
-From $(3)$ and $(4)$ we obtain $b_0 \le b_h​−1$; together with $(5)$ this yields $b_0​=b_h​−1$. Therefore  
+From $(3)$ and $(4)$ we obtain $b_0 \le b_h−1$; together with $(5)$ this yields $b_0=b_h−1$. Therefore  
 
 $$\begin{equation} \tag{6}
-\left\lceil \frac{n}{a_w} \right\rceil = b_h​−1.
+\left\lceil \frac{n}{a_w} \right\rceil = b_h−1.
 \end{equation}$$
 
-Because of $(1)$ and $(6)$ we have $b_w \ge b_h​−1$; together with $(2)$ and $(4)$ we get $b_w \le b_h​−1$. Hence  
+Because of $(1)$ and $(6)$ we have $b_w \ge b_h−1$; together with $(2)$ and $(4)$ we get $b_w \le b_h−1$. Hence  
 
 $$\begin{equation} \tag{7}
-b_w​=b_h​−1.
+b_w=b_h−1.
 \end{equation}$$
 
-Finally $(7)$ and $(4)$ give $b_h​−1 \le  \left\lfloor a_w​/r \right\rfloor$, while $(4)$ itself gives $\left\lfloor a_w​/r \right\rfloor \le b_h​−1$; thus  
+Finally $(7)$ and $(4)$ give $b_h−1 \le  \left\lfloor a_w/r \right\rfloor$, while $(4)$ itself gives $\left\lfloor a_w/r \right\rfloor \le b_h−1$; thus  
 
 $$\begin{equation} \tag{8}
-\left\lfloor \frac{a_w}{r}​​ \right\rfloor = b_h​−1.
+\left\lfloor \frac{a_w}{r} \right\rfloor = b_h−1.
 \end{equation}$$
 
 #### 4. Conclusion
 
-For an integer b we have $(a_w​,b) \in W$ exactly when  
+For an integer b we have $(a_w,b) \in W$ exactly when  
 
 $$\begin{gather*}
 \left\lceil \frac{n}{a_w} \right\rceil \le b \le \left\lfloor \frac{a_w}{r} \right\rfloor.
 \end{gather*}$$
 
-By $(6)$ and $(8)$ the left‑hand side equals the right‑hand side and both equal $b_h​−1$. <br>
-Because of (7) this common value is precisely b_w​. Consequently no other integer $b \ne b_w$​ can satisfy the inequalities, i.e.
+By $(6)$ and $(8)$ the left‑hand side equals the right‑hand side and both equal $b_h−1$. <br>
+Because of (7) this common value is precisely b_w. Consequently no other integer $b \ne b_w$ can satisfy the inequalities, i.e.
 
 $$\begin{gather*}
-\left\lceil \frac{n}{a_w} \right\rceil = \left\lfloor ra_w \right\rfloor = b_w​.
+\left\lceil \frac{n}{a_w} \right\rceil = \left\lfloor ra_w \right\rfloor = b_w.
 \end{gather*}$$
 
-Hence there is no $b \ne b_w$​ with $(a_w​,b) \in W$. ∎
+Hence there is no $b \ne b_w$ with $(a_w,b) \in W$. ∎
 
 ### Proof 3
 
@@ -278,6 +279,7 @@ Another attempt from DeepSeek.
 #### Proof
 
 Assume the fit‑width solution $(a,b)$ is strictly optimal, meaning its square side $s_{\text{fw}} = w/a$ is larger than the side of every fit‑height solution.  
+
 - Strict optimality forces $r = w/h > 1$ (for $r \le 1$ the fit‑height solution is at least as good).  
 - The algorithm finds the smallest integer $a$ satisfying $a \ge r \lceil n/a \rceil$. Hence  
   $$\begin{gather*}
@@ -304,7 +306,7 @@ If a $b' > b$ existed with $b' \le a/r$, then $b+1 \le \lfloor a/r \rfloor$. One
 
 ## My proof
 
-Assume towards a contradiction there exists $b' \ne b$ such that $(a, b')$ is a fit-width point. Without loss of generality, we can further assume $b < b'$. From $\text{(14)}$ and the minimality of $a$ we can write $a$ in terms of $b'$:
+Assume towards a contradiction there exists $b' \ne b$ such that $(a, b')$ is a fit-width point. Without loss of generality, we can further assume $b < b'$. Using the definition of a fit-width point and the minimality of $a$ we can write $a$ in terms of $b'$:
 
 $$
 n \le ab' \land a \ge rb'
@@ -312,7 +314,7 @@ n \le ab' \land a \ge rb'
      \implies a = \max \Set{ \left\lceil \frac{n}{b'} \right\rceil, \left\lceil rb' \right\rceil }
 $$
 
-Suppose that $a = \left\lceil \frac{n}{b'} \right\rceil$. Since we have $n \le ab$ from $\text{(14)}$, $b < b'$ and $r \ge 1$:
+Suppose that $a = \left\lceil \frac{n}{b'} \right\rceil$. Since we have $n \le ab$ by definition, and assumed $b < b'$ and $r \ge 1$:
 
 $$
 a - 1 < \frac{n}{b'} \implies b'(a - 1) < ab \implies (b' - b)a < b' \implies a < rb'
@@ -324,7 +326,7 @@ $$
 a \ne \left\lceil \frac{n}{b'} \right\rceil \implies \left\lceil \frac{n}{b'} \right\rceil < \left\lceil rb' \right\rceil = a \implies \left\lceil \frac{n}{b'} \right\rceil \le \left\lfloor rb' \right\rfloor 
 $$
 
-By $\text{(14)}$ this means for integer $\left\lceil \frac{n}{b'} \right\rceil \le a' \le \left\lfloor rb' \right\rfloor$ the point $(a', b')$ is fit-height (real example in [graph C](#graph-c)). But then, since for this one fit-height point $s_h = \frac{h}{b'}$:
+Choose any integer $a' \in \left[\left\lceil \frac{n}{b'} \right\rceil, \left\lfloor rb' \right\rfloor\right]$: the point $(a', b')$ is by definition fit-height (real example in second graph from Hint&nbsp;1). But then, since for this one fit-height point $s_h = \frac{h}{b'}$:
 
 $$\begin{align*}
     a \ge rb' \implies s_w \le s_h
