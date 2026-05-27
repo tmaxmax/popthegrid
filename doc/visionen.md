@@ -11,8 +11,8 @@ Let's state the problem: place a $b \times a \in \N$ grid (rows x columns) into 
 
 $$
 \begin{gathered}
-S_w \coloneqq \Set{ s \in \R^{+} | \exist a, b \in \N \text{ . } n \le ab \land as = w \land bs \le h } \\
-S_h \coloneqq \Set{ s \in \R^{+} | \exist a, b \in \N \text{ . } n \le ab \land as \le h \land bs = h } \\
+S_w \coloneqq \Set{ s \in \R^{+} \mid \exist a, b \in \N \text{ . } n \le ab \land as = w \land bs \le h } \\
+S_h \coloneqq \Set{ s \in \R^{+} \mid \exist a, b \in \N \text{ . } n \le ab \land as \le h \land bs = h } \\
 s \coloneqq \max (S_w \cup S_h).
 \end{gathered}
 $$
@@ -54,8 +54,8 @@ $s$ is now dependent on the grid and rectangle dimensions. Using $r \coloneqq \f
 
 $$
 \begin{gathered}
-a_w \coloneqq \min \Set{a \in \N | \exist b \in \N \text{ . } n \le ab \land a \ge rb} \\
-b_h \coloneqq \min \Set{b \in \N | \exist a \in \N \text{ . } n \le ab \land b \ge \frac{a}{r}} \\
+a_w \coloneqq \min \Set{a \in \N \mid \exist b \in \N \text{ . } n \le ab \land a \ge rb} \\
+b_h \coloneqq \min \Set{b \in \N \mid \exist a \in \N \text{ . } n \le ab \land b \ge \frac{a}{r}} \\
 s = \max \Set{ \frac{w}{a_w}, \frac{h}{b_h}}.
 \end{gathered}
 $$
@@ -72,7 +72,7 @@ $$
 This is a range for all $b_w$ corresponding to $a_w$. With an analogous derivation for $b_h$, we get:
 
 $$
-a_w = \min \Set{ a \in \N | \left\lfloor \frac{a}{r} \right\rfloor \ge \left\lceil \frac{n}{a} \right\rceil }, \quad b_h = \min \Set{ b \in \N | \left\lfloor rb \right\rfloor \ge \left\lceil \frac{n}{b} \right\rceil }.
+a_w = \min \Set{ a \in \N \mid \left\lfloor \frac{a}{r} \right\rfloor \ge \left\lceil \frac{n}{a} \right\rceil }, \quad b_h = \min \Set{ b \in \N \mid \left\lfloor rb \right\rfloor \ge \left\lceil \frac{n}{b} \right\rceil }.
 $$
 
 Since the second comparison term is non-increasing in $a$ (respectively in $b$), it follows that every $a > a_w$ (and $b > b_h$) would satisfy the solution condition. The algorithm idea is thus the following: starting from an initial guess $a_0 \le a_w$ (and $b_0 \le b_h$) test every value until the solution condition holds, i.e. loop while:
@@ -88,7 +88,7 @@ $$
 a_w \ge r \left\lceil \frac{n}{a_w} \right\rceil \implies {a_w}^2 \ge rn \implies a_w \ge \sqrt{rn}.
 $$
 
-Since $a_w \in \N$ it can therefore be no smaller than $a_0 = \left\lceil \sqrt{rn} \right\rceil$. Likewise, $b_w \ge b_0 = \left\lceil \sqrt{\frac{n}{r}} \right\rceil$. Using the loop condition above, an algorithm can finally be built:
+Since $a_w \in \N$ it can therefore be no smaller than $a_0 = \left\lceil a^* \right\rceil$, with $a^* \coloneqq \sqrt{rn}$. Likewise, $b_w \ge \left\lceil b^* \right\rceil$, with $b^* \coloneqq \sqrt{\frac{n}{r}}$. Using the loop condition above, an algorithm can finally be built:
 
 ```javascript
 function fillGrid(n, w, h) {
@@ -122,19 +122,19 @@ My $n = 10^{20}$ grid is a piece of cake now, but my $r = 2 \uarr \uarr 6$ grid 
 
 Let's return to the initial algorithm. It iterates through all solutions $\left(a = \left\lceil \frac{n}{b} \right\rceil, b\right)$ for $1 \le b \le n$. It must find the optimal $s$: any other $a' > a$ is worse, as at each step the side length $s' = \min \Set{\frac{w}{a'}, \frac{h}{b}} \le \min \Set{\frac{w}{a}, \frac{h}{b}}$, and any other $b' > n$ does not help, since it would correspond to a solution $(1, b')$ with $s' = \min \Set{ w, \frac{h}{b'} } \le \min \Set{ w, \frac{h}{n} }$, with the latter value being the side length of $(1, n)$, a solution that's tested.
 
-Consider what happens when $b \le \sqrt{\frac{n}{r}}$:
+Consider what happens when $b \le b^* = \sqrt{\frac{n}{r}}$:
 
 $$
 b \le \sqrt{\frac{n}{r}} \implies rb \le \frac{n}{b} \le a \implies \frac{h}{b} \ge \frac{w}{a} \implies s' = \frac{w}{\left\lceil \frac{n}{b} \right\rceil}.
 $$
 
-Every solution tested is fit&#8209;width and to maximize the side length we must take $b = \left\lfloor \sqrt{\frac{n}{r}} \right\rfloor$. Consider now $b \ge \sqrt{\frac{n}{r}}$:
+Every solution tested is fit&#8209;width and to maximize the side length we must take $b = \lfloor b^* \rfloor$. Consider now $b \ge b^*$:
 
 $$
 b \ge \sqrt{\frac{n}{r}} \implies rb \ge \frac{n}{b} \implies \underbrace{rb > \left\lceil \frac{n}{b} \right\rceil}_{\text{(1)}} \lor \underbrace{\left\lceil \frac{n}{b} \right\rceil \ge rb}_{\text{(2)}}.
 $$
 
-In case $\text{(1)}$ the solution $(a = \left\lceil \frac{n}{b} \right\rceil, b)$ is clearly fit&#8209;height, so $s' = \frac{h}{b}$ is maximized when $b \ge \sqrt{\frac{n}{r}}$ by $b = \left\lceil \sqrt{\frac{n}{r}} \right\rceil$. To tackle case $\text{(2)}$ we'll assume that $r \ge 1$; it then follows:
+In case $\text{(1)}$ the solution $(a = \left\lceil \frac{n}{b} \right\rceil, b)$ is clearly fit&#8209;height, so $s' = \frac{h}{b}$ is maximized when $b \ge b^*$ by $b = \lceil b^* \rceil$. To tackle case $\text{(2)}$ we'll assume that $r \ge 1$; it then follows:
 
 $$
 \begin{aligned}
@@ -143,9 +143,9 @@ rb \le \left\lceil \frac{n}{b} \right\rceil < \frac{n}{b} + 1 \implies &rb^2 - b
 \end{aligned}
 $$
 
-Under both assumptions about $b$ and $r$ we have $\sqrt{\frac{n}{r}} \le b < \sqrt{\frac{n}{r}} + 1$, thus, simply by definition of the ceiling function, $b = \left\lceil \sqrt{\frac{n}{r}} \right\rceil$. Hence when $r \ge 1$ only $b \in \Set{ \left\lfloor \sqrt{\frac{n}{r}} \right\rfloor, \left\lceil \sqrt{\frac{n}{r}} \right\rceil }$ can ever maximize the side length.
+Under both assumptions about $b$ and $r$ we have $b^* \le b < b^* + 1$, thus, simply by definition of the ceiling function, $b = \left\lceil b^* \right\rceil$. Hence when $r \ge 1$ only $b \in \Set{ \lfloor b^* \rfloor, \lceil b^* \rceil }$ can ever maximize the side length.
 
-To tackle $r \le 1$, notice the symmetry of the problem with respect to $r$. Taking $r' \coloneqq \frac{1}{r}$ just rotates the original rectangle by $90^\circ$ – the side length of the squares remains the same, the number of rows and columns swap. Using the result above, for $r \le 1$ the optimal grid $(a, b)$ must have $a \in \{ \lfloor \sqrt{rn} \rfloor, \lceil \sqrt{rn} \rceil \}$, with $\sqrt{rn} = \sqrt{\frac{n}{r'}}$, and $(a, b) = (b', a')$, where $(a', b')$ is the optimal grid for $r'$.
+To tackle $r \le 1$, notice the symmetry of the problem with respect to $r$. Taking $r' \coloneqq \frac{1}{r}$ just rotates the original rectangle by $90^\circ$ – the side length of the squares remains the same, the number of rows and columns swap. Using the result above, for $r \le 1$ the optimal grid $(a, b)$ must have $a \in \{ \lfloor a^* \rfloor, \lceil a^* \rceil \}$, with $a^* = \sqrt{rn} = \sqrt{\frac{n}{r'}}$, and $(a, b) = (b', a')$, where $(a', b')$ is the optimal grid for $r'$.
 
 With this we have exhaustively covered the input domain. The $\mathcal{O}(1)$ algorithm we've all been waiting for is...
 
@@ -154,8 +154,8 @@ function fillGrid(n, w, h) {
     const r = w / h
     if (r < 1) return fillGrid(n, h, w)
     const s = (b) => Math.min(w / Math.ceil(n / b), h / b)
-    const b0 = Math.sqrt(n / r)
-    return Math.max(s(Math.floor(b0)), s(Math.ceil(b0)))
+    const bs = Math.sqrt(n / r)
+    return Math.max(s(Math.floor(bs)), s(Math.ceil(bs)))
 }
 ```
 
