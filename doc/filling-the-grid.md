@@ -1,5 +1,6 @@
 ---
-Title: Filling the grid
+title: Filling the grid
+math: true
 ---
 # Filling the grid
 

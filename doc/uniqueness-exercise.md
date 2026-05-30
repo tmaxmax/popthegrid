@@ -1,5 +1,6 @@
 ---
 title: Uniqueness of fit-width solution
+math: true
 ---
 # Uniqueness of fit&#8209;width solution
 

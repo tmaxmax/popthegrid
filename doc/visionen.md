@@ -1,5 +1,6 @@
 ---
 title: Filling the grid
+math: true
 ---
 # Filling the grid
 
