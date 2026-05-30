@@ -1,5 +1,6 @@
 ---
 title: 'Filling the grid: a rigorous proof'
+math: true
 ---
 <header>
 
@@ -73,7 +74,7 @@ For $r \le 1$ solve for $r' = \frac{1}{r}$. This procedure finds solutions for e
 
 **Proof:** For $r \ge 1$, the first formula, proven to always find the maximal $s$, is simply restricted to $b \in \{\lfloor b^* \rfloor, \lceil b^* \rceil\}$, proven to always maximize $s$.
 
-Let $s_{w,h}(a, b) = \min \left\{ \frac{w}{a}, \frac{h}{b} \right\}$ the side length of $(a, b) \in W \cup H$. Let $r' = \frac{h}{w} = \frac{1}{r}$, $W'$ and $H'$ defined as $W$ and $H$ but with $r'$ substituted for $r$. $s_{h,w}$ is the side length of $(a, b) \in W' \cup H'$. Finally, let the symmetry function $\phi(a, b) = (b, a)$. It follows that:
+For $r \le 1$, let $s_{w,h}(a, b) = \min \left\{ \frac{w}{a}, \frac{h}{b} \right\}$ the side length of $(a, b) \in W \cup H$. Let $r' = \frac{h}{w} = \frac{1}{r} \ge 1$, $W'$ and $H'$ defined as $W$ and $H$ but with $r'$ substituted for $r$. $s_{h,w}$ is the side length of $(a, b) \in W' \cup H'$. Finally, let the symmetry function $\phi(a, b) = (b, a)$. It follows that:
 
 $$
 \begin{gathered}
@@ -83,5 +84,5 @@ s_{w,h}(a, b) = \min \left\{ \frac{w}{a}, \frac{h}{b} \right\} = \min \left\{  \
 \end{gathered}
 $$
 
-$\phi$ bijectively maps $W$ to $H'$ and $H$ to $W'$ while preserving side lengths. Therefore the solution for $r'$ can be searched in the solution space for $r$, and the solutions for $r$ and $r'$ are equal. The mapping $r \mapsto \frac{1}{r}$ is bijective on $(0, \infty)$, thus this procedure finds all solutions.
+$\phi$ bijectively maps $W$ to $H'$ and $H$ to $W'$ while preserving side lengths. Therefore the solution for $r$ can be searched in the solution space for $r'$, and the solutions for $r$ and $r'$ are equal. The mapping $r \mapsto \frac{1}{r}$ is bijective on $(0, \infty)$, thus this procedure finds all solutions.
 $\blacksquare$
