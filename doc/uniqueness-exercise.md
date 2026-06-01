@@ -36,8 +36,6 @@ How do the fit&#8209;width and fit&#8209;height points compare in each of them?
 
 </details>
 
-<br />
-
 <details>
 <summary>Reveal second hint</summary>
 
@@ -48,8 +46,6 @@ By hint 1 a viable proof path is to show that if such a $b'$ exists then one can
 Try to prove that if $b'$ exists then specifically $(a - 1, b')$ is fit&#8209;height.
 
 </details>
-
-<br />
 
 <details>
 <summary>Reveal third hint</summary>
@@ -298,9 +294,6 @@ Assume the fit‑width solution $(a,b)$ is strictly optimal, meaning its square 
 If a $b' > b$ existed with $b' \le a/r$, then $b+1 \le \lfloor a/r \rfloor$. One can show this forces the existence of a fit‑height solution with side $\ge w/a$, contradicting strict optimality. In practice, however, the simpler box argument above already forbids the existence of any such $b'$ when $r>1$.
 
 </details>
-
-<br />
-<br />
 
 <details>
 <summary>Reveal solution</summary>
