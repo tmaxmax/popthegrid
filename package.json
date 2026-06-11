@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.11.2",
   "type": "module",
+  "packageManager": "pnpm@11.5.1",
   "scripts": {
     "dev:client": "env-cmd -f .env.local -- vite -l warn",
     "dev:server": "env-cmd -f .env.local -- go run ./internal/cmd/dev",
@@ -15,19 +16,19 @@
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^7.0.0",
+    "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "@tsconfig/svelte": "^5.0.8",
-    "@types/debug": "^4.1.12",
+    "@types/debug": "^4.1.13",
     "@types/human-date": "^1.4.5",
-    "@types/node": "^25.5.0",
+    "@types/node": "^25.9.2",
     "env-cmd": "^11.0.0",
     "njs-types": "^0.9.4",
     "npm-run-all": "^4.1.5",
-    "svelte": "^5.53.12",
-    "svelte-check": "^4.4.5",
+    "svelte": "^5.56.3",
+    "svelte-check": "^4.6.0",
     "typescript": "~5.9.3",
-    "vite": "^8.0.0",
-    "vitest": "^4.1.0"
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8"
   },
   "dependencies": {
     "@svelte-put/clickoutside": "^4.0.0",
